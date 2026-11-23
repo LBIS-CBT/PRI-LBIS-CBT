@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#12304a">
+  <meta name="description" content="Lead British International School Computer-Based Testing">
+  <title>LBIS CBT | Login</title>
+  <link rel="stylesheet" href="assets/css/app.css">
+  <script src="assets/js/login.js" defer></script>
+</head>
+<body>
+  <div id="unsupported-device" class="device-message" role="alert" hidden>
+    <div class="device-message__panel">
+      <h1>Device not supported</h1>
+      <p>LBIS CBT is designed for laptops, desktop computers and tablets. Please access the examination system using a supported device.</p>
+    </div>
+  </div>
+
+  <main class="page-shell">
+    <section class="login-panel" aria-labelledby="page-title">
+      <div class="school-mark" aria-hidden="true">LBIS</div>
+      <h1 id="page-title">LBIS CBT</h1>
+      <p class="school-name">Lead British International School</p>
+      <form id="account-form">
+        <label for="account-type">Select account type</label>
+        <select id="account-type" name="accountType" required>
+          <option value="" selected disabled>Choose Student or Admin</option>
+          <option value="student">Student</option>
+          <option value="admin">Admin</option>
+        </select>
+        <button type="submit">Submit</button>
+        <p id="form-error" class="form-error" role="alert" aria-live="polite"></p>
+      </form>
+    </section>
+    <footer>Designed by TUPS Technologies</footer>
+  </main>
+</body>
+</html>
