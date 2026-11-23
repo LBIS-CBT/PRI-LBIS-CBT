@@ -1,0 +1,94 @@
+:root {
+  color-scheme: light;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #172b3a;
+  background: #f3f6f8;
+  font-synthesis: none;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; margin: 0; }
+body { min-height: 100vh; }
+.page-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px 18px;
+}
+.login-panel {
+  width: min(100%, 440px);
+  padding: 42px 40px 38px;
+  background: #fff;
+  border: 1px solid #e2e8ed;
+  border-radius: 12px;
+  box-shadow: 0 12px 36px rgba(20, 44, 62, .08);
+}
+.school-mark {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: #12304a;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: .5px;
+}
+h1 { margin: 0; text-align: center; font-size: 27px; letter-spacing: .2px; }
+.school-name { margin: 9px 0 32px; color: #687987; text-align: center; font-size: 14px; }
+form { display: grid; gap: 12px; }
+label { font-size: 14px; font-weight: 600; }
+select, button {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 6px;
+  font: inherit;
+}
+select {
+  padding: 0 13px;
+  color: #263b4b;
+  background: #fff;
+  border: 1px solid #cbd5dc;
+}
+select:focus, button:focus-visible { outline: 3px solid rgba(29, 132, 177, .25); outline-offset: 2px; }
+button {
+  margin-top: 8px;
+  border: 0;
+  background: #123f5b;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+button:hover { background: #0d3249; }
+.form-error { min-height: 18px; margin: 0; color: #b42318; font-size: 13px; }
+footer { margin-top: 24px; color: #73818c; font-size: 12px; text-align: center; }
+.device-message {
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #f3f6f8;
+}
+.device-message[hidden] { display: none; }
+.device-message__panel {
+  max-width: 480px;
+  padding: 32px;
+  border-radius: 10px;
+  background: #fff;
+  text-align: center;
+  box-shadow: 0 12px 36px rgba(20, 44, 62, .08);
+}
+.device-message__panel h1 { font-size: 23px; }
+.device-message__panel p { color: #526574; line-height: 1.6; }
+@media (max-width: 767px) {
+  .page-shell { display: none; }
+  .device-message { display: grid; }
+}
+@media (max-width: 420px) {
+  .login-panel { padding: 34px 24px 28px; }
+}
