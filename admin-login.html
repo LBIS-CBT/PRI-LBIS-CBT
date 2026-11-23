@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#12304a">
+  <title>LBIS CBT | Admin Login</title>
+  <link rel="stylesheet" href="assets/css/app.css">
+  <script src="assets/js/admin-login.js" defer></script>
+</head>
+<body>
+  <main class="page-shell">
+    <section class="login-panel" aria-labelledby="page-title">
+      <div class="school-mark" aria-hidden="true">LBIS</div>
+      <h1 id="page-title">Admin Login</h1>
+      <p class="school-name">Lead British International School</p>
+
+      <form id="admin-identity-form" novalidate>
+        <label for="admin-code">Admin Code</label>
+        <input id="admin-code" name="adminCode" type="text" autocomplete="username" required>
+        <label for="admin-role">Select Role</label>
+        <select id="admin-role" name="role" required>
+          <option value="" selected disabled>Choose Teacher or Admin</option>
+          <option value="teacher">Teacher</option>
+          <option value="admin">Admin</option>
+        </select>
+        <button type="submit">Continue</button>
+        <p id="admin-identity-message" class="form-message" role="status" aria-live="polite"></p>
+      </form>
+
+      <form id="admin-password-form" hidden novalidate>
+        <p id="admin-role-summary" class="role-summary"></p>
+        <label for="admin-password">Password</label>
+        <input id="admin-password" name="password" type="password" autocomplete="current-password" required>
+        <button type="submit">Sign In</button>
+        <button id="change-admin-identity" class="button-secondary" type="button">Back</button>
+        <p id="admin-password-message" class="form-message" role="status" aria-live="polite"></p>
+      </form>
+      <a class="back-link" href="index.html">Back to account selection</a>
+    </section>
+    <footer>Designed by TUPS Technologies</footer>
+  </main>
+</body>
+</html>
