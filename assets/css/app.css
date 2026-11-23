@@ -6,6 +6,7 @@
   font-synthesis: none;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { min-height: 100%; margin: 0; }
 body { min-height: 100vh; }
 .page-shell {
@@ -41,21 +42,23 @@ h1 { margin: 0; text-align: center; font-size: 27px; letter-spacing: .2px; }
 .school-name { margin: 9px 0 32px; color: #687987; text-align: center; font-size: 14px; }
 form { display: grid; gap: 12px; }
 label { font-size: 14px; font-weight: 600; }
-select, button {
+select, input, button {
   width: 100%;
   min-height: 48px;
   border-radius: 6px;
   font: inherit;
 }
-select {
+select, input {
   padding: 0 13px;
   color: #263b4b;
   background: #fff;
   border: 1px solid #cbd5dc;
 }
-select:focus, button:focus-visible { outline: 3px solid rgba(29, 132, 177, .25); outline-offset: 2px; }
+input[readonly] { background: #f3f6f8; color: #596b78; }
+select:focus, input:focus, button:focus-visible { outline: 3px solid rgba(29, 132, 177, .25); outline-offset: 2px; }
 button {
   margin-top: 8px;
+  padding: 0 16px;
   border: 0;
   background: #123f5b;
   color: #fff;
@@ -63,7 +66,13 @@ button {
   cursor: pointer;
 }
 button:hover { background: #0d3249; }
-.form-error { min-height: 18px; margin: 0; color: #b42318; font-size: 13px; }
+button.button-secondary { margin-top: 0; border: 1px solid #cbd5dc; background: #fff; color: #254052; }
+button.button-secondary:hover { background: #f3f6f8; }
+.form-error, .form-message { min-height: 18px; margin: 0; color: #b42318; font-size: 13px; line-height: 1.45; }
+.field-help { margin: -6px 0 2px; color: #73818c; font-size: 12px; line-height: 1.4; }
+.role-summary { margin: 0; color: #526574; font-size: 14px; }
+.back-link { display: block; margin-top: 20px; color: #245b79; text-align: center; font-size: 13px; text-decoration: none; }
+.back-link:hover { text-decoration: underline; }
 footer { margin-top: 24px; color: #73818c; font-size: 12px; text-align: center; }
 .device-message {
   position: fixed;
