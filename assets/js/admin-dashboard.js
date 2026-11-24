@@ -361,6 +361,7 @@ async function loadLiveCandidates(){
 $("refresh-live").addEventListener("click",loadLiveCandidates);
 $("live-search").addEventListener("input",renderLiveCandidates);
 $("live-exam-filter").addEventListener("change",renderLiveCandidates);
+setInterval(renderLiveCandidates,60000);
 $("sign-out-button").addEventListener("click",async()=>{const b=$("sign-out-button");b.disabled=true;b.textContent="Signing out…";const {error}=await window.supabaseClient.auth.signOut();if(error){b.disabled=false;b.textContent="↪  Sign Out";setNotice("Unable to sign out. Please retry.");return;}sessionStorage.removeItem("lbis_staff_profile");location.replace("admin-login.html");});
 session().then(v=>{context=v;if(context)loadExaminations();}).catch(e=>{console.error(e);setNotice("Dashboard initialization failed. Reload the page.");});
 $("refresh-examinations").addEventListener("click",loadExaminations);
