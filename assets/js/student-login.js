@@ -1,68 +1,95 @@
 (() => {
+  "use strict";
+
   const form = document.getElementById("student-login-form");
   if (!form) return;
+
+  const SUPABASE_URL = "https://mbsbfhifbsdiryerqxbq.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_7UJC2JRYXUSJth87lEYq6w_xNfjdXLq";
 
   const admission = document.getElementById("admission-number");
   const classField = document.getElementById("student-class");
   const password = document.getElementById("exam-password");
   const message = document.getElementById("student-login-message");
-  let lookupTimer;
+  const submitButton = form.querySelector('button[type="submit"]');
 
-  async function lookupStudent() {
-    const admissionNumber = admission.value.trim();
-    classField.value = "";
-    if (!admissionNumber) return;
-    message.textContent = "Looking up student record…";
-
-    try {
-      if (!window.LBISAuth || typeof window.LBISAuth.lookupStudent !== "function") {
-        message.textContent = "Student account service is not connected yet.";
-        return;
-      }
-      const student = await window.LBISAuth.lookupStudent(admissionNumber);
-      if (!student || !student.className) {
-        message.textContent = "No matching student record was found. Check the Admission Number.";
-        return;
-      }
-      classField.value = student.className;
-      message.textContent = "";
-    } catch (error) {
-      message.textContent = "Unable to retrieve your class at the moment. Please try again.";
-    }
+  function showMessage(text, type = "") {
+    message.textContent = text || "";
+    message.dataset.state = type;
   }
 
-  admission.addEventListener("change", lookupStudent);
-  admission.addEventListener("blur", lookupStudent);
+  function clearStudentSession() {
+    sessionStorage.removeItem("lbis_student_session_token");
+    sessionStorage.removeItem("lbis_student_session_expires_at");
+    sessionStorage.removeItem("lbis_student_profile");
+  }
+
+  // Do not reveal student existence or class before the global password is verified.
+  admission.addEventListener("input", () => {
+    classField.value = "";
+    if (message.textContent) showMessage("");
+  });
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    message.textContent = "";
+    showMessage("");
+
     const admissionNumber = admission.value.trim();
-    if (!admissionNumber || !password.value) {
-      message.textContent = "Enter your Admission Number and Examination Password.";
+    const examPassword = password.value;
+
+    if (!admissionNumber || !examPassword) {
+      showMessage("Enter your Admission Number and Examination Password.", "error");
       return;
     }
-    if (!classField.value) {
-      await lookupStudent();
-      if (!classField.value) return;
-    }
-    if (!window.LBISAuth || typeof window.LBISAuth.studentLogin !== "function") {
-      message.textContent = "Student authentication is not connected yet. Your details have not been submitted.";
-      return;
-    }
+
+    submitButton.disabled = true;
+    submitButton.textContent = "Verifying…";
+    classField.value = "";
+    clearStudentSession();
+
     try {
-      message.textContent = "Verifying…";
-      const result = await window.LBISAuth.studentLogin({
-        admissionNumber,
-        examPassword: password.value
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/student-auth`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_PUBLISHABLE_KEY,
+          "Authorization": `Bearer ${SUPABASE_PUBLISHABLE_KEY}`
+        },
+        body: JSON.stringify({
+          admission_number: admissionNumber,
+          exam_password: examPassword
+        }),
+        cache: "no-store"
       });
-      if (result && result.success && result.redirectUrl) {
-        window.location.assign(result.redirectUrl);
-      } else {
-        message.textContent = (result && result.message) || "Login could not be completed.";
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.success !== true || !data.student_token || !data.student) {
+        throw new Error(data.message || "Admission Number or Examination Password is incorrect.");
       }
+
+      sessionStorage.setItem("lbis_student_session_token", data.student_token);
+      sessionStorage.setItem("lbis_student_session_expires_at", data.expires_at);
+      sessionStorage.setItem("lbis_student_profile", JSON.stringify(data.student));
+
+      const classLabel = data.student.class_level
+        ? `${data.student.class_name} — ${data.student.class_level}`
+        : data.student.class_name;
+      classField.value = classLabel || "";
+
+      password.value = "";
+      showMessage(
+        `Identity verified. Welcome, ${data.student.full_name}. Your registered class is ${classLabel}. Your secure sign-in is ready.`,
+        "success"
+      );
+
+      form.dataset.authenticated = "true";
+      submitButton.textContent = "Verified";
     } catch (error) {
-      message.textContent = "Login service is temporarily unavailable. Please try again.";
+      clearStudentSession();
+      classField.value = "";
+      showMessage(error.message || "Unable to sign in. Please try again.", "error");
+      submitButton.disabled = false;
+      submitButton.textContent = "Enter Exam Room";
     }
   });
 })();
