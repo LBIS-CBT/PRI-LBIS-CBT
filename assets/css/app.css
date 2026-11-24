@@ -96,7 +96,7 @@ footer { margin-top: 24px; color: #73818c; font-size: 12px; text-align: center; 
 .device-message__panel h1 { font-size: 23px; }
 .device-message__panel p { color: #526574; line-height: 1.6; }
 /* Keep small-screen phones out while allowing tablet portrait and landscape. */
-@media (max-width: 600px) {
+@media (max-width: 480px) {
   .page-shell { display: none; }
   .device-message { display: grid; }
 }
@@ -269,7 +269,7 @@ footer {
   font-size: 14px;
   line-height: 1.65;
 }
-@media (max-width: 600px) {
+@media (max-width: 480px) {
   .page-shell { padding: 22px 16px 16px; }
 }
 @media (max-width: 420px) {
