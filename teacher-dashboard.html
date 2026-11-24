@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#64172d"><meta name="description" content="LBIS CBT Teacher Dashboard">
+<title>LBIS CBT | Teacher Dashboard</title>
+<link rel="stylesheet" href="assets/css/app.css?v=20261124-brand4">
+<link rel="stylesheet" href="assets/css/teacher-dashboard.css?v=20261124-teacher1">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/auth.js?v=20261124-3" defer></script>
+<script src="assets/js/teacher-dashboard.js?v=20261124-teacher1" defer></script>
+</head>
+<body class="teacher-body">
+<div id="unsupported-device" class="device-message" role="alert" hidden><div class="device-message__panel"><h1>Device not supported</h1><p>LBIS CBT is designed for laptops, desktop computers and tablets. Please access the system using a supported device.</p></div></div>
+<div class="teacher-layout" id="teacher-layout">
+<aside class="teacher-sidebar">
+ <a class="teacher-brand" href="teacher-dashboard.html"><span class="teacher-brand-mark">LBIS</span><span><b>LBIS CBT</b><small>Teacher Portal</small></span></a>
+ <p class="sidebar-label">TEACHING WORKSPACE</p>
+ <nav class="teacher-nav" aria-label="Teacher dashboard navigation">
+  <button class="teacher-nav-button active" type="button" data-panel="overview"><span>▦</span> Overview</button>
+  <button class="teacher-nav-button" type="button" data-panel="create-exam"><span>＋</span> Create Examination</button>
+  <button class="teacher-nav-button" type="button" data-panel="my-exams"><span>▤</span> My Examinations</button>
+  <button class="teacher-nav-button" type="button" data-panel="question-bank"><span>☷</span> Question Extraction</button>
+ </nav>
+ <div class="teacher-sidebar-bottom">
+  <div class="teacher-help"><strong>Need assistance?</strong><p>Contact the school CBT administrator for account or examination support.</p></div>
+  <button id="teacher-sign-out" class="teacher-logout" type="button">↪ &nbsp; Sign Out</button>
+ </div>
+</aside>
+<main class="teacher-main">
+ <header class="teacher-topbar"><div><span class="topbar-kicker">LEAD BRITISH INTERNATIONAL SCHOOL</span><h1 id="teacher-page-title">Teacher Overview</h1></div><div class="teacher-user"><span class="teacher-online-dot"></span><span id="teacher-top-name">Loading account…</span><span class="teacher-avatar" id="teacher-avatar">T</span></div></header>
+ <div class="teacher-content">
+  <section class="teacher-panel active" id="teacher-panel-overview">
+   <div class="teacher-welcome"><div><p class="teacher-eyebrow">TEACHER WORKSPACE</p><h2>Welcome, <span id="teacher-name">…</span></h2><p>Prepare examinations, extract questions and manage the assessments you create.</p></div><span class="teacher-role-pill">TEACHER ACCOUNT</span></div>
+   <div class="teacher-profile-grid">
+    <article class="teacher-info-card"><span>STAFF CODE</span><strong id="teacher-code">—</strong></article>
+    <article class="teacher-info-card"><span>ACCOUNT STATUS</span><strong class="teacher-status-good">Active</strong></article>
+    <article class="teacher-info-card"><span>MY EXAMINATIONS</span><strong id="teacher-exam-count">—</strong></article>
+   </div>
+   <div class="teacher-section-heading"><div><h3>Quick Actions</h3><p>Start preparing an examination or review your existing work.</p></div></div>
+   <div class="teacher-action-grid">
+    <button type="button" class="teacher-action-card" data-open-panel="create-exam"><span class="action-icon">＋</span><strong>Create Examination</strong><small>Set up a new class assessment.</small><em>Open workspace →</em></button>
+    <button type="button" class="teacher-action-card" data-open-panel="question-bank"><span class="action-icon">☷</span><strong>Question Extraction</strong><small>Bring supported MCQ questions in from Google Forms.</small><em>Open workspace →</em></button>
+    <button type="button" class="teacher-action-card" data-open-panel="my-exams"><span class="action-icon">▤</span><strong>My Examinations</strong><small>Review examinations created under your account.</small><em>View examinations →</em></button>
+   </div>
+   <div class="teacher-notice teacher-notice-info"><strong>Important</strong><p>Teachers prepare and publish examination content for review. Examination admission is controlled from the LBIS Administration Portal. Publishing an examination does not automatically open it to candidates.</p></div>
+  </section>
+  <section class="teacher-panel" id="teacher-panel-create-exam">
+   <div class="teacher-section-heading"><div><p class="teacher-eyebrow">EXAMINATION SETUP</p><h3>Create Examination</h3><p>Set up the examination details before importing its questions.</p></div></div>
+   <div class="teacher-empty-state"><span class="empty-state-icon">＋</span><h4>Examination setup</h4><p>The secure examination-creation workflow is the next connection step. It will let you set the title, subject, class, duration and examination window, then save a draft.</p><span class="feature-state">Setup interface planned</span></div>
+  </section>
+  <section class="teacher-panel" id="teacher-panel-my-exams">
+   <div class="teacher-section-heading"><div><p class="teacher-eyebrow">YOUR ASSESSMENTS</p><h3>My Examinations</h3><p>Examinations created by your teacher account.</p></div></div>
+   <div class="teacher-table-card"><div class="teacher-table-scroll"><table><thead><tr><th>Examination</th><th>Subject</th><th>Class</th><th>Questions</th><th>Status</th><th>Action</th></tr></thead><tbody id="teacher-exams-body"><tr><td colspan="6" class="teacher-table-empty">Your examination list will appear here when the secure examination service is connected.</td></tr></tbody></table></div></div>
+  </section>
+  <section class="teacher-panel" id="teacher-panel-question-bank">
+   <div class="teacher-section-heading"><div><p class="teacher-eyebrow">GOOGLE FORMS BRIDGE</p><h3>Question Extraction</h3><p>Import supported multiple-choice questions and review them before publishing.</p></div></div>
+   <div class="teacher-process-grid">
+    <article><span>01</span><h4>Provide Google Form</h4><p>Paste the Google Forms link or Form ID for the examination.</p></article>
+    <article><span>02</span><h4>Extract Questions</h4><p>The bridge reads supported single-answer MCQ items and identifies unsupported items.</p></article>
+    <article><span>03</span><h4>Review Preview</h4><p>Check question text, answer choices, correct answers and marks before saving.</p></article>
+    <article><span>04</span><h4>Save or Publish</h4><p>Save a draft or publish the reviewed examination for administrator activation.</p></article>
+   </div>
+   <div class="teacher-notice teacher-notice-info"><strong>Review is mandatory</strong><p>Extracted questions will not be published automatically. The teacher must inspect the extraction preview first. The initial release supports single-correct-answer MCQs only.</p></div>
+   <div class="teacher-empty-state compact"><h4>Extraction workspace</h4><p>The secure Google Forms extraction and preview connection will be added after the examination service is in place.</p><span class="feature-state">Bridge connection next</span></div>
+  </section>
+  <p id="teacher-dashboard-message" class="teacher-message" role="status" aria-live="polite"></p>
+ </div>
+ <footer class="teacher-footer">Designed by TUPS Technologies</footer>
+</main>
+</div>
+</body>
+</html>
