@@ -28,6 +28,33 @@ async function session(){
  return {profile:p,session:data.session};
 }
 let context=null;
+const examBody=$("exam-table-body");
+function renderExamRows(rows){
+ examBody.replaceChildren();
+ if(!Array.isArray(rows)||rows.length===0){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=5;td.className="table-empty";td.textContent="No examinations are currently available.";tr.appendChild(td);examBody.appendChild(tr);return;}
+ rows.forEach(exam=>{
+  const tr=document.createElement("tr"),subject=document.createElement("td"),klass=document.createElement("td"),controls=document.createElement("td"),status=document.createElement("td"),count=document.createElement("td");
+  subject.textContent=exam.subject||exam.title||"—";klass.textContent=exam.class_name||exam.class_label||"—";
+  const accepting=exam.accepts_new_candidates===true,canStart=["ready","active"].includes(String(exam.status||"").toLowerCase());
+  const wrap=document.createElement("div");wrap.className="exam-controls";const action=document.createElement("button");action.type="button";action.className="exam-action "+(accepting?"close":"start");action.textContent=accepting?"Close to New Candidates":"Start Exam";action.disabled=!canStart;action.addEventListener("click",()=>setExamEntry(exam.id,!accepting,action));wrap.appendChild(action);controls.appendChild(wrap);
+  const pill=document.createElement("span");pill.className="exam-status "+String(exam.status||"draft").toLowerCase();pill.textContent=String(exam.status||"draft").replaceAll("_"," ");status.appendChild(pill);
+  count.textContent=Number(exam.candidate_count??exam.candidates_count??0).toLocaleString();
+  [subject,klass,controls,status,count].forEach(td=>tr.appendChild(td));examBody.appendChild(tr);
+ });
+}
+async function loadExaminations(){
+ if(!context)return;const btn=$("refresh-examinations");btn.disabled=true;btn.textContent="Refreshing…";
+ const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=5;td.className="table-empty";td.textContent="Loading examination records…";tr.appendChild(td);examBody.replaceChildren(tr);
+ try{const {data,error}=await window.supabaseClient.functions.invoke("admin-examinations",{body:{action:"list_examinations"}});if(error)throw error;if(!data||data.success===false)throw new Error(data?.message||"Examination records could not be loaded.");renderExamRows(data.examinations||data.data||[]);}
+ catch(err){const row=document.createElement("tr"),cell=document.createElement("td");cell.colSpan=5;cell.className="table-empty";cell.textContent="The examination table is ready, but its secure data service has not yet been deployed. Records and controls will become available after that service is connected.";row.appendChild(cell);examBody.replaceChildren(row);console.warn("LBIS examinations could not be loaded:",err);}
+ finally{btn.disabled=false;btn.textContent="Refresh Examinations";}
+}
+async function setExamEntry(examId,accepting,button){
+ button.disabled=true;const original=button.textContent;button.textContent="Saving…";
+ try{const {data,error}=await window.supabaseClient.functions.invoke("admin-examinations",{body:{action:"set_candidate_entry",exam_id:examId,accepts_new_candidates:accepting}});if(error)throw error;if(!data||data.success===false)throw new Error(data?.message||"Exam setting was not updated.");setNotice(data.message||"Examination entry setting updated.");await loadExaminations();}
+ catch(err){setNotice(err.message||"Unable to update examination entry.");button.disabled=false;button.textContent=original;}
+}
+
 $("add-teacher-form").addEventListener("submit",async ev=>{
  ev.preventDefault();if(!context)return;
  const form=ev.currentTarget,btn=$("create-teacher-button"),v=Object.fromEntries(new FormData(form).entries());
@@ -55,5 +82,6 @@ $("reload-teachers").addEventListener("click",async()=>{
 });
 $("refresh-live").addEventListener("click",()=>setNotice("Live candidate monitoring is awaiting the protected monitoring endpoint."));
 $("sign-out-button").addEventListener("click",async()=>{const b=$("sign-out-button");b.disabled=true;b.textContent="Signing out…";const {error}=await window.supabaseClient.auth.signOut();if(error){b.disabled=false;b.textContent="↪  Sign Out";setNotice("Unable to sign out. Please retry.");return;}sessionStorage.removeItem("lbis_staff_profile");location.replace("admin-login.html");});
-session().then(v=>{context=v;}).catch(e=>{console.error(e);setNotice("Dashboard initialization failed. Reload the page.");});
+session().then(v=>{context=v;if(context)loadExaminations();}).catch(e=>{console.error(e);setNotice("Dashboard initialization failed. Reload the page.");});
+$("refresh-examinations").addEventListener("click",loadExaminations);
 })();
