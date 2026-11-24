@@ -16,6 +16,7 @@
  <nav class="side-nav" aria-label="Administration menu">
   <button class="nav-button active" data-panel="overview"><span>▦</span> Dashboard</button>
   <button class="nav-button" data-panel="add-teacher"><span>＋</span> Add Teacher</button>
+  <button class="nav-button" data-panel="add-student"><span>＋</span> Add Student</button>
   <button class="nav-button" data-panel="teachers"><span>♙</span> Manage Teachers</button>
   <button class="nav-button" data-panel="live-candidates"><span>◉</span> Live Candidates</button>
   <button class="nav-button" data-panel="examinations"><span>▤</span> Examinations</button>
@@ -55,6 +56,22 @@
    <form id="add-teacher-form" class="form-card">
     <div class="form-grid"><label>Teacher full name<input name="full_name" required autocomplete="name" placeholder="Enter full name"></label><label>Staff code<input name="staff_code" required placeholder="e.g. LBIS/PRI/027"></label><label>Teacher email<input name="email" type="email" required autocomplete="email" placeholder="name@lbis.org"></label><label>Temporary password<input name="password" type="password" required minlength="8" autocomplete="new-password" placeholder="At least 8 characters"></label></div>
     <button class="primary-button" type="submit" id="create-teacher-button">Create Teacher Account</button><p class="form-help">Share temporary credentials securely and require the teacher to change the password through the approved account-recovery process.</p>
+   </form>
+  </section>
+  <section class="panel-view" id="panel-add-student">
+   <div class="section-title"><div><h3>Add a Student</h3><p>Register a student in the LBIS CBT student records.</p></div></div>
+   <form id="add-student-form" class="form-card">
+    <div class="form-grid">
+     <label>Student full name<input name="full_name" required maxlength="150" autocomplete="off" placeholder="Enter student's full name"></label>
+     <label>Admission number<input name="admission_number" required maxlength="60" autocomplete="off" placeholder="Enter admission number"></label>
+     <label>Class
+      <select name="class_id" id="student-class" required>
+       <option value="">Loading available classes…</option>
+      </select>
+     </label>
+    </div>
+    <button class="primary-button" type="submit" id="create-student-button">Add Student</button>
+    <p class="form-help">Admission numbers must be unique. The system checks duplicates without regard to letter case or extra spaces. Select the student's current class before saving.</p>
    </form>
   </section>
   <section class="panel-view" id="panel-teachers"><div class="section-title"><div><h3>Manage Teachers</h3><p>Teacher account administration.</p></div><button class="secondary-button" id="reload-teachers">Refresh List</button></div><div id="teachers-content" class="table-card"><p class="empty-state">Select Refresh List to retrieve staff records securely.</p></div></section>
