@@ -74,7 +74,23 @@
     <article><span>04</span><h4>Save or Publish</h4><p>Save a draft or publish the reviewed examination for administrator activation.</p></article>
    </div>
    <div class="teacher-notice teacher-notice-info"><strong>Review is mandatory</strong><p>Extracted questions will not be published automatically. The teacher must inspect the extraction preview first. The initial release supports single-correct-answer MCQs only.</p></div>
-   <div class="teacher-empty-state compact"><h4>Extraction workspace</h4><p>The secure Google Forms extraction and preview connection will be added after the examination service is in place.</p><span class="feature-state">Bridge connection next</span></div>
+   <div class="teacher-google-card" aria-labelledby="google-connection-heading">
+    <div class="teacher-google-card__heading">
+     <div class="teacher-google-card__identity"><span class="teacher-google-icon" aria-hidden="true">G</span><div><h4 id="google-connection-heading">Google Account Connection</h4><p>Connect the Google account that owns the Google Forms you want to import.</p></div></div>
+     <span id="google-connection-badge" class="google-connection-badge checking">Checking connection…</span>
+    </div>
+    <div id="google-connected-details" class="teacher-google-connected" hidden>
+     <span class="teacher-google-check" aria-hidden="true">✓</span>
+     <div><strong id="google-account-email">—</strong><small>Google account connected</small></div>
+     <button id="google-disconnect-button" class="teacher-secondary-button" type="button">Disconnect</button>
+    </div>
+    <div id="google-not-connected-details" class="teacher-google-not-connected" hidden>
+     <p>Connect your Google account to grant LBIS CBT read-only access to supported Google Forms. You will choose and approve the account on Google's secure sign-in page.</p>
+     <button id="google-connect-button" class="teacher-primary-button" type="button">Connect Google Account</button>
+    </div>
+    <p id="google-connection-message" class="teacher-google-message" role="status" aria-live="polite"></p>
+   </div>
+   <div class="teacher-empty-state compact teacher-extraction-next-step"><h4>Form extraction workspace</h4><p>After connecting your Google account, the next stage will add the Google Form link, question extraction, and teacher-review preview. No questions are imported or published by connecting an account.</p><span class="feature-state">Google connection setup</span></div>
   </section>
   <p id="teacher-dashboard-message" class="teacher-message" role="status" aria-live="polite"></p>
  </div>
