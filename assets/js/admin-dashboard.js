@@ -15,6 +15,7 @@ function showPanel(name){
  if(name==="add-class")loadClasses();
  if(name==="add-student")loadStudentClasses();
  if(name==="manage-students")loadManageStudents();
+ if(name==="teachers")loadTeachers();
 }
 document.querySelectorAll("[data-panel]").forEach(b=>b.addEventListener("click",()=>showPanel(b.dataset.panel)));
 async function session(){
@@ -239,9 +240,15 @@ async function loadTeachers(){
  if(!context)return;const btn=$("reload-teachers"),body=$("teachers-table-body");btn.disabled=true;btn.textContent="Loading…";
  body.innerHTML='<tr><td colspan="5" class="table-empty">Loading teacher accounts…</td></tr>';
  try{
-  const {data,error}=await window.supabaseClient.functions.invoke("staff-management",{body:{action:"list_staff"}});
-  if(error)throw error;if(!data||data.success===false)throw new Error(data?.message||"Unable to retrieve staff.");
-  teacherRecords=data.staff||data.users||data.data||[];teacherPage=1;renderTeachers();
+  const all=[];let page=1,total=0;
+  do{
+   const {data,error}=await window.supabaseClient.functions.invoke("staff-management",{body:{action:"list_staff",page,limit:100}});
+   if(error)throw error;
+   if(!data||data.success===false)throw new Error(data?.error||data?.message||"Unable to retrieve staff.");
+   all.push(...(data.staff||[]));total=Number(data.total??all.length);page++;
+   if(page>10000)throw new Error("The staff list exceeded the supported page limit.");
+  }while(all.length<total);
+  teacherRecords=all.filter(s=>s.role==="teacher");teacherPage=1;renderTeachers();
  }catch(err){body.replaceChildren();const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=5;td.className="table-empty";td.textContent=err.message||"Teacher accounts could not be loaded.";tr.appendChild(td);body.appendChild(tr);}
  finally{btn.disabled=false;btn.textContent="Refresh Teachers";}
 }
@@ -260,7 +267,7 @@ async function toggleTeacherActive(s,button){
  try{
   const action=next?"reactivate_staff":"deactivate_staff";
   const {data,error}=await window.supabaseClient.functions.invoke("staff-management",{body:{action,staff_id:s.id}});
-  if(error)throw error;if(!data||data.success===false)throw new Error(data?.message||"Teacher status could not be changed.");
+  if(error)throw error;if(!data||data.success===false)throw new Error(data?.message||data?.error||"Teacher status could not be changed.");
   setNotice(data.message||(next?"Teacher reactivated.":"Teacher deactivated."));await loadTeachers();
  }catch(err){setNotice(err.message||"Unable to update teacher status.");button.disabled=false;button.textContent=old;}
 }
@@ -275,18 +282,18 @@ $("teacher-edit-form").addEventListener("submit",async ev=>{
  if(!selectedTeacher)return;btn.disabled=true;btn.textContent="Saving…";
  try{
   const {data,error}=await window.supabaseClient.functions.invoke("staff-management",{body:{action:"update_staff_profile",staff_id:v.id,full_name:v.full_name,staff_code:v.staff_code,email:v.email}});
-  if(error)throw error;if(!data||data.success===false)throw new Error(data?.message||"Teacher profile update failed.");
+  if(error)throw error;if(!data||data.success===false)throw new Error(data?.message||data?.error||"Teacher profile update failed.");
   $("teacher-modal").hidden=true;setNotice(data.message||"Teacher profile updated.");await loadTeachers();
  }catch(err){setNotice(err.message||"Unable to update teacher profile.");}
  finally{btn.disabled=false;btn.textContent="Save Changes";}
 });
 $("teacher-reset-form").addEventListener("submit",async ev=>{
  ev.preventDefault();if(!selectedTeacher)return;const form=ev.currentTarget,btn=$("reset-teacher-password"),password=form.elements.password.value;
- if(password.length<8){setNotice("The new password must contain at least 8 characters.");return;}
+ if(password.length<12){setNotice("The new password must contain at least 12 characters.");return;}
  btn.disabled=true;btn.textContent="Resetting…";
  try{
-  const {data,error}=await window.supabaseClient.functions.invoke("staff-management",{body:{action:"reset_staff_password",staff_id:selectedTeacher.id,password}});
-  if(error)throw error;if(!data||data.success===false)throw new Error(data?.message||"Password reset failed.");
+  const {data,error}=await window.supabaseClient.functions.invoke("staff-management",{body:{action:"reset_staff_password",staff_id:selectedTeacher.id,new_password:password}});
+  if(error)throw error;if(!data||data.success===false)throw new Error(data?.message||data?.error||"Password reset failed.");
   form.reset();$("teacher-modal").hidden=true;setNotice(data.message||"Teacher password reset successfully.");
  }catch(err){setNotice(err.message||"Unable to reset teacher password.");}
  finally{btn.disabled=false;btn.textContent="Reset Password";}
