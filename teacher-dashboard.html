@@ -46,12 +46,24 @@
    <div class="teacher-notice teacher-notice-info"><strong>Important</strong><p>Teachers prepare and publish examination content for review. Examination admission is controlled from the LBIS Administration Portal. Publishing an examination does not automatically open it to candidates.</p></div>
   </section>
   <section class="teacher-panel" id="teacher-panel-create-exam">
-   <div class="teacher-section-heading"><div><p class="teacher-eyebrow">EXAMINATION SETUP</p><h3>Create Examination</h3><p>Set up the examination details before importing its questions.</p></div></div>
-   <div class="teacher-empty-state"><span class="empty-state-icon">＋</span><h4>Examination setup</h4><p>The secure examination-creation workflow is the next connection step. It will let you set the title, subject, class, duration and examination window, then save a draft.</p><span class="feature-state">Setup interface planned</span></div>
+   <div class="teacher-section-heading"><div><p class="teacher-eyebrow">EXAMINATION SETUP</p><h3>Create Examination</h3><p>Enter the details below to create a draft examination.</p></div></div>
+   <form id="teacher-create-exam-form" class="teacher-form-card">
+    <div class="teacher-form-grid">
+     <label class="teacher-field teacher-field-wide">Examination title<input id="exam-title" name="title" type="text" maxlength="160" placeholder="e.g. First Term Mathematics Examination" required></label>
+     <label class="teacher-field">Subject<input id="exam-subject" name="subject" type="text" maxlength="100" placeholder="e.g. Mathematics" required></label>
+     <label class="teacher-field">Class<select id="exam-class" name="class_id" required><option value="">Loading classes…</option></select></label>
+     <label class="teacher-field">Duration (minutes)<input id="exam-duration" name="duration_minutes" type="number" min="1" max="300" step="1" value="60" required><small>Enter a whole number from 1 to 300.</small></label>
+     <label class="teacher-field">Scheduled start (optional)<input id="exam-starts-at" name="starts_at" type="datetime-local"><small>Leave blank if the date has not been decided.</small></label>
+     <label class="teacher-field">Scheduled end (optional)<input id="exam-ends-at" name="ends_at" type="datetime-local"><small>If supplied, the end must be after the start.</small></label>
+    </div>
+    <div class="teacher-form-actions"><p id="teacher-create-message" class="teacher-form-message" role="status" aria-live="polite"></p><button id="teacher-create-submit" class="teacher-primary-button" type="submit">Save Examination Draft</button></div>
+   </form>
+   <div class="teacher-notice teacher-notice-info"><strong>Draft only</strong><p>Saving creates a draft. It does not publish, activate or open the examination to candidates. You will add and review the Google Forms questions in the next workflow stage.</p></div>
   </section>
   <section class="teacher-panel" id="teacher-panel-my-exams">
-   <div class="teacher-section-heading"><div><p class="teacher-eyebrow">YOUR ASSESSMENTS</p><h3>My Examinations</h3><p>Examinations created by your teacher account.</p></div></div>
-   <div class="teacher-table-card"><div class="teacher-table-scroll"><table><thead><tr><th>Examination</th><th>Subject</th><th>Class</th><th>Questions</th><th>Status</th><th>Action</th></tr></thead><tbody id="teacher-exams-body"><tr><td colspan="6" class="teacher-table-empty">Your examination list will appear here when the secure examination service is connected.</td></tr></tbody></table></div></div>
+   <div class="teacher-section-heading teacher-section-heading-row"><div><p class="teacher-eyebrow">YOUR ASSESSMENTS</p><h3>My Examinations</h3><p>Only examinations created by your teacher account are shown here.</p></div><button id="teacher-refresh-exams" class="teacher-secondary-button" type="button">↻ Refresh List</button></div>
+   <div class="teacher-table-card"><div class="teacher-table-scroll"><table><thead><tr><th>Examination</th><th>Subject</th><th>Class</th><th>Duration</th><th>Questions</th><th>Status</th><th>Created</th></tr></thead><tbody id="teacher-exams-body"><tr><td colspan="7" class="teacher-table-empty">Loading your examinations…</td></tr></tbody></table></div></div>
+   <p id="teacher-exams-summary" class="teacher-table-summary"></p>
   </section>
   <section class="teacher-panel" id="teacher-panel-question-bank">
    <div class="teacher-section-heading"><div><p class="teacher-eyebrow">GOOGLE FORMS BRIDGE</p><h3>Question Extraction</h3><p>Import supported multiple-choice questions and review them before publishing.</p></div></div>
