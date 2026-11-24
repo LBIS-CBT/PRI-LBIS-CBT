@@ -56,3 +56,175 @@
 @media(max-width:900px){.content-area{padding:24px 20px}}
 
 .live-stat-grid{margin-bottom:18px}.live-filters{max-width:none;margin-bottom:18px}.live-table-card{padding:0;overflow:hidden}.live-table{min-width:1120px}.live-table th{white-space:nowrap}.live-table td{white-space:nowrap}.live-table .exam-status{font-size:10px}.live-table-card .student-pagination{background:#fff}
+
+
+/* =========================================================
+   LBIS ADMIN DASHBOARD — FINAL BRAND AND CONTROL OVERRIDES
+   ========================================================= */
+:root {
+  --navy: #64172d;
+  --navy2: #781d37;
+  --cyan: #b36b7e;
+  --ink: #292629;
+  --muted: #77727a;
+  --line: #e2dfe1;
+  --bg: #f5f4f5;
+  --lbis-maroon: #781d37;
+  --lbis-maroon-dark: #591326;
+  --lbis-maroon-soft: #f7edf0;
+}
+.admin-body {
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.sidebar {
+  background: #64172d;
+  color: #fff;
+}
+.brand-mark { color: #781d37; }
+.brand small, .sidebar-caption { color: #e4cbd2; }
+.nav-button {
+  min-height: 42px;
+  padding: 10px 12px;
+  color: #f5edf0;
+  font-size: 12px;
+  line-height: 1.3;
+}
+.nav-button span { color: #e2bdc7; }
+.nav-button:hover, .nav-button.active { background: #812b45; }
+.nav-button.active { box-shadow: inset 3px 0 #fff; }
+.logout-button {
+  min-height: 42px;
+  padding: 10px 13px;
+  border: 1px solid #a56b7c;
+  border-radius: 7px;
+  color: #fff;
+  font-size: 12px;
+}
+.topbar {
+  min-height: 74px;
+  height: auto;
+  background: #fff;
+  border-bottom-color: var(--line);
+}
+.topbar-label, .eyebrow { color: var(--lbis-maroon); }
+.topbar-label { font-size: 9px; }
+.topbar h1 {
+  color: var(--ink);
+  font-size: 20px;
+  line-height: 1.25;
+}
+.topbar-user { color: var(--lbis-grey-700, #555158); font-size: 12px; }
+.avatar { background: var(--lbis-maroon-soft); color: var(--lbis-maroon); }
+.content-area { padding: 28px 32px; }
+.welcome-row h2 { color: var(--ink); font-size: 25px; line-height: 1.25; }
+.welcome-row p:not(.eyebrow), .section-title p { color: var(--muted); }
+.role-pill { background: var(--lbis-maroon-soft); color: var(--lbis-maroon); }
+.stat-card, .table-card, .form-card, .security-note {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 5px 18px rgba(41, 38, 41, .04);
+}
+.stat-card span { color: var(--muted); font-size: 10px; }
+.stat-card strong { color: var(--ink); font-size: 21px; }
+.section-title h3 { color: var(--ink); font-size: 17px; }
+.section-title p { font-size: 11px; line-height: 1.5; }
+.shortcut-card {
+  min-height: 132px;
+  border-color: var(--line);
+  border-radius: 9px;
+}
+.shortcut-card:hover {
+  border-color: #b36b7e;
+  box-shadow: 0 6px 16px rgba(90, 20, 40, .07);
+}
+.shortcut-card b { background: var(--lbis-maroon-soft); color: var(--lbis-maroon); }
+.shortcut-card strong { color: var(--ink); font-size: 12px; }
+.shortcut-card span { color: var(--muted); font-size: 11px; }
+.form-grid { gap: 16px; }
+.form-grid label, .teacher-reset-form label {
+  color: #555158;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.form-grid input, .form-grid select, .teacher-reset-form input {
+  min-height: 42px;
+  margin-top: 7px;
+  padding: 9px 11px;
+  border: 1px solid #d9d6d9;
+  border-radius: 7px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+}
+.form-grid input:focus, .form-grid select:focus, .teacher-reset-form input:focus {
+  outline: 3px solid rgba(120, 29, 55, .14);
+  border-color: #a65b70;
+}
+.primary-button, .secondary-button {
+  width: auto;
+  min-height: 40px;
+  margin: 0;
+  padding: 9px 16px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.primary-button { background: var(--lbis-maroon); color: #fff; border: 1px solid var(--lbis-maroon); }
+.primary-button:hover { background: var(--lbis-maroon-dark); border-color: var(--lbis-maroon-dark); }
+.secondary-button { background: #fff; color: var(--lbis-maroon); border: 1px solid #d9d6d9; }
+.secondary-button:hover { background: var(--lbis-maroon-soft); border-color: #c9aab4; }
+.exam-table, .staff-table { font-size: 12px; }
+.exam-table th, .staff-table th {
+  background: #f3f0f1;
+  color: #555158;
+  font-size: 10px;
+  line-height: 1.35;
+}
+.exam-table td, .staff-table td { color: #383338; font-size: 12px; }
+.exam-table th, .exam-table td, .staff-table th, .staff-table td { padding: 11px 12px; }
+.exam-action {
+  width: auto;
+  min-height: 32px;
+  margin: 0;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 5px;
+  font-size: 10px;
+}
+.exam-action.start { background: #e7f2ec; color: #276447; }
+.exam-action.close { background: var(--lbis-maroon-soft); color: var(--lbis-maroon); }
+.exam-action:hover { filter: brightness(.97); }
+.exam-status { font-size: 10px; }
+.notice { color: #9b273f; font-size: 12px; }
+.empty-state, .form-help { color: var(--muted); font-size: 11px; line-height: 1.6; }
+.page-footer { color: #89838a; font-size: 11px; }
+.security-note { border-left-color: var(--lbis-maroon); }
+.student-modal { background: rgba(35, 20, 26, .56); }
+.student-modal-card {
+  border: 1px solid var(--line);
+  border-top: 5px solid var(--lbis-maroon);
+  border-radius: 11px;
+}
+.student-pagination {
+  color: var(--muted);
+  font-size: 11px;
+}
+.student-pagination button { width: auto; }
+.live-table th, .live-table td { white-space: nowrap; }
+@media (max-width: 900px) {
+  .content-area { padding: 23px 20px; }
+  .topbar { padding: 0 22px; }
+}
+@media (max-width: 650px) {
+  .content-area { padding: 18px 14px; }
+  .topbar { padding: 0 16px; }
+  .section-title { align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  .section-title > button { width: auto; }
+  .form-grid { grid-template-columns: 1fr; }
+  .student-pagination { flex-wrap: wrap; }
+}
