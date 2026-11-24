@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#12304a">
+  <meta name="description" content="LBIS CBT staff dashboard">
+  <title>LBIS CBT | Staff Dashboard</title>
+  <link rel="stylesheet" href="assets/css/app.css">
+  <link rel="stylesheet" href="assets/css/staff-dashboard.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/auth.js" defer></script>
+  <script src="assets/js/staff-dashboard.js" defer></script>
+</head>
+<body class="dashboard-body">
+  <div id="unsupported-device" class="device-message" role="alert" hidden>
+    <div class="device-message__panel">
+      <h1>Device not supported</h1>
+      <p>LBIS CBT is designed for laptops, desktop computers and tablets. Please access the system using a supported device.</p>
+    </div>
+  </div>
+
+  <div class="dashboard-shell" id="dashboard-shell">
+    <header class="dashboard-header">
+      <a class="dashboard-brand" href="staff-dashboard.html" aria-label="LBIS CBT dashboard home">
+        <span class="dashboard-brand__mark">LBIS</span>
+        <span>
+          <strong>LBIS CBT</strong>
+          <small>Staff Portal</small>
+        </span>
+      </a>
+      <div class="header-actions">
+        <span class="connection-indicator"><span></span> Secure session</span>
+        <button id="sign-out-button" class="sign-out-button" type="button">Sign Out</button>
+      </div>
+    </header>
+
+    <main class="dashboard-main">
+      <section class="welcome-section">
+        <div>
+          <p class="eyebrow">STAFF WORKSPACE</p>
+          <h1>Welcome, <span id="staff-name">...</span></h1>
+          <p class="welcome-copy">Your LBIS CBT workspace is ready.</p>
+        </div>
+        <div class="role-chip" id="staff-role">Loading role…</div>
+      </section>
+
+      <section class="profile-strip" aria-label="Staff account information">
+        <div>
+          <span class="profile-label">Staff Code</span>
+          <strong id="staff-code">—</strong>
+        </div>
+        <div>
+          <span class="profile-label">Account Role</span>
+          <strong id="profile-role">—</strong>
+        </div>
+        <div>
+          <span class="profile-label">Account Status</span>
+          <strong class="status-active" id="account-status">Checking…</strong>
+        </div>
+      </section>
+
+      <section class="workspace-section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">YOUR TOOLS</p>
+            <h2 id="workspace-title">Staff Workspace</h2>
+          </div>
+          <p id="workspace-description">Tools and activities available to your account.</p>
+        </div>
+
+        <div class="workspace-grid" id="workspace-grid">
+          <article class="workspace-card">
+            <div class="card-icon">EX</div>
+            <div>
+              <h3>Examinations</h3>
+              <p>Exam creation and management tools will appear here.</p>
+              <span class="card-status">Coming next</span>
+            </div>
+          </article>
+          <article class="workspace-card" id="staff-management-card" hidden>
+            <div class="card-icon">ST</div>
+            <div>
+              <h3>Staff Management</h3>
+              <p>Manage staff accounts and access permissions.</p>
+              <span class="card-status">Coming next</span>
+            </div>
+          </article>
+          <article class="workspace-card">
+            <div class="card-icon">AC</div>
+            <div>
+              <h3>My Account</h3>
+              <p>View your staff identity and account access details.</p>
+              <span class="card-status">Available</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <p id="dashboard-message" class="dashboard-message" role="status" aria-live="polite"></p>
+    </main>
+
+    <footer class="dashboard-footer">Designed by TUPS Technologies</footer>
+  </div>
+</body>
+</html>
