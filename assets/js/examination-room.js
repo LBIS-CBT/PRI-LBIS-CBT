@@ -202,13 +202,25 @@
       else showSave("Connection interrupted. Your saved answers remain on the server; reconnecting…", "error");
     }
   }
-  async function handleEnded(message) {
-    if (finished) return;
+  function showCompleted(message, status = "Submitted") {
     finished = true;
+    submitting = false;
     clearInterval(timerHandle);
     clearInterval(heartbeatHandle);
-    showError(message || "This examination session has ended.", "Examination session ended");
-    ui.errorDashboard.textContent = "Return to Dashboard";
+    ui.dialog.hidden = true;
+    ui.workspace.hidden = true;
+    ui.error.hidden = true;
+    ui.result.hidden = false;
+    $("result-heading").textContent = "Your examination has been completed";
+    $("result-message").textContent = message || "Your saved responses have been recorded.";
+    $("result-answered").textContent = `${answers.size} / ${questions.length}`;
+    $("result-status").textContent = status;
+    sessionStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(EXAM_KEY);
+  }
+  async function handleEnded(message) {
+    if (finished) return;
+    showCompleted(message || "Your examination session has ended. Your saved responses have been recorded.", "Time ended");
   }
   async function autoSubmit(message) {
     if (finished || submitting) return;
@@ -246,11 +258,7 @@
       sessionStorage.removeItem(EXAM_KEY);
     } catch (error) {
       if (error.status === 409) {
-        finished = true;
-        clearInterval(timerHandle);
-        clearInterval(heartbeatHandle);
-        ui.dialog.hidden = true;
-        showError(error.message || "Your examination session has ended.", "Examination session ended");
+        showCompleted(error.message || "Your examination time has ended. Your saved answers have been submitted.", error.data?.attempt_status === "expired" ? "Time expired" : "Completed");
       } else {
         submitting = false;
         ui.confirm.disabled = false;
