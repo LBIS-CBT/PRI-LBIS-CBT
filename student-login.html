@@ -5,8 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#781d37">
   <title>LBIS CBT | Student Login</title>
-  <link rel="stylesheet" href="assets/css/app.css?v=20261124-student-auth2">
-  <script src="assets/js/student-login.js?v=20261124-student-auth1" defer></script>
+  <link rel="stylesheet" href="assets/css/app.css?v=20261124-student-login-force1">
+  <style>
+    /* Student login is laptop/desktop/tablet only. Never let legacy phone-warning
+       styles hide this page or display an obsolete warning overlay. */
+    html, body { min-height: 100% !important; }
+    body { display: block !important; }
+    .page-shell { display: flex !important; visibility: visible !important; }
+    .device-message, #unsupported-device { display: none !important; visibility: hidden !important; }
+  </style>
+  <script src="assets/js/student-login.js?v=20261124-student-login-force1" defer></script>
 </head>
 <body>
   <main class="page-shell">
