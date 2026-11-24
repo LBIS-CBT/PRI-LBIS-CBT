@@ -75,6 +75,7 @@ button.button-secondary:hover { background: #f3f6f8; }
 .back-link:hover { text-decoration: underline; }
 footer { margin-top: 24px; color: #73818c; font-size: 12px; text-align: center; }
 .device-message {
+  display: none;
   position: fixed;
   z-index: 10;
   inset: 0;
