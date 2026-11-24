@@ -1,8 +1,8 @@
 :root {
   color-scheme: light;
   font-family: Arial, Helvetica, sans-serif;
-  color: #172b3a;
-  background: #f3f6f8;
+  color: #292629;
+  background: #f5f5f6;
   font-synthesis: none;
 }
 * { box-sizing: border-box; }
@@ -32,7 +32,7 @@ body { min-height: 100vh; }
   place-items: center;
   margin: 0 auto 18px;
   border-radius: 50%;
-  background: #12304a;
+  background: #701b32;
   color: #fff;
   font-size: 17px;
   font-weight: 700;
@@ -55,23 +55,23 @@ select, input {
   border: 1px solid #cbd5dc;
 }
 input[readonly] { background: #f3f6f8; color: #596b78; }
-select:focus, input:focus, button:focus-visible { outline: 3px solid rgba(29, 132, 177, .25); outline-offset: 2px; }
+select:focus, input:focus, button:focus-visible { outline: 3px solid rgba(112, 27, 50, .22); outline-offset: 2px; }
 button {
   margin-top: 8px;
   padding: 0 16px;
   border: 0;
-  background: #123f5b;
+  background: #781d37;
   color: #fff;
   font-weight: 700;
   cursor: pointer;
 }
-button:hover { background: #0d3249; }
+button:hover { background: #581326; }
 button.button-secondary { margin-top: 0; border: 1px solid #cbd5dc; background: #fff; color: #254052; }
 button.button-secondary:hover { background: #f3f6f8; }
 .form-error, .form-message { min-height: 18px; margin: 0; color: #b42318; font-size: 13px; line-height: 1.45; }
 .field-help { margin: -6px 0 2px; color: #73818c; font-size: 12px; line-height: 1.4; }
 .role-summary { margin: 0; color: #526574; font-size: 14px; }
-.back-link { display: block; margin-top: 20px; color: #245b79; text-align: center; font-size: 13px; text-decoration: none; }
+.back-link { display: block; margin-top: 20px; color: #701b32; text-align: center; font-size: 13px; text-decoration: none; }
 .back-link:hover { text-decoration: underline; }
 footer { margin-top: 24px; color: #73818c; font-size: 12px; text-align: center; }
 .device-message {
@@ -102,3 +102,15 @@ footer { margin-top: 24px; color: #73818c; font-size: 12px; text-align: center; 
 @media (max-width: 420px) {
   .login-panel { padding: 34px 24px 28px; }
 }
+
+/* LBIS brand system: maroon red, cool grey and white */
+:root{--lbis-maroon:#781d37;--lbis-maroon-dark:#591326;--lbis-maroon-soft:#f7edf0;--lbis-grey-900:#292629;--lbis-grey-700:#555158;--lbis-grey-500:#77727a;--lbis-grey-300:#d9d6d9;--lbis-grey-100:#f5f4f5;--lbis-white:#fff}
+body{color:var(--lbis-grey-900);background:var(--lbis-grey-100)}
+.login-panel{border-top:5px solid var(--lbis-maroon);box-shadow:0 14px 38px rgba(50,20,30,.09)}
+.school-mark{background:var(--lbis-maroon);color:#fff}
+h1{color:var(--lbis-grey-900)}
+select:focus,input:focus,button:focus-visible{outline:3px solid rgba(120,29,55,.2);outline-offset:2px}
+button{background:var(--lbis-maroon);color:#fff;min-height:44px;border-radius:7px}
+button:hover{background:var(--lbis-maroon-dark)}
+button.button-secondary{background:#fff;color:var(--lbis-maroon);border:1px solid var(--lbis-grey-300)}
+button.button-secondary:hover{background:var(--lbis-maroon-soft)}
