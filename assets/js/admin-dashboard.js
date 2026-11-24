@@ -211,18 +211,85 @@ $("manage-student-edit-form").addEventListener("submit",async ev=>{
  catch(err){setNotice(err.message||"Unable to save student changes.");}
  finally{btn.disabled=false;btn.textContent="Save Changes";}
 });
-$("reload-teachers").addEventListener("click",async()=>{
- if(!context)return;const area=$("teachers-content");area.textContent="Loading staff records…";
+let teacherRecords=[],teacherPage=1,teacherPageSize=25,selectedTeacher=null;
+function renderTeachers(){
+ const body=$("teachers-table-body");body.replaceChildren();
+ const q=$("teacher-search").value.trim().toLowerCase(),status=$("teacher-status-filter").value;
+ const rows=teacherRecords.filter(s=>{
+  const active=s.active!==false;
+  return (s.role==="teacher")&&(!q||String(s.full_name||"").toLowerCase().includes(q)||String(s.staff_code||"").toLowerCase().includes(q))&&(!status||(status==="active"?active:!active));
+ });
+ const pages=Math.max(1,Math.ceil(rows.length/teacherPageSize));teacherPage=Math.min(teacherPage,pages);
+ const visible=rows.slice((teacherPage-1)*teacherPageSize,teacherPage*teacherPageSize);
+ if(!visible.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=5;td.className="table-empty";td.textContent="No matching teacher accounts found.";tr.appendChild(td);body.appendChild(tr);}
+ visible.forEach(s=>{
+  const tr=document.createElement("tr");
+  [s.full_name||"—",s.staff_code||"—",s.email||"—",s.active===false?"Inactive":"Active"].forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.appendChild(td);});
+  const td=document.createElement("td"),view=document.createElement("button"),edit=document.createElement("button"),reset=document.createElement("button"),toggle=document.createElement("button");
+  [view,edit,reset,toggle].forEach(b=>{b.type="button";b.className="secondary-button";});
+  view.textContent="View";edit.textContent="Edit";reset.textContent="Reset Password";toggle.textContent=s.active===false?"Reactivate":"Deactivate";
+  view.addEventListener("click",()=>openTeacherModal(s,false));edit.addEventListener("click",()=>openTeacherModal(s,true));
+  reset.addEventListener("click",()=>openTeacherModal(s,true,true));toggle.addEventListener("click",()=>toggleTeacherActive(s,toggle));
+  td.append(view,edit,reset,toggle);tr.appendChild(td);body.appendChild(tr);
+ });
+ $("teacher-page-info").textContent="Page "+teacherPage+" of "+pages+" • "+rows.length+" teacher(s)";
+ $("teacher-prev").disabled=teacherPage<=1;$("teacher-next").disabled=teacherPage>=pages;
+}
+async function loadTeachers(){
+ if(!context)return;const btn=$("reload-teachers"),body=$("teachers-table-body");btn.disabled=true;btn.textContent="Loading…";
+ body.innerHTML='<tr><td colspan="5" class="table-empty">Loading teacher accounts…</td></tr>';
  try{
   const {data,error}=await window.supabaseClient.functions.invoke("staff-management",{body:{action:"list_staff"}});
   if(error)throw error;if(!data||data.success===false)throw new Error(data?.message||"Unable to retrieve staff.");
-  const staff=data.staff||data.users||data.data||[];
-  if(!staff.length){area.textContent="No staff records were returned.";return;}
-  const table=document.createElement("table");table.className="staff-table";
-  const head=document.createElement("tr");["Name","Staff Code","Role","Status"].forEach(t=>{const th=document.createElement("th");th.textContent=t;head.appendChild(th);});table.appendChild(head);
-  staff.forEach(s=>{const tr=document.createElement("tr");[s.full_name||s.name||"—",s.staff_code||"—",label(s.role),s.active===false?"Inactive":"Active"].forEach(t=>{const td=document.createElement("td");td.textContent=t;tr.appendChild(td);});table.appendChild(tr);});
-  area.replaceChildren(table);
- }catch(err){area.textContent=err.message||"Staff list could not be loaded.";}
+  teacherRecords=data.staff||data.users||data.data||[];teacherPage=1;renderTeachers();
+ }catch(err){body.replaceChildren();const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=5;td.className="table-empty";td.textContent=err.message||"Teacher accounts could not be loaded.";tr.appendChild(td);body.appendChild(tr);}
+ finally{btn.disabled=false;btn.textContent="Refresh Teachers";}
+}
+function openTeacherModal(s,editing,resetOnly=false){
+ selectedTeacher=s;const form=$("teacher-edit-form");
+ form.elements.id.value=s.id;form.elements.full_name.value=s.full_name||"";form.elements.staff_code.value=s.staff_code||"";form.elements.email.value=s.email||"";
+ $("teacher-modal-title").textContent=resetOnly?"Reset Teacher Password":editing?"Edit Teacher":"Teacher Details";
+ form.querySelectorAll("input:not([type=hidden])").forEach(el=>el.disabled=!editing||resetOnly);
+ $("save-teacher-edit").hidden=!editing||resetOnly;
+ $("teacher-modal-status").textContent="Account status: "+(s.active===false?"Inactive":"Active")+" • Role: "+label(s.role);
+ $("teacher-reset-form").hidden=!resetOnly;
+ $("teacher-modal").hidden=false;
+}
+async function toggleTeacherActive(s,button){
+ const next=s.active===false,old=button.textContent;button.disabled=true;button.textContent="Updating…";
+ try{
+  const action=next?"reactivate_staff":"deactivate_staff";
+  const {data,error}=await window.supabaseClient.functions.invoke("staff-management",{body:{action,staff_id:s.id}});
+  if(error)throw error;if(!data||data.success===false)throw new Error(data?.message||"Teacher status could not be changed.");
+  setNotice(data.message||(next?"Teacher reactivated.":"Teacher deactivated."));await loadTeachers();
+ }catch(err){setNotice(err.message||"Unable to update teacher status.");button.disabled=false;button.textContent=old;}
+}
+$("reload-teachers").addEventListener("click",loadTeachers);
+$("teacher-search").addEventListener("input",()=>{teacherPage=1;renderTeachers();});
+$("teacher-status-filter").addEventListener("change",()=>{teacherPage=1;renderTeachers();});
+$("teacher-prev").addEventListener("click",()=>{if(teacherPage>1){teacherPage--;renderTeachers();}});
+$("teacher-next").addEventListener("click",()=>{teacherPage++;renderTeachers();}});
+$("teacher-modal-close").addEventListener("click",()=>{$("teacher-modal").hidden=true;});
+$("teacher-edit-form").addEventListener("submit",async ev=>{
+ ev.preventDefault();const form=ev.currentTarget,v=Object.fromEntries(new FormData(form).entries()),btn=$("save-teacher-edit");
+ if(!selectedTeacher)return;btn.disabled=true;btn.textContent="Saving…";
+ try{
+  const {data,error}=await window.supabaseClient.functions.invoke("staff-management",{body:{action:"update_staff_profile",staff_id:v.id,full_name:v.full_name,staff_code:v.staff_code,email:v.email}});
+  if(error)throw error;if(!data||data.success===false)throw new Error(data?.message||"Teacher profile update failed.");
+  $("teacher-modal").hidden=true;setNotice(data.message||"Teacher profile updated.");await loadTeachers();
+ }catch(err){setNotice(err.message||"Unable to update teacher profile.");}
+ finally{btn.disabled=false;btn.textContent="Save Changes";}
+});
+$("teacher-reset-form").addEventListener("submit",async ev=>{
+ ev.preventDefault();if(!selectedTeacher)return;const form=ev.currentTarget,btn=$("reset-teacher-password"),password=form.elements.password.value;
+ if(password.length<8){setNotice("The new password must contain at least 8 characters.");return;}
+ btn.disabled=true;btn.textContent="Resetting…";
+ try{
+  const {data,error}=await window.supabaseClient.functions.invoke("staff-management",{body:{action:"reset_staff_password",staff_id:selectedTeacher.id,password}});
+  if(error)throw error;if(!data||data.success===false)throw new Error(data?.message||"Password reset failed.");
+  form.reset();$("teacher-modal").hidden=true;setNotice(data.message||"Teacher password reset successfully.");
+ }catch(err){setNotice(err.message||"Unable to reset teacher password.");}
+ finally{btn.disabled=false;btn.textContent="Reset Password";}
 });
 $("refresh-live").addEventListener("click",()=>setNotice("Live candidate monitoring is awaiting the protected monitoring endpoint."));
 $("sign-out-button").addEventListener("click",async()=>{const b=$("sign-out-button");b.disabled=true;b.textContent="Signing out…";const {error}=await window.supabaseClient.auth.signOut();if(error){b.disabled=false;b.textContent="↪  Sign Out";setNotice("Unable to sign out. Please retry.");return;}sessionStorage.removeItem("lbis_staff_profile");location.replace("admin-login.html");});
