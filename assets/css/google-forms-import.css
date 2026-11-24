@@ -1,0 +1,28 @@
+.google-import-card{margin-top:20px;padding:22px;border:1px solid #e2dfe1;border-radius:10px;background:#fff;box-shadow:0 4px 14px #29262908}
+.google-import-card h4{margin:0 0 7px;color:#292629;font-size:15px}
+.google-import-intro{margin:0 0 18px;color:#77727a;font-size:12px;line-height:1.6}
+.google-import-controls{display:grid;grid-template-columns:minmax(220px,.8fr) minmax(280px,1.2fr);gap:16px;align-items:end}
+.google-import-field{display:flex;flex-direction:column;gap:8px;color:#4d474d;font-size:12px;font-weight:700}
+.google-import-field select,.google-import-field input{width:100%;min-height:43px;box-sizing:border-box;padding:10px 12px;border:1px solid #d9d3d8;border-radius:7px;background:#fff;color:#292629;font:13px Arial,Helvetica,sans-serif}
+.google-import-field select:focus,.google-import-field input:focus{outline:0;border-color:#781d37;box-shadow:0 0 0 3px #781d3715}
+.google-import-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:17px}
+.google-import-actions button{min-height:40px;padding:0 17px;border-radius:7px;font-size:12px;font-weight:800;cursor:pointer}
+.google-import-actions button:disabled{opacity:.55;cursor:not-allowed}
+.google-import-extract{border:1px solid #781d37;background:#781d37;color:#fff}
+.google-import-extract:hover{background:#591326}
+.google-import-save{border:1px solid #18764d;background:#18764d;color:#fff}
+.google-import-refresh{border:1px solid #d8cbd0;background:#fff;color:#781d37}
+.google-import-message{min-height:17px;margin:14px 0 0;color:#a3263e;font-size:12px;line-height:1.5}
+.google-import-message.success{color:#18764d}
+.google-import-message.info{color:#675c65}
+.google-import-preview{margin-top:20px;padding-top:19px;border-top:1px solid #eee}
+.google-import-summary{margin:0 0 14px;color:#675c65;font-size:12px;line-height:1.6}
+.google-import-question-list{display:grid;gap:12px}
+.google-import-question{padding:16px;border:1px solid #e7e2e5;border-radius:8px;background:#fcfbfc}
+.google-import-question h4{margin:0 0 11px;font-size:13px;line-height:1.5}
+.google-import-question ol{margin:0;padding-left:25px;color:#5e5860;font-size:12px;line-height:1.8}
+.google-import-question li{padding-left:3px}
+.google-import-question li.correct-answer{color:#18764d;font-weight:700}
+.google-import-question-meta{margin:10px 0 0;color:#77727a;font-size:10px}
+.google-import-warning{margin-top:14px;padding:12px 14px;border:1px solid #e7d7dd;border-radius:7px;background:#f7edf0;color:#59434b;font-size:11px;line-height:1.6}
+@media(max-width:700px){.google-import-controls{grid-template-columns:1fr}.google-import-actions{flex-direction:column}.google-import-actions button{width:100%}}
