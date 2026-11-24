@@ -97,6 +97,30 @@ $("add-teacher-form").addEventListener("submit",async ev=>{
  }catch(err){setNotice(err.message||"Unable to create teacher account. Please try again.");}
  finally{btn.disabled=false;btn.textContent="Create Teacher Account";}
 });
+$("global-exam-password-form").addEventListener("submit", async (event) => {
+ event.preventDefault();
+ if (!context) { setNotice("Administrator access has not been verified."); return; }
+ const form = event.currentTarget;
+ const password = form.elements.new_password.value;
+ const confirmation = form.elements.confirm_password.value;
+ const button = $("reset-global-exam-password");
+ if (password.length < 8) { setNotice("The new password must contain at least 8 characters."); return; }
+ if (password !== confirmation) { setNotice("The two password entries do not match."); return; }
+ if (!window.confirm("Reset the one global examination password for every subject and examination?")) return;
+ button.disabled = true; button.textContent = "Resetting…"; setNotice("");
+ try {
+  const { data, error } = await window.supabaseClient.functions.invoke("admin-exam-access", {
+   body: { action: "reset_global_password", new_password: password }
+  });
+  if (error) throw error;
+  if (!data || data.success !== true) throw new Error(data?.message || "The global examination password could not be reset.");
+  form.reset(); setNotice(data.message || "Global examination password reset successfully.");
+ } catch (error) {
+  setNotice(error?.message || "Unable to reset the global examination password.");
+ } finally {
+  button.disabled = false; button.textContent = "Reset Global Password";
+ }
+});
 async function loadClasses(){
  if(!context)return;
  const area=$("classes-content");
