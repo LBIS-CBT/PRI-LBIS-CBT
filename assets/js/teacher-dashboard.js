@@ -36,6 +36,7 @@ function showPanel(name) {
   say("");
   if (name === "create-exam") loadClasses();
   if (name === "my-exams") loadExaminations();
+  if (name === "question-bank") loadGoogleConnectionStatus();
 }
 
 async function callTeacherService(payload) {
@@ -59,6 +60,173 @@ async function callTeacherService(payload) {
     throw new Error(result.message || "The examination service could not complete the request.");
   }
   return result;
+}
+
+
+const GOOGLE_FUNCTION_BASE = "https://mbsbfhifbsdiryerqxbq.supabase.co/functions/v1";
+
+async function callGoogleFunction(functionName, payload = {}) {
+  const { data: sessionData, error: sessionError } =
+    await window.supabaseClient.auth.getSession();
+
+  if (sessionError || !sessionData?.session?.access_token) {
+    throw new Error("Your login session has expired. Please sign in again.");
+  }
+
+  const response = await fetch(GOOGLE_FUNCTION_BASE + "/" + functionName, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "apikey": window.LBIS_SUPABASE_PUBLISHABLE_KEY || "sb_publishable_7UJC2JRYXUSJth87lEYq6w_xNfjdXLq",
+      "Authorization": "Bearer " + sessionData.session.access_token
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const result = await response.json().catch(() => ({}));
+
+  if (!response.ok || result.success === false) {
+    throw new Error(result.message || "The Google connection service could not complete the request.");
+  }
+
+  return result;
+}
+
+function setGoogleConnectionView(connected, email) {
+  const badge = $("google-connection-badge");
+  const connectedDetails = $("google-connected-details");
+  const notConnectedDetails = $("google-not-connected-details");
+
+  if (badge) {
+    badge.textContent = connected ? "Connected" : "Not connected";
+    badge.className = "google-connection-badge " + (connected ? "connected" : "not-connected");
+  }
+
+  if (connectedDetails) connectedDetails.hidden = !connected;
+  if (notConnectedDetails) notConnectedDetails.hidden = connected;
+
+  const emailElement = $("google-account-email");
+  if (emailElement) emailElement.textContent = email || "Google account";
+}
+
+async function loadGoogleConnectionStatus() {
+  const badge = $("google-connection-badge");
+  const feedback = $("google-connection-message");
+  if (!badge) return;
+
+  badge.textContent = "Checking connection…";
+  badge.className = "google-connection-badge checking";
+  if (feedback && !feedback.dataset.callbackNotice) feedback.textContent = "";
+
+  try {
+    const result = await callGoogleFunction("google-connection-status", {
+      action: "status"
+    });
+
+    setGoogleConnectionView(result.connected === true, result.google_email || "");
+    if (feedback && !feedback.dataset.callbackNotice) {
+      feedback.textContent = result.connected
+        ? "Your Google account is ready for the next extraction step."
+        : "Connect a Google account to continue.";
+    }
+  } catch (error) {
+    badge.textContent = "Status unavailable";
+    badge.className = "google-connection-badge not-connected";
+    if (feedback) feedback.textContent = error.message;
+  }
+}
+
+async function connectGoogleAccount() {
+  const button = $("google-connect-button");
+  const feedback = $("google-connection-message");
+  if (!button) return;
+
+  button.disabled = true;
+  button.textContent = "Opening Google…";
+  if (feedback) feedback.textContent = "";
+
+  try {
+    const result = await callGoogleFunction("google-oauth-start", {});
+    if (!result.authorization_url) {
+      throw new Error("The Google authorization link was not returned. Please try again.");
+    }
+
+    window.location.assign(result.authorization_url);
+  } catch (error) {
+    if (feedback) feedback.textContent = error.message;
+    button.disabled = false;
+    button.textContent = "Connect Google Account";
+  }
+}
+
+async function disconnectGoogleAccount() {
+  const button = $("google-disconnect-button");
+  const feedback = $("google-connection-message");
+  if (!button) return;
+
+  if (!window.confirm("Disconnect this Google account from LBIS CBT?")) return;
+
+  button.disabled = true;
+  button.textContent = "Disconnecting…";
+  if (feedback) feedback.textContent = "";
+
+  try {
+    const result = await callGoogleFunction("google-connection-status", {
+      action: "disconnect"
+    });
+
+    setGoogleConnectionView(false, "");
+    if (feedback) {
+      feedback.textContent = result.google_revocation_confirmed
+        ? "Google account disconnected and authorization revoked."
+        : "The connection was removed from LBIS CBT. Google did not confirm revocation; you can also remove LBIS CBT access in your Google Account security settings.";
+    }
+  } catch (error) {
+    if (feedback) feedback.textContent = error.message;
+    button.disabled = false;
+    button.textContent = "Disconnect";
+  }
+}
+
+function handleGoogleCallbackNotice() {
+  const params = new URLSearchParams(window.location.search);
+  const status = params.get("google_connection");
+  if (!status) return;
+
+  const feedback = $("google-connection-message");
+  if (status === "success") {
+    if (feedback) {
+      feedback.textContent = "Google account connected successfully.";
+      feedback.dataset.callbackNotice = "true";
+    }
+  } else {
+    const reason = params.get("reason");
+    const messages = {
+      authorization_denied: "Google authorization was cancelled or denied.",
+      invalid_callback: "The Google authorization response was incomplete. Please try again.",
+      state_validation_failed: "We could not validate the Google sign-in request. Please try again.",
+      invalid_or_expired_state: "This Google sign-in request has expired. Please connect again.",
+      state_already_used: "This Google sign-in request has already been used. Please connect again.",
+      token_exchange_failed: "Google could not complete authorization. Please try again.",
+      missing_access_token: "Google did not return the required access permission.",
+      google_identity_failed: "We could not verify the selected Google account.",
+      connection_lookup_failed: "We could not check the existing Google connection.",
+      refresh_token_missing: "Google did not provide a refresh token. Please reconnect and approve the requested access.",
+      connection_save_failed: "The Google account was verified, but its connection could not be saved.",
+      server_error: "A server error interrupted Google account connection."
+    };
+
+    if (feedback) {
+      feedback.textContent = messages[reason] || "Google account connection could not be completed. Please try again.";
+      feedback.dataset.callbackNotice = "true";
+    }
+  }
+
+  window.history.replaceState(
+    {},
+    document.title,
+    window.location.pathname + window.location.hash
+  );
 }
 
 async function loadClasses(force = false) {
@@ -194,6 +362,8 @@ document.querySelectorAll("[data-open-panel]").forEach(button =>
 );
 
 $("teacher-create-exam-form")?.addEventListener("submit", createExamination);
+$("google-connect-button")?.addEventListener("click", connectGoogleAccount);
+$("google-disconnect-button")?.addEventListener("click", disconnectGoogleAccount);
 $("teacher-refresh-exams")?.addEventListener("click", loadExaminations);
 
 async function init() {
@@ -236,6 +406,8 @@ async function init() {
   $("teacher-avatar").textContent = name.trim().split(/\s+/).map(part => part[0]).slice(0, 2).join("").toUpperCase() || "T";
   $("teacher-exam-count").textContent = "…";
   await loadExaminations();
+  handleGoogleCallbackNotice();
+  await loadGoogleConnectionStatus();
 }
 
 $("teacher-sign-out").addEventListener("click", async () => {
