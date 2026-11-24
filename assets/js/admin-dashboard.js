@@ -20,16 +20,41 @@ function showPanel(name){
 document.querySelectorAll("[data-panel]").forEach(b=>b.addEventListener("click",()=>showPanel(b.dataset.panel)));
 async function session(){
  if(!window.supabaseClient){setNotice("Secure connection unavailable. Reload this page.");return null;}
- const {data,error}=await window.supabaseClient.auth.getSession();
- if(error||!data.session){location.replace("admin-login.html");return null;}
- const {data:p,error:e}=await window.supabaseClient.from("user_profiles").select("id,full_name,staff_code,role,active").eq("id",data.session.user.id).single();
- if(e||!p||!p.active){await window.supabaseClient.auth.signOut();location.replace("admin-login.html");return null;}
- if(!["admin","super_admin"].includes(p.role)){location.replace("staff-dashboard.html");return null;}
- $("staff-name").textContent=p.full_name||"Administrator";$("staff-code").textContent=p.staff_code||"—";
- $("staff-role").textContent=label(p.role);$("profile-role").textContent=label(p.role);
- $("top-user").textContent=p.full_name||p.staff_code||"Administrator";
- $("user-initials").textContent=(p.full_name||"LB").split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase();
- return {profile:p,session:data.session};
+ const timeout=(promise,ms,message)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(message)),ms))]);
+ const paintProfile=p=>{
+  $("staff-name").textContent=p.full_name||"Administrator";$("staff-code").textContent=p.staff_code||"—";
+  $("staff-role").textContent=label(p.role);$("profile-role").textContent=label(p.role);
+  $("top-user").textContent=p.full_name||p.staff_code||"Administrator";
+  $("user-initials").textContent=(p.full_name||"LB").split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase();
+ };
+ const cached=(()=>{try{return JSON.parse(sessionStorage.getItem("lbis_staff_profile")||"null");}catch(_){return null;}})();
+ try{
+  const {data,error}=await timeout(window.supabaseClient.auth.getSession(),10000,"Authentication session check timed out.");
+  if(error)throw error;
+  if(!data?.session){location.replace("admin-login.html");return null;}
+  let p=null;
+  try{
+   const result=await timeout(window.supabaseClient.from("user_profiles").select("id,full_name,staff_code,role,active").eq("id",data.session.user.id).single(),10000,"Account profile check timed out.");
+   if(result.error)throw result.error;
+   p=result.data;
+  }catch(profileError){
+   if(cached?.id===data.session.user.id&&["admin","super_admin"].includes(cached.role)){
+    console.warn("LBIS profile refresh unavailable; using the signed-in profile for display. Protected actions remain server-authorized.",profileError);
+    p={...cached,active:true};
+    setNotice("Account details could not be refreshed right now. Protected actions will still be checked securely.");
+   }else throw profileError;
+  }
+  if(!p||p.active===false){await window.supabaseClient.auth.signOut();sessionStorage.removeItem("lbis_staff_profile");location.replace("admin-login.html");return null;}
+  if(!["admin","super_admin"].includes(p.role)){location.replace("staff-dashboard.html");return null;}
+  paintProfile(p);
+  return {profile:p,session:data.session};
+ }catch(error){
+  console.error("LBIS dashboard account initialization failed:",error);
+  setNotice((error?.message||"Account verification failed.")+" Please sign in again. If this continues, open the browser console and share the first red error.");
+  $("top-user").textContent="Account verification failed";
+  $("staff-role").textContent="Access not verified";
+  return null;
+ }
 }
 let context=null;
 const examBody=$("exam-table-body");
