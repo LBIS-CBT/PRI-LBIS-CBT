@@ -14,6 +14,7 @@ function showPanel(name){
  setNotice("");
  if(name==="add-class")loadClasses();
  if(name==="add-student")loadStudentClasses();
+ if(name==="manage-students")loadManageStudents();
 }
 document.querySelectorAll("[data-panel]").forEach(b=>b.addEventListener("click",()=>showPanel(b.dataset.panel)));
 async function session(){
@@ -145,6 +146,70 @@ $("add-student-form").addEventListener("submit",async ev=>{
   setNotice(data.message||"Student added successfully.");
  }catch(err){setNotice(err.message||"Unable to add student. Please try again.");}
  finally{btn.disabled=false;btn.textContent="Add Student";}
+});
+let studentRecords=[],studentPage=1,studentPageSize=25,studentClasses=[];
+function classLabel(id){const c=studentClasses.find(x=>x.id===id);return c?c.name+(c.level?" — "+c.level:""):"—";}
+function renderManageStudents(){
+ const tbody=$("manage-students-body");tbody.replaceChildren();
+ const q=$("student-search").value.trim().toLowerCase(),classId=$("manage-student-class").value;
+ const rows=studentRecords.filter(s=>(!q||String(s.full_name||"").toLowerCase().includes(q)||String(s.admission_number||"").toLowerCase().includes(q))&&(!classId||s.class_id===classId));
+ const pages=Math.max(1,Math.ceil(rows.length/studentPageSize));studentPage=Math.min(studentPage,pages);
+ const visible=rows.slice((studentPage-1)*studentPageSize,studentPage*studentPageSize);
+ if(!visible.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=5;td.className="table-empty";td.textContent="No matching students found.";tr.appendChild(td);tbody.appendChild(tr);}
+ visible.forEach(s=>{
+  const tr=document.createElement("tr");
+  [s.admission_number||"—",s.full_name||"—",classLabel(s.class_id),s.active===false?"Inactive":"Active"].forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.appendChild(td);});
+  const td=document.createElement("td"),view=document.createElement("button"),edit=document.createElement("button"),toggle=document.createElement("button");
+  view.className=edit.className=toggle.className="secondary-button";view.type=edit.type=toggle.type="button";
+  view.textContent="View";edit.textContent="Edit";toggle.textContent=s.active===false?"Activate":"Deactivate";
+  view.addEventListener("click",()=>openStudentModal(s,false));edit.addEventListener("click",()=>openStudentModal(s,true));toggle.addEventListener("click",()=>toggleStudentActive(s,toggle));
+  td.append(view,edit,toggle);tr.appendChild(td);tbody.appendChild(tr);
+ });
+ $("student-page-info").textContent="Page "+studentPage+" of "+pages+" • "+rows.length+" student(s)";
+ $("student-prev").disabled=studentPage<=1;$("student-next").disabled=studentPage>=pages;
+}
+async function loadManageStudents(){
+ if(!context)return;const body=$("manage-students-body");body.innerHTML='<tr><td colspan="5" class="table-empty">Loading student records…</td></tr>';
+ try{
+  const [studentRes,classRes]=await Promise.all([
+   window.supabaseClient.functions.invoke("admin-students",{body:{action:"list_students"}}),
+   window.supabaseClient.functions.invoke("admin-classes",{body:{action:"list_classes"}})
+  ]);
+  if(studentRes.error)throw studentRes.error;if(studentRes.data?.success===false)throw new Error(studentRes.data.message||"Unable to retrieve students.");
+  if(classRes.error)throw classRes.error;if(classRes.data?.success===false)throw new Error(classRes.data.message||"Unable to retrieve classes.");
+  studentRecords=studentRes.data.students||[];studentClasses=classRes.data.classes||[];
+  const filter=$("manage-student-class"),editSelect=$("edit-student-class");
+  const selected=filter.value;filter.replaceChildren(new Option("All classes",""));
+  studentClasses.forEach(c=>filter.add(new Option(c.name+(c.level?" — "+c.level:""),c.id)));
+  if(studentClasses.some(c=>c.id===selected))filter.value=selected;
+  editSelect.replaceChildren();studentClasses.forEach(c=>editSelect.add(new Option(c.name+(c.level?" — "+c.level:""),c.id)));
+  studentPage=1;renderManageStudents();
+ }catch(err){body.replaceChildren();const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=5;td.className="table-empty";td.textContent=err.message||"Student records could not be loaded.";tr.appendChild(td);body.appendChild(tr);}
+}
+function openStudentModal(s,editing){
+ const modal=$("student-edit-modal"),form=$("manage-student-edit-form");form.elements.id.value=s.id;form.elements.full_name.value=s.full_name||"";form.elements.admission_number.value=s.admission_number||"";form.elements.class_id.value=s.class_id||"";
+ $("student-modal-title").textContent=editing?"Edit Student":"Student Details";form.querySelectorAll("input:not([type=hidden]),select").forEach(el=>el.disabled=!editing);
+ $("save-student-edit").hidden=!editing;
+ const details=$("student-view-details");details.textContent=editing?"":"Status: "+(s.active===false?"Inactive":"Active");
+ modal.hidden=false;form.dataset.editing=editing?"true":"false";
+}
+async function toggleStudentActive(s,button){
+ const next=s.active===false,old=button.textContent;button.disabled=true;button.textContent="Updating…";
+ try{const {data,error}=await window.supabaseClient.functions.invoke("admin-students",{body:{action:"set_student_active",student_id:s.id,active:next}});if(error)throw error;if(!data||data.success===false)throw new Error(data?.message||"Student status could not be changed.");setNotice(data.message||"Student status updated.");await loadManageStudents();}
+ catch(err){setNotice(err.message||"Unable to update student status.");button.disabled=false;button.textContent=old;}
+}
+$("refresh-students").addEventListener("click",loadManageStudents);
+$("student-search").addEventListener("input",()=>{studentPage=1;renderManageStudents();});
+$("manage-student-class").addEventListener("change",()=>{studentPage=1;renderManageStudents();});
+$("student-prev").addEventListener("click",()=>{if(studentPage>1){studentPage--;renderManageStudents();}});
+$("student-next").addEventListener("click",()=>{studentPage++;renderManageStudents();});
+$("student-modal-close").addEventListener("click",()=>{$("student-edit-modal").hidden=true;});
+$("manage-student-edit-form").addEventListener("submit",async ev=>{
+ ev.preventDefault();const form=ev.currentTarget;if(form.dataset.editing!=="true")return;
+ const v=Object.fromEntries(new FormData(form).entries()),btn=$("save-student-edit");btn.disabled=true;btn.textContent="Saving…";
+ try{const {data,error}=await window.supabaseClient.functions.invoke("admin-students",{body:{action:"update_student",student_id:v.id,full_name:v.full_name,admission_number:v.admission_number,class_id:v.class_id}});if(error)throw error;if(!data||data.success===false)throw new Error(data?.message||"Student update failed.");$("student-edit-modal").hidden=true;setNotice(data.message||"Student updated.");await loadManageStudents();}
+ catch(err){setNotice(err.message||"Unable to save student changes.");}
+ finally{btn.disabled=false;btn.textContent="Save Changes";}
 });
 $("reload-teachers").addEventListener("click",async()=>{
  if(!context)return;const area=$("teachers-content");area.textContent="Loading staff records…";
