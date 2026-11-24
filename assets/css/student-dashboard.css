@@ -1,0 +1,38 @@
+.student-dashboard-page{min-height:100vh;background:#f5f4f5;color:#292629}
+.student-topbar{height:72px;padding:0 max(24px,calc((100% - 1120px)/2));display:flex;align-items:center;justify-content:space-between;background:#fff;border-bottom:1px solid #e2dfe1}
+.student-brand{display:flex;align-items:center;gap:12px;color:#292629;text-decoration:none}
+.student-brand-mark{width:42px;height:42px;display:grid;place-items:center;border-radius:9px;background:#781d37;color:#fff;font-size:13px;font-weight:800}
+.student-brand strong,.student-brand small{display:block}.student-brand strong{font-size:15px}.student-brand small{margin-top:2px;color:#77727a;font-size:11px}
+.student-logout,.refresh-button{width:auto;min-height:38px;margin:0;padding:8px 15px;border:1px solid #d9d6d9;border-radius:7px;background:#fff;color:#781d37;font-size:12px}
+.student-logout:hover,.refresh-button:hover{background:#f7edf0;border-color:#c9aab4}
+.student-dashboard-main{width:min(1120px,calc(100% - 40px));margin:38px auto 56px}
+.student-welcome{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:28px 30px;border:1px solid #e2dfe1;border-top:5px solid #781d37;border-radius:12px;background:#fff}
+.eyebrow{margin:0 0 8px;color:#781d37;font-size:10px;font-weight:800;letter-spacing:1.2px}
+.student-welcome h1{margin:0;text-align:left;font-size:27px}.welcome-subtitle{margin:9px 0 0;color:#77727a;font-size:13px}
+.student-class-card{min-width:190px;padding:14px 17px;border-radius:8px;background:#f7edf0}
+.student-class-card span,.summary-label{display:block;color:#77727a;font-size:10px;font-weight:700;letter-spacing:.5px}
+.student-class-card strong{display:block;margin-top:6px;color:#781d37;font-size:15px}
+.dashboard-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:18px 0 34px}
+.summary-card{padding:19px 21px;border:1px solid #e2dfe1;border-radius:9px;background:#fff}
+.summary-card strong{display:block;margin-top:7px;font-size:22px;color:#292629}
+.examinations-section{padding:26px 28px;border:1px solid #e2dfe1;border-radius:12px;background:#fff}
+.section-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px}
+.section-heading h2{margin:0;text-align:left;font-size:21px}
+.dashboard-message{padding:14px 16px;border-radius:8px;background:#f5f4f5;color:#555158;font-size:13px}
+.dashboard-message.error{background:#fff1f0;color:#a3263e}
+.examination-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin-top:16px}
+.exam-card{padding:19px;border:1px solid #e2dfe1;border-radius:9px;background:#fff}
+.exam-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.exam-card h3{margin:0;color:#292629;font-size:16px;text-align:left}
+.exam-subject{margin:7px 0 13px;color:#77727a;font-size:12px}
+.exam-meta{display:flex;flex-wrap:wrap;gap:8px 15px;color:#555158;font-size:11px}
+.exam-state{display:inline-block;padding:5px 8px;border-radius:20px;background:#f1f0f1;color:#555158;font-size:10px;font-weight:700;white-space:nowrap}
+.exam-state.available,.exam-state.resume{background:#e8f5ed;color:#21643b}
+.exam-state.upcoming{background:#fff4df;color:#855600}
+.exam-state.closed,.exam-state.attempted{background:#f1f0f1;color:#68636a}
+.exam-description{margin:14px 0 0;color:#77727a;font-size:12px;line-height:1.5}
+.exam-card button{width:auto;min-height:36px;margin-top:14px;padding:8px 13px;font-size:11px}
+.exam-card button:disabled{cursor:not-allowed;opacity:.55}
+.student-footer{padding:20px 12px;margin:0;text-align:center}
+@media(max-width:700px){.student-topbar{padding:0 18px}.student-dashboard-main{width:calc(100% - 28px);margin:22px auto 36px}.student-welcome{align-items:flex-start;flex-direction:column;padding:22px}.student-class-card{width:100%}.dashboard-summary{gap:9px}.summary-card{padding:14px 12px}.summary-card strong{font-size:18px}.summary-label{font-size:9px}.examinations-section{padding:20px 16px}.examination-list{grid-template-columns:1fr}}
+@media(max-width:420px){.dashboard-summary{grid-template-columns:1fr}.section-heading h2{font-size:18px}}
