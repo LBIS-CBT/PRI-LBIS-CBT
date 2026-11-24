@@ -12,6 +12,7 @@ function showPanel(name){
  const active=document.querySelector('[data-panel="'+name+'"]');
  $("page-title").textContent=active?active.textContent.trim():"Dashboard";
  setNotice("");
+ if(name==="add-student")loadStudentClasses();
 }
 document.querySelectorAll("[data-panel]").forEach(b=>b.addEventListener("click",()=>showPanel(b.dataset.panel)));
 async function session(){
@@ -66,6 +67,43 @@ $("add-teacher-form").addEventListener("submit",async ev=>{
   form.reset();setNotice(data.message||"Teacher account created successfully.");
  }catch(err){setNotice(err.message||"Unable to create teacher account. Please try again.");}
  finally{btn.disabled=false;btn.textContent="Create Teacher Account";}
+});
+async function loadStudentClasses(){
+ const select=$("student-class");
+ if(!context||!select)return;
+ select.disabled=true;select.replaceChildren(new Option("Loading classes…",""));
+ try{
+  const {data,error}=await window.supabaseClient.functions.invoke("admin-students",{body:{action:"list_classes"}});
+  if(error)throw error;
+  if(!data||data.success===false)throw new Error(data?.message||"Could not load classes.");
+  select.replaceChildren(new Option("Select a class",""));
+  (data.classes||[]).forEach(c=>{
+   const label=c.level?c.name+" — "+c.level:c.name;
+   select.add(new Option(label,c.id));
+  });
+  if(!(data.classes||[]).length)select.replaceChildren(new Option("No active classes available",""));
+ }catch(err){
+  select.replaceChildren(new Option("Unable to load classes — retry by reopening this section",""));
+  setNotice(err.message||"Class list could not be loaded.");
+ }finally{select.disabled=false;}
+}
+$("add-student-form").addEventListener("submit",async ev=>{
+ ev.preventDefault();if(!context)return;
+ const form=ev.currentTarget,btn=$("create-student-button"),v=Object.fromEntries(new FormData(form).entries());
+ btn.disabled=true;btn.textContent="Saving student…";setNotice("");
+ try{
+  const {data,error}=await window.supabaseClient.functions.invoke("admin-students",{body:{
+   action:"create_student",
+   full_name:v.full_name,
+   admission_number:v.admission_number,
+   class_id:v.class_id||null
+  }});
+  if(error)throw error;
+  if(!data||data.success===false)throw new Error(data?.message||"Student registration failed.");
+  form.reset();
+  setNotice(data.message||"Student added successfully.");
+ }catch(err){setNotice(err.message||"Unable to add student. Please try again.");}
+ finally{btn.disabled=false;btn.textContent="Add Student";}
 });
 $("reload-teachers").addEventListener("click",async()=>{
  if(!context)return;const area=$("teachers-content");area.textContent="Loading staff records…";
