@@ -337,7 +337,7 @@ function renderLiveCandidates(){
  rows.forEach(c=>{
   const s=c.student||{},e=c.examination||{},tr=document.createElement("tr");
   const remaining=c.deadline_at?Math.max(0,Math.ceil((new Date(c.deadline_at).getTime()-Date.now())/60000)):null;
-  const values=[s.full_name||"—",s.admission_number||"—",(s.class_name||"—")+(s.class_level?" — "+s.class_level:""),e.subject||e.title||"—",formatClock(c.started_at),remaining===null?"—":remaining+" min",String(c.answered_count??0),"In Progress"];
+  const values=[s.full_name||"—",s.admission_number||"—",(e.class_name||"—")+(e.class_level?" — "+e.class_level:""),e.subject||e.title||"—",formatClock(c.started_at),remaining===null?"—":remaining+" min",String(c.answered_count??0),"In Progress"];
   values.forEach((v,i)=>{const td=document.createElement("td");td.textContent=v;if(i===7){const pill=document.createElement("span");pill.className="exam-status active";pill.textContent=v;td.replaceChildren(pill);}tr.appendChild(td);});body.appendChild(tr);
  });
  $("live-page-info").textContent=rows.length+" candidate(s) shown • "+liveCandidateRecords.length+" active";
