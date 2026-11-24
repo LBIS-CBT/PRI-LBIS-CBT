@@ -1,11 +1,11 @@
 (() => {
   "use strict";
-
   const SUPABASE_URL = "https://mbsbfhifbsdiryerqxbq.supabase.co";
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_7UJC2JRYXUSJth87lEYq6w_xNfjdXLq";
   const tokenKey = "lbis_student_session_token";
   const expiryKey = "lbis_student_session_expires_at";
   const profileKey = "lbis_student_profile";
+  const activeExamKey = "lbis_active_exam_id";
 
   const nameEl = document.getElementById("student-name");
   const classEl = document.getElementById("student-class");
@@ -18,50 +18,66 @@
   const logoutButton = document.getElementById("student-logout");
 
   function clearSession() {
-    sessionStorage.removeItem(tokenKey);
-    sessionStorage.removeItem(expiryKey);
-    sessionStorage.removeItem(profileKey);
+    [tokenKey, expiryKey, profileKey, activeExamKey, "lbis_active_exam_session_id"]
+      .forEach((key) => sessionStorage.removeItem(key));
   }
-
   function signOut() {
     clearSession();
     window.location.replace("student-login.html");
   }
-
   function getSession() {
     const token = sessionStorage.getItem(tokenKey);
     const expiresAt = sessionStorage.getItem(expiryKey);
     if (!token || !expiresAt || Date.parse(expiresAt) <= Date.now()) return null;
     return token;
   }
-
   function showMessage(text, state = "") {
     messageEl.textContent = text;
     messageEl.className = state ? `dashboard-message ${state}` : "dashboard-message";
     messageEl.hidden = !text;
   }
-
   function safeDate(value) {
     if (!value) return "Not specified";
     const date = new Date(value);
     return Number.isNaN(date.getTime()) ? "Not specified" : date.toLocaleString();
   }
-
   function statusLabel(value) {
-    return ({
-      available: "Available",
-      resume: "In Progress",
-      upcoming: "Upcoming",
-      closed: "Closed",
-      attempted: "Attempted",
-      unavailable: "Unavailable"
-    })[value] || "Unavailable";
+    return ({available:"Available",resume:"In Progress",upcoming:"Upcoming",closed:"Closed",attempted:"Attempted",unavailable:"Unavailable"})[value] || "Unavailable";
   }
-
+  async function openExam(exam, button) {
+    const token = getSession();
+    if (!token) { signOut(); return; }
+    button.disabled = true;
+    const original = button.textContent;
+    button.textContent = exam.availability === "resume" ? "Resuming…" : "Preparing…";
+    try {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/student-exam-room`, {
+        method: "POST",
+        headers: {
+          "Content-Type":"application/json",
+          "apikey":SUPABASE_PUBLISHABLE_KEY,
+          "Authorization":`Bearer ${token}`
+        },
+        body: JSON.stringify({action:"start_or_resume", exam_id:exam.id}),
+        cache:"no-store"
+      });
+      const data = await response.json().catch(() => ({}));
+      if (response.status === 401) { signOut(); return; }
+      if (!response.ok || data.success !== true || !data.session || !data.examination) {
+        throw new Error(data.message || "Unable to open this examination.");
+      }
+      sessionStorage.setItem(activeExamKey, exam.id);
+      sessionStorage.setItem("lbis_active_exam_session_id", data.session.id);
+      window.location.href = `examination-room.html?exam_id=${encodeURIComponent(exam.id)}`;
+    } catch (error) {
+      showMessage(error.message || "Unable to open the examination. Please try again.", "error");
+      button.disabled = false;
+      button.textContent = original;
+    }
+  }
   function createExamCard(exam) {
     const card = document.createElement("article");
     card.className = "exam-card";
-
     const top = document.createElement("div");
     top.className = "exam-card-top";
     const title = document.createElement("h3");
@@ -70,11 +86,9 @@
     state.className = `exam-state ${exam.availability || "unavailable"}`;
     state.textContent = statusLabel(exam.availability);
     top.append(title, state);
-
     const subject = document.createElement("p");
     subject.className = "exam-subject";
     subject.textContent = exam.subject || "Subject not specified";
-
     const meta = document.createElement("div");
     meta.className = "exam-meta";
     [
@@ -86,77 +100,52 @@
       item.textContent = value;
       meta.appendChild(item);
     });
-
     const description = document.createElement("p");
     description.className = "exam-description";
     description.textContent = exam.availability_message || "";
-
     const schedule = document.createElement("p");
     schedule.className = "exam-description";
     schedule.textContent = `Starts: ${safeDate(exam.starts_at)} · Ends: ${safeDate(exam.ends_at)}`;
-
     card.append(top, subject, meta, description, schedule);
 
-    // Examination room launch is enabled in the next implementation stage.
     const button = document.createElement("button");
     button.type = "button";
     button.textContent = exam.availability === "resume" ? "Resume Examination" : "Start Examination";
-    button.disabled = true;
-    button.title = "Examination room access is being prepared.";
-    button.setAttribute("aria-label", `${button.textContent}: ${exam.title || "examination"} — not yet enabled`);
+    const canStart = ["available", "resume"].includes(exam.availability) && !!exam.id;
+    button.disabled = !canStart;
+    button.title = canStart ? "" : "This examination is not currently available.";
+    button.setAttribute("aria-label", `${button.textContent}: ${exam.title || "examination"}`);
+    if (canStart) button.addEventListener("click", () => openExam(exam, button));
     card.appendChild(button);
     return card;
   }
-
   async function loadDashboard() {
     const token = getSession();
-    if (!token) {
-      signOut();
-      return;
-    }
-
+    if (!token) { signOut(); return; }
     refreshButton.disabled = true;
     refreshButton.textContent = "Loading…";
     listEl.replaceChildren();
     showMessage("Loading your examinations…");
-
     try {
       const response = await fetch(`${SUPABASE_URL}/functions/v1/student-dashboard`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": SUPABASE_PUBLISHABLE_KEY,
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({ action: "load_dashboard" }),
-        cache: "no-store"
+        method:"POST",
+        headers:{"Content-Type":"application/json","apikey":SUPABASE_PUBLISHABLE_KEY,"Authorization":`Bearer ${token}`},
+        body:JSON.stringify({action:"load_dashboard"}),
+        cache:"no-store"
       });
       const data = await response.json().catch(() => ({}));
-      if (response.status === 401) {
-        signOut();
-        return;
-      }
-      if (!response.ok || data.success !== true) {
-        throw new Error(data.message || "Unable to load your dashboard.");
-      }
-
+      if (response.status === 401) { signOut(); return; }
+      if (!response.ok || data.success !== true) throw new Error(data.message || "Unable to load your dashboard.");
       const student = data.student || {};
       const assignedClass = data.class || {};
       const exams = Array.isArray(data.examinations) ? data.examinations : [];
       nameEl.textContent = student.full_name || "Student";
-      classEl.textContent = assignedClass.level
-        ? `${assignedClass.name} — ${assignedClass.level}`
-        : (assignedClass.name || "Not assigned");
+      classEl.textContent = assignedClass.level ? `${assignedClass.name} — ${assignedClass.level}` : (assignedClass.name || "Not assigned");
       admissionEl.textContent = student.admission_number || "—";
       totalEl.textContent = String(exams.length);
-      availableEl.textContent = String(exams.filter((exam) => ["available", "resume"].includes(exam.availability)).length);
-
-      if (!exams.length) {
-        showMessage("There are currently no examinations assigned to your registered class.");
-      } else {
-        showMessage("");
-        exams.forEach((exam) => listEl.appendChild(createExamCard(exam)));
-      }
+      availableEl.textContent = String(exams.filter((exam) => ["available","resume"].includes(exam.availability)).length);
+      if (!exams.length) showMessage("There are currently no examinations assigned to your registered class.");
+      else { showMessage(""); exams.forEach((exam) => listEl.appendChild(createExamCard(exam))); }
     } catch (error) {
       showMessage(error.message || "Unable to load your dashboard. Please try again.", "error");
     } finally {
@@ -164,7 +153,6 @@
       refreshButton.textContent = "Refresh";
     }
   }
-
   logoutButton.addEventListener("click", signOut);
   refreshButton.addEventListener("click", loadDashboard);
   loadDashboard();
