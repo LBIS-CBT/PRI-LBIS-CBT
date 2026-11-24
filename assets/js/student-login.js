@@ -77,13 +77,10 @@
       classField.value = classLabel || "";
 
       password.value = "";
-      showMessage(
-        `Identity verified. Welcome, ${data.student.full_name}. Your registered class is ${classLabel}. Your secure sign-in is ready.`,
-        "success"
-      );
-
       form.dataset.authenticated = "true";
-      submitButton.textContent = "Verified";
+      submitButton.textContent = "Opening Student Dashboard…";
+      showMessage("Identity verified. Opening your Student Dashboard…", "success");
+      window.location.replace("student-dashboard.html");
     } catch (error) {
       clearStudentSession();
       classField.value = "";
