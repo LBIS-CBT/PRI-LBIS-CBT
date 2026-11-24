@@ -1,33 +1,260 @@
 (() => {
 "use strict";
-const $=id=>document.getElementById(id);
-const layout=$("teacher-layout"),unsupported=$("unsupported-device"),message=$("teacher-dashboard-message");
-if(!layout)return;
-if(window.matchMedia("(max-width: 600px)").matches){unsupported.hidden=false;return;}
-const say=t=>{message.textContent=t||"";};
-const roleNames={teacher:"Teacher",admin:"Administrator",super_admin:"Super Administrator"};
-function showPanel(name){
- document.querySelectorAll(".teacher-panel").forEach(p=>p.classList.toggle("active",p.id==="teacher-panel-"+name));
- document.querySelectorAll(".teacher-nav-button").forEach(b=>b.classList.toggle("active",b.dataset.panel===name));
- const titles={overview:"Teacher Overview","create-exam":"Create Examination","my-exams":"My Examinations","question-bank":"Question Extraction"};
- $("teacher-page-title").textContent=titles[name]||"Teacher Dashboard";
- say("");
+
+const $ = id => document.getElementById(id);
+const layout = $("teacher-layout");
+const unsupported = $("unsupported-device");
+const message = $("teacher-dashboard-message");
+if (!layout) return;
+
+if (window.matchMedia("(max-width: 600px)").matches) {
+  unsupported.hidden = false;
+  return;
 }
-document.querySelectorAll("[data-panel]").forEach(b=>b.addEventListener("click",()=>showPanel(b.dataset.panel)));
-document.querySelectorAll("[data-open-panel]").forEach(b=>b.addEventListener("click",()=>showPanel(b.dataset.openPanel)));
-async function init(){
- if(!window.supabaseClient){say("The secure connection could not be initialized. Reload this page.");return;}
- const {data,error}=await window.supabaseClient.auth.getSession();
- if(error||!data?.session){location.replace("admin-login.html");return;}
- const {data:profile,error:profileError}=await window.supabaseClient.from("user_profiles").select("id,full_name,staff_code,role,active").eq("id",data.session.user.id).single();
- if(profileError||!profile){say("Your staff profile could not be loaded. Contact the school CBT administrator.");return;}
- if(profile.active!==true){await window.supabaseClient.auth.signOut();sessionStorage.removeItem("lbis_staff_profile");location.replace("admin-login.html");return;}
- if(profile.role!=="teacher"){location.replace(profile.role==="admin"||profile.role==="super_admin"?"admin-dashboard.html":"admin-login.html");return;}
- const name=profile.full_name||"Teacher";
- $("teacher-name").textContent=name;$("teacher-top-name").textContent=name;$("teacher-code").textContent=profile.staff_code||"—";
- $("teacher-avatar").textContent=name.trim().split(/\s+/).map(x=>x[0]).slice(0,2).join("").toUpperCase()||"T";
- $("teacher-exam-count").textContent="—";
+
+const FUNCTION_URL = "https://mbsbfhifbsdiryerqxbq.supabase.co/functions/v1/teacher-examinations";
+let currentTeacher = null;
+let classesLoaded = false;
+
+const say = text => { if (message) message.textContent = text || ""; };
+const roleNames = { teacher: "Teacher", admin: "Administrator", super_admin: "Super Administrator" };
+
+function showPanel(name) {
+  document.querySelectorAll(".teacher-panel").forEach(panel =>
+    panel.classList.toggle("active", panel.id === "teacher-panel-" + name)
+  );
+  document.querySelectorAll(".teacher-nav-button").forEach(button =>
+    button.classList.toggle("active", button.dataset.panel === name)
+  );
+  const titles = {
+    overview: "Teacher Overview",
+    "create-exam": "Create Examination",
+    "my-exams": "My Examinations",
+    "question-bank": "Question Extraction"
+  };
+  $("teacher-page-title").textContent = titles[name] || "Teacher Dashboard";
+  say("");
+  if (name === "create-exam") loadClasses();
+  if (name === "my-exams") loadExaminations();
 }
-$("teacher-sign-out").addEventListener("click",async()=>{const b=$("teacher-sign-out");b.disabled=true;b.textContent="Signing out…";const {error}=await window.supabaseClient.auth.signOut();if(error){b.disabled=false;b.textContent="↪  Sign Out";say("Unable to sign out. Please try again.");return;}sessionStorage.removeItem("lbis_staff_profile");location.replace("admin-login.html");});
-init().catch(e=>{console.error("Teacher dashboard:",e);say("The teacher dashboard could not be loaded. Refresh the page.");});
+
+async function callTeacherService(payload) {
+  const { data: sessionData, error: sessionError } = await window.supabaseClient.auth.getSession();
+  if (sessionError || !sessionData?.session?.access_token) {
+    throw new Error("Your login session has expired. Please sign in again.");
+  }
+
+  const response = await fetch(FUNCTION_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "apikey": window.LBIS_SUPABASE_PUBLISHABLE_KEY || "sb_publishable_7UJC2JRYXUSJth87lEYq6w_xNfjdXLq",
+      "Authorization": "Bearer " + sessionData.session.access_token
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || !result.success) {
+    throw new Error(result.message || "The examination service could not complete the request.");
+  }
+  return result;
+}
+
+async function loadClasses(force = false) {
+  const select = $("exam-class");
+  if (!select || (classesLoaded && !force)) return;
+  select.innerHTML = '<option value="">Loading classes…</option>';
+  try {
+    const result = await callTeacherService({ action: "list_classes" });
+    const classes = Array.isArray(result.classes) ? result.classes : [];
+    select.innerHTML = '<option value="">Select a class</option>';
+    classes.forEach(item => {
+      const option = document.createElement("option");
+      option.value = item.id;
+      option.textContent = item.level ? item.name + " (" + item.level + ")" : item.name;
+      select.appendChild(option);
+    });
+    classesLoaded = true;
+    if (!classes.length) {
+      select.innerHTML = '<option value="">No active classes available</option>';
+    }
+  } catch (error) {
+    select.innerHTML = '<option value="">Unable to load classes</option>';
+    $("teacher-create-message").textContent = error.message;
+    $("teacher-create-message").classList.remove("success");
+  }
+}
+
+function formatDate(value) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+}
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, character => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  })[character]);
+}
+
+async function loadExaminations() {
+  const tbody = $("teacher-exams-body");
+  const summary = $("teacher-exams-summary");
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="7" class="teacher-table-empty">Loading your examinations…</td></tr>';
+  if (summary) summary.textContent = "";
+  try {
+    const result = await callTeacherService({ action: "list_teacher_examinations" });
+    const exams = Array.isArray(result.examinations) ? result.examinations : [];
+    $("teacher-exam-count").textContent = String(result.total ?? exams.length);
+
+    if (!exams.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="teacher-table-empty">You have not created any examinations yet. Use Create Examination to get started.</td></tr>';
+    } else {
+      tbody.innerHTML = exams.map(exam => {
+        const className = exam.class ? (exam.class.name + (exam.class.level ? " (" + exam.class.level + ")" : "")) : "Class unavailable";
+        const status = String(exam.status || "draft").toLowerCase();
+        return '<tr>' +
+          '<td><strong>' + escapeHtml(exam.title) + '</strong></td>' +
+          '<td>' + escapeHtml(exam.subject) + '</td>' +
+          '<td>' + escapeHtml(className) + '</td>' +
+          '<td>' + escapeHtml(exam.duration_minutes) + ' mins</td>' +
+          '<td>' + escapeHtml(exam.extracted_question_count ?? 0) + '</td>' +
+          '<td><span class="teacher-status-pill ' + escapeHtml(status) + '">' + escapeHtml(status.replace(/_/g, " ")) + '</span></td>' +
+          '<td>' + escapeHtml(formatDate(exam.created_at)) + '</td>' +
+          '</tr>';
+      }).join("");
+    }
+    if (summary) summary.textContent = exams.length + " examination(s) found. The list is limited to your own examinations.";
+  } catch (error) {
+    tbody.innerHTML = '<tr><td colspan="7" class="teacher-table-empty error">' + escapeHtml(error.message) + '</td></tr>';
+    $("teacher-exam-count").textContent = "—";
+  }
+}
+
+async function createExamination(event) {
+  event.preventDefault();
+  const form = $("teacher-create-exam-form");
+  const button = $("teacher-create-submit");
+  const feedback = $("teacher-create-message");
+  if (!form.reportValidity()) return;
+
+  const startsValue = $("exam-starts-at").value;
+  const endsValue = $("exam-ends-at").value;
+  const startsAt = startsValue ? new Date(startsValue) : null;
+  const endsAt = endsValue ? new Date(endsValue) : null;
+
+  if (startsAt && endsAt && endsAt <= startsAt) {
+    feedback.textContent = "The scheduled end must be later than the scheduled start.";
+    feedback.classList.remove("success");
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "Saving Draft…";
+  feedback.textContent = "";
+  feedback.classList.remove("success");
+
+  try {
+    const payload = {
+      action: "create_examination",
+      title: $("exam-title").value,
+      subject: $("exam-subject").value,
+      class_id: $("exam-class").value,
+      duration_minutes: Number($("exam-duration").value),
+      starts_at: startsAt ? startsAt.toISOString() : null,
+      ends_at: endsAt ? endsAt.toISOString() : null
+    };
+    const result = await callTeacherService(payload);
+    feedback.textContent = result.message || "Examination draft created successfully.";
+    feedback.classList.add("success");
+    form.reset();
+    $("exam-duration").value = "60";
+    await loadExaminations();
+    const exam = result.examination;
+    if (exam?.id) {
+      showPanel("my-exams");
+    }
+  } catch (error) {
+    feedback.textContent = error.message;
+    feedback.classList.remove("success");
+  } finally {
+    button.disabled = false;
+    button.textContent = "Save Examination Draft";
+  }
+}
+
+document.querySelectorAll("[data-panel]").forEach(button =>
+  button.addEventListener("click", () => showPanel(button.dataset.panel))
+);
+document.querySelectorAll("[data-open-panel]").forEach(button =>
+  button.addEventListener("click", () => showPanel(button.dataset.openPanel))
+);
+
+$("teacher-create-exam-form")?.addEventListener("submit", createExamination);
+$("teacher-refresh-exams")?.addEventListener("click", loadExaminations);
+
+async function init() {
+  if (!window.supabaseClient) {
+    say("The secure connection could not be initialized. Reload this page.");
+    return;
+  }
+  const { data, error } = await window.supabaseClient.auth.getSession();
+  if (error || !data?.session) {
+    location.replace("admin-login.html");
+    return;
+  }
+
+  const { data: profile, error: profileError } = await window.supabaseClient
+    .from("user_profiles")
+    .select("id,full_name,staff_code,role,active")
+    .eq("id", data.session.user.id)
+    .single();
+
+  if (profileError || !profile) {
+    say("Your staff profile could not be loaded. Contact the school CBT administrator.");
+    return;
+  }
+  if (profile.active !== true) {
+    await window.supabaseClient.auth.signOut();
+    sessionStorage.removeItem("lbis_staff_profile");
+    location.replace("admin-login.html");
+    return;
+  }
+  if (profile.role !== "teacher") {
+    location.replace(profile.role === "admin" || profile.role === "super_admin" ? "admin-dashboard.html" : "admin-login.html");
+    return;
+  }
+
+  currentTeacher = profile;
+  const name = profile.full_name || "Teacher";
+  $("teacher-name").textContent = name;
+  $("teacher-top-name").textContent = name;
+  $("teacher-code").textContent = profile.staff_code || "—";
+  $("teacher-avatar").textContent = name.trim().split(/\s+/).map(part => part[0]).slice(0, 2).join("").toUpperCase() || "T";
+  $("teacher-exam-count").textContent = "…";
+  await loadExaminations();
+}
+
+$("teacher-sign-out").addEventListener("click", async () => {
+  const button = $("teacher-sign-out");
+  button.disabled = true;
+  button.textContent = "Signing out…";
+  const { error } = await window.supabaseClient.auth.signOut();
+  if (error) {
+    button.disabled = false;
+    button.textContent = "↪  Sign Out";
+    say("Unable to sign out. Please try again.");
+    return;
+  }
+  sessionStorage.removeItem("lbis_staff_profile");
+  location.replace("admin-login.html");
+});
+
+init().catch(error => {
+  console.error("Teacher dashboard:", error);
+  say("The teacher dashboard could not be loaded. Refresh the page.");
+});
 })();
