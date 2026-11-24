@@ -68,8 +68,8 @@ Deno.serve(async (req: Request) => {
     }
 
     if (body.action === "create_class") {
-      const name = typeof body.name === "string" ? body.name.trim().replace(/\\s+/g, " ") : "";
-      const level = typeof body.level === "string" ? body.level.trim().replace(/\\s+/g, " ") : "";
+      const name = typeof body.name === "string" ? body.name.trim().replace(/\s+/g, " ") : "";
+      const level = typeof body.level === "string" ? body.level.trim().replace(/\s+/g, " ") : "";
       const sortOrderRaw = body.sort_order === "" || body.sort_order === undefined ? 0 : Number(body.sort_order);
 
       if (!name) return jsonResponse({ success: false, message: "Class name is required." }, 400);
