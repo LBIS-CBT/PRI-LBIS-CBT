@@ -12,6 +12,7 @@ function showPanel(name){
  const active=document.querySelector('[data-panel="'+name+'"]');
  $("page-title").textContent=active?active.textContent.trim():"Dashboard";
  setNotice("");
+ if(name==="add-class")loadClasses();
  if(name==="add-student")loadStudentClasses();
 }
 document.querySelectorAll("[data-panel]").forEach(b=>b.addEventListener("click",()=>showPanel(b.dataset.panel)));
@@ -68,12 +69,52 @@ $("add-teacher-form").addEventListener("submit",async ev=>{
  }catch(err){setNotice(err.message||"Unable to create teacher account. Please try again.");}
  finally{btn.disabled=false;btn.textContent="Create Teacher Account";}
 });
+async function loadClasses(){
+ if(!context)return;
+ const area=$("classes-content");
+ if(area)area.textContent="Loading classes…";
+ try{
+  const {data,error}=await window.supabaseClient.functions.invoke("admin-classes",{body:{action:"list_classes"}});
+  if(error)throw error;
+  if(!data||data.success===false)throw new Error(data?.message||"Could not load classes.");
+  const classes=data.classes||[];
+  if(!classes.length){area.textContent="No classes have been created yet. Use the form above to add the first class.";return;}
+  const table=document.createElement("table");table.className="staff-table";
+  const head=document.createElement("tr");
+  ["Class Name","Level / Section","Display Order","Status"].forEach(t=>{const th=document.createElement("th");th.textContent=t;head.appendChild(th);});
+  table.appendChild(head);
+  classes.forEach(c=>{
+   const tr=document.createElement("tr");
+   [c.name||"—",c.level||"—",String(c.sort_order??0),c.active===false?"Inactive":"Active"].forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.appendChild(td);});
+   table.appendChild(tr);
+  });
+  area.replaceChildren(table);
+ }catch(err){area.textContent=err.message||"Class list could not be loaded.";}
+}
+$("add-class-form").addEventListener("submit",async ev=>{
+ ev.preventDefault();if(!context)return;
+ const form=ev.currentTarget,btn=$("create-class-button"),v=Object.fromEntries(new FormData(form).entries());
+ btn.disabled=true;btn.textContent="Creating class…";setNotice("");
+ try{
+  const {data,error}=await window.supabaseClient.functions.invoke("admin-classes",{body:{
+   action:"create_class",name:v.name,level:v.level,sort_order:v.sort_order
+  }});
+  if(error)throw error;
+  if(!data||data.success===false)throw new Error(data?.message||"Class creation failed.");
+  form.reset();form.elements.sort_order.value="0";
+  setNotice(data.message||"Class created successfully.");
+  await loadClasses();
+ }catch(err){setNotice(err.message||"Unable to create class. Please try again.");}
+ finally{btn.disabled=false;btn.textContent="Create Class";}
+}
+);
+$("refresh-classes").addEventListener("click",loadClasses);
 async function loadStudentClasses(){
  const select=$("student-class");
  if(!context||!select)return;
  select.disabled=true;select.replaceChildren(new Option("Loading classes…",""));
  try{
-  const {data,error}=await window.supabaseClient.functions.invoke("admin-students",{body:{action:"list_classes"}});
+  const {data,error}=await window.supabaseClient.functions.invoke("admin-classes",{body:{action:"list_classes"}});
   if(error)throw error;
   if(!data||data.success===false)throw new Error(data?.message||"Could not load classes.");
   select.replaceChildren(new Option("Select a class",""));
