@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#781d37">
   <title>LBIS CBT | Student Login</title>
-  <link rel="stylesheet" href="assets/css/app.css?v=20261124-brand3">
-  <script src="assets/js/student-login.js" defer></script>
+  <link rel="stylesheet" href="assets/css/app.css?v=20261124-student-auth1">
+  <script src="assets/js/student-login.js?v=20261124-student-auth1" defer></script>
 </head>
 <body>
   <div id="unsupported-device" class="device-message" role="alert">
@@ -23,12 +23,12 @@
       <p class="school-name">Lead British International School</p>
       <form id="student-login-form" novalidate>
         <label for="admission-number">Admission Number</label>
-        <input id="admission-number" name="admissionNumber" type="text" autocomplete="username" required>
+        <input id="admission-number" name="admissionNumber" type="text" autocomplete="username" maxlength="60" required>
         <label for="student-class">Class</label>
-        <input id="student-class" name="className" type="text" placeholder="Automatically retrieved" readonly aria-describedby="class-help">
-        <p id="class-help" class="field-help">Your class will be retrieved from your student record.</p>
+        <input id="student-class" name="className" type="text" placeholder="Automatically retrieved after verification" readonly aria-describedby="class-help">
+        <p id="class-help" class="field-help">Your class is retrieved securely after your Admission Number and Examination Password are verified.</p>
         <label for="exam-password">Examination Password</label>
-        <input id="exam-password" name="examPassword" type="password" autocomplete="current-password" required>
+        <input id="exam-password" name="examPassword" type="password" autocomplete="current-password" maxlength="128" required>
         <button type="submit">Enter Exam Room</button>
         <p id="student-login-message" class="form-message" role="status" aria-live="polite"></p>
       </form>
