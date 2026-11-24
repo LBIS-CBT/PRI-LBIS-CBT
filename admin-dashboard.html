@@ -16,6 +16,7 @@
  <nav class="side-nav" aria-label="Administration menu">
   <button class="nav-button active" data-panel="overview"><span>▦</span> Dashboard</button>
   <button class="nav-button" data-panel="add-teacher"><span>＋</span> Add Teacher</button>
+  <button class="nav-button" data-panel="add-class"><span>＋</span> Add Class</button>
   <button class="nav-button" data-panel="add-student"><span>＋</span> Add Student</button>
   <button class="nav-button" data-panel="teachers"><span>♙</span> Manage Teachers</button>
   <button class="nav-button" data-panel="live-candidates"><span>◉</span> Live Candidates</button>
@@ -57,6 +58,20 @@
     <div class="form-grid"><label>Teacher full name<input name="full_name" required autocomplete="name" placeholder="Enter full name"></label><label>Staff code<input name="staff_code" required placeholder="e.g. LBIS/PRI/027"></label><label>Teacher email<input name="email" type="email" required autocomplete="email" placeholder="name@lbis.org"></label><label>Temporary password<input name="password" type="password" required minlength="8" autocomplete="new-password" placeholder="At least 8 characters"></label></div>
     <button class="primary-button" type="submit" id="create-teacher-button">Create Teacher Account</button><p class="form-help">Share temporary credentials securely and require the teacher to change the password through the approved account-recovery process.</p>
    </form>
+  </section>
+  <section class="panel-view" id="panel-add-class">
+   <div class="section-title"><div><h3>Add a Class</h3><p>Create the classes students will be assigned to when their records are registered.</p></div><button class="secondary-button" id="refresh-classes" type="button">Refresh Classes</button></div>
+   <form id="add-class-form" class="form-card">
+    <div class="form-grid">
+     <label>Class name<input name="name" required maxlength="100" autocomplete="off" placeholder="e.g. Primary 1, JSS 1, Nursery 2"></label>
+     <label>Level / Section<input name="level" maxlength="80" autocomplete="off" placeholder="e.g. Primary, Junior Secondary, Nursery"></label>
+     <label>Display order<input name="sort_order" type="number" min="0" step="1" value="0"></label>
+    </div>
+    <button class="primary-button" type="submit" id="create-class-button">Create Class</button>
+    <p class="form-help">Create each class once. Active classes will automatically appear in the Add Student class dropdown.</p>
+   </form>
+   <div class="section-title"><div><h3>Available Classes</h3><p>Classes currently registered in the school database.</p></div></div>
+   <div class="table-card" id="classes-content"><p class="empty-state">Loading classes…</p></div>
   </section>
   <section class="panel-view" id="panel-add-student">
    <div class="section-title"><div><h3>Add a Student</h3><p>Register a student in the LBIS CBT student records.</p></div></div>
