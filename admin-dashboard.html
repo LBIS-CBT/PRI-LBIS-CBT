@@ -18,6 +18,7 @@
   <button class="nav-button" data-panel="add-teacher"><span>＋</span> Add Teacher</button>
   <button class="nav-button" data-panel="add-class"><span>＋</span> Add Class</button>
   <button class="nav-button" data-panel="add-student"><span>＋</span> Add Student</button>
+  <button class="nav-button" data-panel="manage-students"><span>☷</span> Manage Students</button>
   <button class="nav-button" data-panel="teachers"><span>♙</span> Manage Teachers</button>
   <button class="nav-button" data-panel="live-candidates"><span>◉</span> Live Candidates</button>
   <button class="nav-button" data-panel="examinations"><span>▤</span> Examinations</button>
@@ -88,6 +89,17 @@
     <button class="primary-button" type="submit" id="create-student-button">Add Student</button>
     <p class="form-help">Admission numbers must be unique. The system checks duplicates without regard to letter case or extra spaces. Select the student's current class before saving.</p>
    </form>
+  </section>
+  <section class="panel-view" id="panel-manage-students">
+   <div class="section-title"><div><h3>Manage Students</h3><p>Search, filter, view, edit and manage student records.</p></div><button class="secondary-button" id="refresh-students" type="button">Refresh Students</button></div>
+   <div class="form-card student-filters">
+    <div class="form-grid">
+     <label>Search student<input id="student-search" type="search" placeholder="Name or admission number"></label>
+     <label>Filter by class<select id="manage-student-class"><option value="">All classes</option></select></label>
+    </div>
+   </div>
+   <div class="table-card student-table-card"><div class="table-scroll"><table class="staff-table"><thead><tr><th>Admission Number</th><th>Full Name</th><th>Class</th><th>Status</th><th>Actions</th></tr></thead><tbody id="manage-students-body"><tr><td colspan="5" class="table-empty">Use Refresh Students to load student records.</td></tr></tbody></table></div><div class="student-pagination"><span id="student-page-info">Page 0 of 0</span><div><button class="secondary-button" id="student-prev" type="button">Previous</button> <button class="secondary-button" id="student-next" type="button">Next</button></div></div></div>
+   <div id="student-edit-modal" class="student-modal" hidden><div class="student-modal-card"><div class="section-title"><div><h3 id="student-modal-title">Student Details</h3></div><button type="button" class="secondary-button" id="student-modal-close">Close</button></div><form id="manage-student-edit-form"><input type="hidden" name="id"><div class="form-grid"><label>Full name<input name="full_name" required maxlength="150"></label><label>Admission number<input name="admission_number" required maxlength="60"></label><label>Class<select name="class_id" id="edit-student-class" required></select></label></div><div id="student-view-details" class="student-view-details"></div><button class="primary-button" id="save-student-edit" type="submit">Save Changes</button></form></div></div>
   </section>
   <section class="panel-view" id="panel-teachers"><div class="section-title"><div><h3>Manage Teachers</h3><p>Teacher account administration.</p></div><button class="secondary-button" id="reload-teachers">Refresh List</button></div><div id="teachers-content" class="table-card"><p class="empty-state">Select Refresh List to retrieve staff records securely.</p></div></section>
   <section class="panel-view" id="panel-live-candidates"><div class="section-title"><div><h3>Live Candidates</h3><p>Monitor students currently taking examinations.</p></div><button class="secondary-button" id="refresh-live">Refresh</button></div><div class="table-card"><p class="empty-state">Live monitoring requires the protected monitoring service and candidate-session read permissions. This view is ready for that integration; it will not display fabricated candidate data.</p></div></section>
