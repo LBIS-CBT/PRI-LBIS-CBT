@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#781d37">
+  <meta name="description" content="LBIS CBT Student Dashboard">
+  <title>LBIS CBT | Student Dashboard</title>
+  <link rel="stylesheet" href="assets/css/app.css?v=20261124-student-dashboard1">
+  <link rel="stylesheet" href="assets/css/student-dashboard.css?v=20261124-student-dashboard1">
+  <script src="assets/js/student-dashboard.js?v=20261124-student-dashboard1" defer></script>
+</head>
+<body class="student-dashboard-page">
+  <header class="student-topbar">
+    <a class="student-brand" href="student-dashboard.html" aria-label="LBIS CBT Student Dashboard">
+      <span class="student-brand-mark">LBIS</span>
+      <span><strong>LBIS CBT</strong><small>Student Portal</small></span>
+    </a>
+    <button id="student-logout" class="student-logout" type="button">Sign Out</button>
+  </header>
+
+  <main class="student-dashboard-main">
+    <section class="student-welcome">
+      <div>
+        <p class="eyebrow">STUDENT DASHBOARD</p>
+        <h1>Welcome, <span id="student-name">Student</span></h1>
+        <p class="welcome-subtitle">Your examinations and examination activities are shown below.</p>
+      </div>
+      <div class="student-class-card">
+        <span>REGISTERED CLASS</span>
+        <strong id="student-class">Loading…</strong>
+      </div>
+    </section>
+
+    <section class="dashboard-summary" aria-label="Student information">
+      <article class="summary-card">
+        <span class="summary-label">Admission Number</span>
+        <strong id="student-admission">—</strong>
+      </article>
+      <article class="summary-card">
+        <span class="summary-label">Examinations</span>
+        <strong id="exam-total">—</strong>
+      </article>
+      <article class="summary-card">
+        <span class="summary-label">Available Now</span>
+        <strong id="exam-available">—</strong>
+      </article>
+    </section>
+
+    <section class="examinations-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">YOUR CLASS</p>
+          <h2>My Examinations</h2>
+        </div>
+        <button id="refresh-examinations" class="refresh-button" type="button">Refresh</button>
+      </div>
+      <div id="dashboard-message" class="dashboard-message" role="status" aria-live="polite">Loading your examinations…</div>
+      <div id="examination-list" class="examination-list" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer class="student-footer">Designed by TUPS Technologies</footer>
+</body>
+</html>
