@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#102d46"><title>LBIS CBT | Administration</title>
-<link rel="stylesheet" href="assets/css/app.css"><link rel="stylesheet" href="assets/css/admin-dashboard.css">
+<meta name="theme-color" content="#64172d"><title>LBIS CBT | Administration</title>
+<link rel="stylesheet" href="assets/css/app.css?v=20261124-brand1"><link rel="stylesheet" href="assets/css/admin-dashboard.css?v=20261124-brand1">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/js/auth.js?v=20261124-2" defer></script><script src="assets/js/admin-dashboard.js?v=20261124-2" defer></script>
 </head>
@@ -115,7 +115,12 @@
     <form id="teacher-reset-form" class="teacher-reset-form"><label>New temporary password<input name="password" type="password" minlength="12" required autocomplete="new-password" placeholder="At least 12 characters"></label><button class="secondary-button" id="reset-teacher-password" type="submit">Reset Password</button><p class="form-help">Existing passwords cannot be viewed. This action sets a new password.</p></form>
    </div></div>
   </section>
-  <section class="panel-view" id="panel-live-candidates"><div class="section-title"><div><h3>Live Candidates</h3><p>Monitor students currently taking examinations.</p></div><button class="secondary-button" id="refresh-live">Refresh</button></div><div class="table-card"><p class="empty-state">Live monitoring requires the protected monitoring service and candidate-session read permissions. This view is ready for that integration; it will not display fabricated candidate data.</p></div></section>
+  <section class="panel-view" id="panel-live-candidates">
+   <div class="section-title"><div><h3>Live Candidates</h3><p>Monitor candidates with an examination session currently in progress.</p></div><button class="secondary-button" id="refresh-live" type="button">Refresh Candidates</button></div>
+   <div class="stat-grid live-stat-grid"><article class="stat-card"><span>ACTIVE CANDIDATES</span><strong id="live-total">—</strong><small>Currently in progress</small></article><article class="stat-card"><span>LAST UPDATED</span><strong id="live-updated">—</strong><small>Most recent refresh</small></article><article class="stat-card"><span>MONITORING STATUS</span><strong id="live-status">Waiting</strong><small>Secure session monitor</small></article></div>
+   <div class="form-card live-filters"><div class="form-grid"><label>Search candidate<input id="live-search" type="search" placeholder="Name or admission number"></label><label>Filter by examination<select id="live-exam-filter"><option value="">All examinations</option></select></label></div></div>
+   <div class="table-card live-table-card"><div class="table-scroll"><table class="staff-table live-table" aria-label="Live examination candidates"><thead><tr><th>Candidate</th><th>Admission No.</th><th>Class</th><th>Examination</th><th>Started</th><th>Time Remaining</th><th>Answered</th><th>Status</th></tr></thead><tbody id="live-candidates-body"><tr><td colspan="8" class="table-empty">Select Live Candidates to load active examination sessions.</td></tr></tbody></table></div><div class="student-pagination"><span id="live-page-info">0 active candidates</span><span class="form-help">Candidate sessions refresh when you select Refresh Candidates.</span></div></div>
+  </section>
   <section class="panel-view" id="panel-examinations"><div class="section-title"><div><h3>Examinations</h3><p>Control exam availability for new candidates.</p></div></div><div class="table-card"><p class="empty-state">Examination listing and the Start Exam / Close to New Candidates controls will connect to the protected examination-management service. Closing an exam must not interrupt candidates already in progress.</p></div></section>
   <section class="panel-view" id="panel-results"><div class="section-title"><div><h3>Results</h3><p>Review examination outcomes and candidate performance.</p></div></div><div class="table-card"><p class="empty-state">Results will appear here after the protected results service is connected.</p></div></section>
   <section class="panel-view" id="panel-admin-password"><div class="section-title"><div><h3>Reset Admin Password</h3><p>Secure administrator account recovery.</p></div></div><div class="table-card"><p class="empty-state">Administrator password resets must be performed through a privileged, audited recovery operation. The current staff-management service supports password reset; the administrator-target selection and confirmation workflow will be connected next.</p></div></section>
