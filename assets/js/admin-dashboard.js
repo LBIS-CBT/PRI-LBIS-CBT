@@ -16,6 +16,7 @@ function showPanel(name){
  if(name==="add-student")loadStudentClasses();
  if(name==="manage-students")loadManageStudents();
  if(name==="teachers")loadTeachers();
+ if(name==="live-candidates")loadLiveCandidates();
 }
 document.querySelectorAll("[data-panel]").forEach(b=>b.addEventListener("click",()=>showPanel(b.dataset.panel)));
 async function session(){
@@ -323,7 +324,43 @@ $("teacher-reset-form").addEventListener("submit",async ev=>{
  }catch(err){setNotice(err.message||"Unable to reset teacher password.");}
  finally{btn.disabled=false;btn.textContent="Reset Password";}
 });
-$("refresh-live").addEventListener("click",()=>setNotice("Live candidate monitoring is awaiting the protected monitoring endpoint."));
+let liveCandidateRecords=[];
+function formatClock(value){if(!value)return "—";const d=new Date(value);return Number.isNaN(d.getTime())?"—":d.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});}
+function renderLiveCandidates(){
+ const body=$("live-candidates-body");body.replaceChildren();
+ const q=$("live-search").value.trim().toLowerCase(),examId=$("live-exam-filter").value;
+ const rows=liveCandidateRecords.filter(c=>{
+  const s=c.student||{},e=c.examination||{};
+  return (!q||String(s.full_name||"").toLowerCase().includes(q)||String(s.admission_number||"").toLowerCase().includes(q))&&(!examId||e.id===examId);
+ });
+ if(!rows.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=8;td.className="table-empty";td.textContent=liveCandidateRecords.length?"No candidates match these filters.":"There are currently no candidates taking an examination.";tr.appendChild(td);body.appendChild(tr);}
+ rows.forEach(c=>{
+  const s=c.student||{},e=c.examination||{},tr=document.createElement("tr");
+  const remaining=c.deadline_at?Math.max(0,Math.ceil((new Date(c.deadline_at).getTime()-Date.now())/60000)):null;
+  const values=[s.full_name||"—",s.admission_number||"—",(s.class_name||"—")+(s.class_level?" — "+s.class_level:""),e.subject||e.title||"—",formatClock(c.started_at),remaining===null?"—":remaining+" min",String(c.answered_count??0),"In Progress"];
+  values.forEach((v,i)=>{const td=document.createElement("td");td.textContent=v;if(i===7){const pill=document.createElement("span");pill.className="exam-status active";pill.textContent=v;td.replaceChildren(pill);}tr.appendChild(td);});body.appendChild(tr);
+ });
+ $("live-page-info").textContent=rows.length+" candidate(s) shown • "+liveCandidateRecords.length+" active";
+}
+async function loadLiveCandidates(){
+ if(!context)return;const btn=$("refresh-live"),body=$("live-candidates-body");btn.disabled=true;btn.textContent="Refreshing…";$("live-status").textContent="Checking";
+ body.innerHTML='<tr><td colspan="8" class="table-empty">Retrieving active candidate sessions…</td></tr>';
+ try{
+  const {data,error}=await window.supabaseClient.functions.invoke("admin-live-candidates",{body:{action:"list_live_candidates"}});
+  if(error)throw error;if(!data||data.success===false)throw new Error(data?.message||"Live candidate records could not be loaded.");
+  liveCandidateRecords=data.candidates||[];$("live-total").textContent=String(data.total??liveCandidateRecords.length);$("live-status").textContent="Connected";
+  $("live-updated").textContent=new Date(data.generated_at||Date.now()).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+  const filter=$("live-exam-filter"),selected=filter.value;filter.replaceChildren(new Option("All examinations",""));
+  const exams=new Map();liveCandidateRecords.forEach(c=>{if(c.examination?.id)exams.set(c.examination.id,c.examination);});
+  [...exams.values()].forEach(e=>filter.add(new Option(e.subject||e.title||"Examination",e.id)));
+  if(exams.has(selected))filter.value=selected;
+  renderLiveCandidates();setNotice(data.truncated?"Showing the latest 500 active sessions.":"");
+ }catch(err){liveCandidateRecords=[];$("live-total").textContent="—";$("live-status").textContent="Unavailable";body.innerHTML='<tr><td colspan="8" class="table-empty"></td></tr>';body.querySelector("td").textContent=err.message||"Unable to load live candidates.";setNotice(err.message||"Live monitoring could not be loaded.");console.error("Live candidates:",err);}
+ finally{btn.disabled=false;btn.textContent="Refresh Candidates";}
+}
+$("refresh-live").addEventListener("click",loadLiveCandidates);
+$("live-search").addEventListener("input",renderLiveCandidates);
+$("live-exam-filter").addEventListener("change",renderLiveCandidates);
 $("sign-out-button").addEventListener("click",async()=>{const b=$("sign-out-button");b.disabled=true;b.textContent="Signing out…";const {error}=await window.supabaseClient.auth.signOut();if(error){b.disabled=false;b.textContent="↪  Sign Out";setNotice("Unable to sign out. Please retry.");return;}sessionStorage.removeItem("lbis_staff_profile");location.replace("admin-login.html");});
 session().then(v=>{context=v;if(context)loadExaminations();}).catch(e=>{console.error(e);setNotice("Dashboard initialization failed. Reload the page.");});
 $("refresh-examinations").addEventListener("click",loadExaminations);
