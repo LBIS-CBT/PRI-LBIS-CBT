@@ -125,7 +125,18 @@
   <section class="panel-view" id="panel-results"><div class="section-title"><div><h3>Results</h3><p>Review examination outcomes and candidate performance.</p></div></div><div class="table-card"><p class="empty-state">Results will appear here after the protected results service is connected.</p></div></section>
   <section class="panel-view" id="panel-admin-password"><div class="section-title"><div><h3>Reset Admin Password</h3><p>Secure administrator account recovery.</p></div></div><div class="table-card"><p class="empty-state">Administrator password resets must be performed through a privileged, audited recovery operation. The current staff-management service supports password reset; the administrator-target selection and confirmation workflow will be connected next.</p></div></section>
   <section class="panel-view" id="panel-teacher-password"><div class="section-title"><div><h3>Reset Teacher Password</h3><p>Issue a new password for a teacher account.</p></div></div><div class="table-card"><p class="empty-state">Use Manage Teachers to identify the account. The secure reset action will be added to each teacher record through the staff-management service.</p></div></section>
-  <section class="panel-view" id="panel-exam-password"><div class="section-title"><div><h3>Reset Examination Password</h3><p>Manage any examination-specific access password.</p></div></div><div class="table-card"><p class="empty-state">The current examinations schema does not yet define an examination password field or reset operation. This control is reserved until that secure feature is added to the database and examination service.</p></div></section>
+  <section class="panel-view" id="panel-exam-password">
+   <div class="section-title"><div><h3>Reset Global Examination Password</h3><p>One password controls entry to every examination and subject.</p></div></div>
+   <form id="global-exam-password-form" class="form-card">
+    <div class="form-grid">
+     <label>New examination password<input name="new_password" type="password" minlength="8" maxlength="128" autocomplete="new-password" required placeholder="Enter the new shared password"></label>
+     <label>Confirm new password<input name="confirm_password" type="password" minlength="8" maxlength="128" autocomplete="new-password" required placeholder="Re-enter the new shared password"></label>
+    </div>
+    <button class="primary-button" id="reset-global-exam-password" type="submit">Reset Global Password</button>
+    <p class="form-help">This change applies to all examinations. Students who have already entered an examination will not be interrupted. Reset the password again after the examination period.</p>
+   </form>
+   <div class="security-note"><strong>Security notice</strong><p>The current password cannot be viewed. Only its secure hash is stored. Only an authenticated administrator can replace it.</p></div>
+  </section>
   <section class="panel-view" id="panel-view-passwords"><div class="section-title"><div><h3>Password Access & Recovery</h3><p>Understand what administrators can safely view or recover.</p></div></div><div class="security-note"><strong>Existing passwords cannot be viewed.</strong><p>Supabase Authentication stores password hashes, not readable passwords. For security, LBIS CBT must never expose a teacher's or administrator's existing password. The correct action is to reset the password and issue a new temporary credential securely.</p><p>This section will provide audited reset actions for administrator and teacher accounts. Examination password recovery will be available only after examination-password support is implemented.</p></div></section>
  </section>
  <footer class="page-footer">Designed by TUPS Technologies</footer>
