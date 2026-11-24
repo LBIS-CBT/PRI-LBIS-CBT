@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#781d37">
+  <meta name="description" content="LBIS CBT Examination Room">
+  <title>LBIS CBT | Examination Room</title>
+  <link rel="stylesheet" href="assets/css/app.css?v=20261124-examroom1">
+  <link rel="stylesheet" href="assets/css/examination-room.css?v=20261124-examroom1">
+  <script src="assets/js/examination-room.js?v=20261124-examroom1" defer></script>
+</head>
+<body class="exam-room-page">
+  <header class="exam-topbar">
+    <a class="exam-brand" href="student-dashboard.html" aria-label="LBIS CBT">
+      <span class="exam-brand-mark">LBIS</span>
+      <span><strong>LBIS CBT</strong><small>Examination Room</small></span>
+    </a>
+    <div class="exam-top-actions">
+      <div class="exam-timer-wrap" aria-live="off">
+        <span class="timer-caption">TIME REMAINING</span>
+        <strong id="exam-timer">--:--</strong>
+      </div>
+      <button id="exam-exit" class="exam-exit" type="button">Exit Room</button>
+    </div>
+  </header>
+
+  <main class="exam-main">
+    <section id="exam-loading" class="exam-panel exam-loading" role="status">
+      <div class="loading-mark">LBIS</div>
+      <h1>Preparing your examination</h1>
+      <p>Please wait while your secure examination session loads.</p>
+    </section>
+
+    <section id="exam-error" class="exam-panel exam-state-panel" hidden>
+      <div class="state-icon">!</div>
+      <h1 id="exam-error-title">Unable to open examination</h1>
+      <p id="exam-error-message">Please return to your dashboard and try again.</p>
+      <button id="exam-error-dashboard" type="button">Return to Dashboard</button>
+    </section>
+
+    <section id="exam-workspace" hidden>
+      <div class="exam-heading">
+        <div>
+          <p class="eyebrow">LIVE EXAMINATION</p>
+          <h1 id="exam-title">Examination</h1>
+          <p id="exam-subject" class="exam-subject-line"></p>
+        </div>
+        <div class="exam-progress-card">
+          <span>YOUR PROGRESS</span>
+          <strong id="answered-count">0 / 0 answered</strong>
+          <div class="progress-track"><span id="progress-fill"></span></div>
+        </div>
+      </div>
+
+      <div class="exam-layout">
+        <section class="question-panel" aria-label="Examination question">
+          <div class="question-topline">
+            <span id="question-number">QUESTION 1</span>
+            <span id="question-marks">2 marks</span>
+          </div>
+          <h2 id="question-text">Loading question…</h2>
+          <p id="question-instruction" class="question-instruction">Select one answer.</p>
+          <div id="options-list" class="options-list"></div>
+          <div class="question-feedback" id="save-status" role="status" aria-live="polite">Your answers are saved automatically.</div>
+          <div class="question-actions">
+            <button id="previous-question" class="button-secondary" type="button">Previous</button>
+            <button id="next-question" type="button">Next Question</button>
+          </div>
+        </section>
+
+        <aside class="navigator-panel" aria-label="Question navigator">
+          <div class="navigator-heading">
+            <h2>Question Navigator</h2>
+            <span id="navigator-total"></span>
+          </div>
+          <p class="navigator-help">Select a number to move to that question.</p>
+          <div id="question-navigator" class="question-navigator"></div>
+          <div class="navigator-legend">
+            <span><i class="legend-dot answered"></i> Answered</span>
+            <span><i class="legend-dot current"></i> Current</span>
+            <span><i class="legend-dot unanswered"></i> Not answered</span>
+          </div>
+          <button id="submit-exam" class="submit-exam-button" type="button">Submit Examination</button>
+        </aside>
+      </div>
+      <p class="exam-security-note">Your answers are saved automatically. Do not close this page until you have submitted your examination.</p>
+    </section>
+
+    <section id="exam-result" class="exam-panel exam-result" hidden>
+      <div class="result-mark">✓</div>
+      <p class="eyebrow">EXAMINATION COMPLETED</p>
+      <h1 id="result-heading">Your examination has been submitted</h1>
+      <p id="result-message">Your responses have been recorded successfully.</p>
+      <div class="result-summary">
+        <div><span>Questions answered</span><strong id="result-answered">—</strong></div>
+        <div><span>Examination status</span><strong id="result-status">Submitted</strong></div>
+      </div>
+      <p class="result-score-note">Your examination has been recorded. Please follow your school's instructions for receiving results.</p>
+      <button id="result-dashboard" type="button">Return to Student Dashboard</button>
+    </section>
+  </main>
+
+  <footer class="exam-footer">Designed by TUPS Technologies</footer>
+
+  <div id="submit-dialog" class="submit-dialog" hidden>
+    <div class="submit-dialog-card" role="dialog" aria-modal="true" aria-labelledby="submit-dialog-title">
+      <h2 id="submit-dialog-title">Submit your examination?</h2>
+      <p id="submit-dialog-message">Once submitted, you cannot change your answers.</p>
+      <div class="dialog-actions">
+        <button id="cancel-submit" class="button-secondary" type="button">Continue Examination</button>
+        <button id="confirm-submit" type="button">Yes, Submit</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
