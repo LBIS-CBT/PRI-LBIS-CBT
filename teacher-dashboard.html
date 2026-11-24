@@ -6,9 +6,11 @@
 <title>LBIS CBT | Teacher Dashboard</title>
 <link rel="stylesheet" href="assets/css/app.css?v=20261124-brand4">
 <link rel="stylesheet" href="assets/css/teacher-dashboard.css?v=20261124-teacher2">
+<link rel="stylesheet" href="assets/css/google-forms-import.css?v=20261124-1">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/js/auth.js?v=20261124-3" defer></script>
 <script src="assets/js/teacher-dashboard.js?v=20261124-teacher2" defer></script>
+<script src="assets/js/google-forms-import.js?v=20261124-1" defer></script>
 </head>
 <body class="teacher-body">
 <div id="unsupported-device" class="device-message" role="alert" hidden><div class="device-message__panel"><h1>Device not supported</h1><p>LBIS CBT is designed for laptops, desktop computers and tablets. Please access the system using a supported device.</p></div></div>
@@ -90,7 +92,30 @@
     </div>
     <p id="google-connection-message" class="teacher-google-message" role="status" aria-live="polite"></p>
    </div>
-   <div class="teacher-empty-state compact teacher-extraction-next-step"><h4>Form extraction workspace</h4><p>After connecting your Google account, the next stage will add the Google Form link, question extraction, and teacher-review preview. No questions are imported or published by connecting an account.</p><span class="feature-state">Google connection setup</span></div>
+   <div class="google-import-card">
+    <h4>Import Questions from Google Forms</h4>
+    <p class="google-import-intro">Choose one of your examinations, paste its Google Form link, and extract supported single-answer multiple-choice questions. Review the extracted questions and correct answers before saving them.</p>
+    <div class="google-import-controls">
+     <label class="google-import-field">Select examination
+      <select id="google-import-exam"><option value="">Loading your examinations…</option></select>
+     </label>
+     <label class="google-import-field">Google Form link or Form ID
+      <input id="google-import-form-url" type="url" inputmode="url" placeholder="https://docs.google.com/forms/d/…" autocomplete="url">
+     </label>
+    </div>
+    <div class="google-import-actions">
+     <button id="google-import-extract" class="google-import-extract" type="button">Extract Questions</button>
+     <button id="google-import-save" class="google-import-save" type="button" disabled>Save Questions to Examination</button>
+     <button id="google-import-refresh-exams" class="google-import-refresh" type="button">Refresh Examinations</button>
+    </div>
+    <p id="google-import-message" class="google-import-message" role="status" aria-live="polite"></p>
+    <section id="google-import-preview" class="google-import-preview" hidden aria-live="polite">
+     <h4>Extraction Preview</h4>
+     <p id="google-import-summary" class="google-import-summary"></p>
+     <div id="google-import-question-list" class="google-import-question-list"></div>
+     <div class="google-import-warning"><strong>Review before saving:</strong> Confirm each question and its highlighted correct answer. Saving synchronises Google Forms-imported questions for this examination while preserving manually added questions. It does not publish or activate the examination.</div>
+    </section>
+   </div>
   </section>
   <p id="teacher-dashboard-message" class="teacher-message" role="status" aria-live="polite"></p>
  </div>
