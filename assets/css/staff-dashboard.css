@@ -197,3 +197,24 @@
   .profile-strip { grid-template-columns: 1fr; gap: 16px; }
   .workspace-grid { grid-template-columns: 1fr; }
 }
+/* LBIS brand alignment */
+:root{--brand-maroon:#781d37;--brand-maroon-dark:#591326;--brand-grey:#77727a;--brand-ink:#292629;--brand-line:#e2dfe1;--brand-soft:#f7edf0}
+.dashboard-body{background:#f5f4f5;color:var(--brand-ink)}
+.dashboard-header{background:#64172d;color:#fff}
+.dashboard-brand,.dashboard-brand strong{color:#fff}
+.dashboard-brand__mark{background:#fff;color:#781d37}
+.dashboard-brand small{color:#e4cbd2}
+.connection-indicator{color:#f2e8eb}
+.sign-out-button{background:#fff;color:#64172d;border:1px solid #fff;border-radius:7px;min-height:40px;padding:9px 17px;font-size:12px}
+.sign-out-button:hover{background:#f7edf0}
+.eyebrow{color:#781d37}
+.welcome-section h1,.section-heading h2,.workspace-card h3{color:#292629}
+.welcome-copy,.section-heading>p,.workspace-card p{color:#77727a}
+.role-chip{background:#f7edf0;color:#781d37}
+.profile-strip,.workspace-card{background:#fff;border:1px solid #e2dfe1;border-radius:11px;box-shadow:0 5px 18px rgba(40,25,30,.04)}
+.profile-label{color:#77727a}
+.profile-strip strong{color:#292629}
+.card-icon{background:#f7edf0;color:#781d37}
+.card-status{color:#781d37}
+.dashboard-message{color:#9b273f}
+.dashboard-footer{color:#89838a}
