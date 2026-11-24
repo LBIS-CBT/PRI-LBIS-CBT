@@ -89,7 +89,7 @@
       return {
         success: true,
         staff,
-        redirectUrl: "staff-dashboard.html"
+        redirectUrl: staff.role === "teacher" ? "staff-dashboard.html" : "admin-dashboard.html"
       };
     } catch (error) {
       return {
