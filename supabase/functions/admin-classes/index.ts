@@ -81,7 +81,7 @@ Deno.serve(async (req: Request) => {
       }
 
       const { data: existing, error: duplicateError } = await adminClient
-        .from("classes").select("id").ilike("name", name).maybeSingle();
+        .from("classes").select("id").ilike("name", name).limit(1).maybeSingle();
       if (duplicateError) throw duplicateError;
       if (existing) return jsonResponse({ success: false, message: "A class with that name already exists." }, 409);
 
