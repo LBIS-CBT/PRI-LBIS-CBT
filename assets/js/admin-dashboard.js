@@ -300,7 +300,7 @@ $("reload-teachers").addEventListener("click",loadTeachers);
 $("teacher-search").addEventListener("input",()=>{teacherPage=1;renderTeachers();});
 $("teacher-status-filter").addEventListener("change",()=>{teacherPage=1;renderTeachers();});
 $("teacher-prev").addEventListener("click",()=>{if(teacherPage>1){teacherPage--;renderTeachers();}});
-$("teacher-next").addEventListener("click",()=>{teacherPage++;renderTeachers();}});
+$("teacher-next").addEventListener("click",()=>{teacherPage++;renderTeachers();});
 $("teacher-modal-close").addEventListener("click",()=>{$("teacher-modal").hidden=true;});
 $("teacher-edit-form").addEventListener("submit",async ev=>{
  ev.preventDefault();const form=ev.currentTarget,v=Object.fromEntries(new FormData(form).entries()),btn=$("save-teacher-edit");
