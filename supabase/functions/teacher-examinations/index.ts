@@ -171,7 +171,7 @@ Deno.serve(async (req: Request) => {
         .from("examinations")
         .insert({
           title, subject, class_id: classId, created_by: authenticatedUserId,
-          status: "draft", accepts_new_candidates: false, duration_minutes: duration,
+          status: "ready", accepts_new_candidates: false, duration_minutes: duration,
           starts_at: startsAt instanceof Date ? startsAt.toISOString() : null,
           ends_at: endsAt instanceof Date ? endsAt.toISOString() : null,
           total_form_items: 0, extracted_question_count: 0, unsupported_question_count: 0, total_marks: 0,
@@ -186,9 +186,9 @@ Deno.serve(async (req: Request) => {
       if (insertError) {
         console.error("CREATE EXAMINATION ERROR:", insertError);
         if (insertError.code === "23503") return jsonResponse({ success: false, message: "The selected class or teacher account is no longer available." }, 400);
-        return jsonResponse({ success: false, message: "The examination draft could not be created. Please try again." }, 500);
+        return jsonResponse({ success: false, message: "The examination could not be created. Please try again." }, 500);
       }
-      return jsonResponse({ success: true, message: "Examination draft created successfully.", examination: { ...examination, class: selectedClass } }, 201);
+      return jsonResponse({ success: true, message: "Examination created successfully and is ready for question extraction.", examination: { ...examination, class: selectedClass } }, 201);
     }
 
     if (action === "delete_examination") {
