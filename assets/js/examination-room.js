@@ -315,6 +315,10 @@
       currentIndex = savedIndex >= 0 ? savedIndex : 0;
       deadlineMs = Date.parse(data.session.deadline_at);
       updateClock(data.server_time);
+      const candidateName = document.getElementById("candidate-full-name");
+      const candidateAdmission = document.getElementById("candidate-admission-number");
+      if (candidateName) candidateName.textContent = data.candidate?.full_name || "Not available — contact the school office";
+      if (candidateAdmission) candidateAdmission.textContent = data.candidate?.admission_number || "Not available — contact the school office";
       ui.title.textContent = data.examination.title || "Examination";
       ui.subject.textContent = data.examination.subject || "";
       ui.loading.hidden = true;
