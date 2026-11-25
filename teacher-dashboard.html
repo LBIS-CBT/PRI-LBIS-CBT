@@ -5,11 +5,11 @@
 <meta name="theme-color" content="#64172d"><meta name="description" content="LBIS CBT Teacher Dashboard">
 <title>LBIS CBT | Teacher Dashboard</title>
 <link rel="stylesheet" href="assets/css/app.css?v=20261124-brand4">
-<link rel="stylesheet" href="assets/css/teacher-dashboard.css?v=20261124-teacher2">
+<link rel="stylesheet" href="assets/css/teacher-dashboard.css?v=20261125-delete1">
 <link rel="stylesheet" href="assets/css/google-forms-import.css?v=20261124-1">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/js/auth.js?v=20261124-3" defer></script>
-<script src="assets/js/teacher-dashboard.js?v=20261124-teacher2" defer></script>
+<script src="assets/js/teacher-dashboard.js?v=20261125-delete1" defer></script>
 <script src="assets/js/google-forms-import.js?v=20261124-1" defer></script>
 </head>
 <body class="teacher-body">
@@ -64,7 +64,7 @@
   </section>
   <section class="teacher-panel" id="teacher-panel-my-exams">
    <div class="teacher-section-heading teacher-section-heading-row"><div><p class="teacher-eyebrow">YOUR ASSESSMENTS</p><h3>My Examinations</h3><p>Only examinations created by your teacher account are shown here.</p></div><button id="teacher-refresh-exams" class="teacher-secondary-button" type="button">↻ Refresh List</button></div>
-   <div class="teacher-table-card"><div class="teacher-table-scroll"><table><thead><tr><th>Examination</th><th>Subject</th><th>Class</th><th>Duration</th><th>Questions</th><th>Status</th><th>Created</th></tr></thead><tbody id="teacher-exams-body"><tr><td colspan="7" class="teacher-table-empty">Loading your examinations…</td></tr></tbody></table></div></div>
+   <div class="teacher-table-card"><div class="teacher-table-scroll"><table><thead><tr><th>Examination</th><th>Subject</th><th>Class</th><th>Duration</th><th>Questions</th><th>Status</th><th>Created</th><th>Action</th></tr></thead><tbody id="teacher-exams-body"><tr><td colspan="8" class="teacher-table-empty">Loading your examinations…</td></tr></tbody></table></div></div>
    <p id="teacher-exams-summary" class="teacher-table-summary"></p>
   </section>
   <section class="teacher-panel" id="teacher-panel-question-bank">
