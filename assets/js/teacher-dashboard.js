@@ -271,7 +271,7 @@ async function loadExaminations() {
   const tbody = $("teacher-exams-body");
   const summary = $("teacher-exams-summary");
   if (!tbody) return;
-  tbody.innerHTML = '<tr><td colspan="7" class="teacher-table-empty">Loading your examinations…</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="8" class="teacher-table-empty">Loading your examinations…</td></tr>';
   if (summary) summary.textContent = "";
   try {
     const result = await callTeacherService({ action: "list_teacher_examinations" });
@@ -279,7 +279,7 @@ async function loadExaminations() {
     $("teacher-exam-count").textContent = String(result.total ?? exams.length);
 
     if (!exams.length) {
-      tbody.innerHTML = '<tr><td colspan="7" class="teacher-table-empty">You have not created any examinations yet. Use Create Examination to get started.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" class="teacher-table-empty">You have not created any examinations yet. Use Create Examination to get started.</td></tr>';
     } else {
       tbody.innerHTML = exams.map(exam => {
         const className = exam.class ? (exam.class.name + (exam.class.level ? " (" + exam.class.level + ")" : "")) : "Class unavailable";
@@ -292,13 +292,40 @@ async function loadExaminations() {
           '<td>' + escapeHtml(exam.extracted_question_count ?? 0) + '</td>' +
           '<td><span class="teacher-status-pill ' + escapeHtml(status) + '">' + escapeHtml(status.replace(/_/g, " ")) + '</span></td>' +
           '<td>' + escapeHtml(formatDate(exam.created_at)) + '</td>' +
+          '<td><button type="button" class="teacher-delete-exam-button" data-delete-exam="' + escapeHtml(exam.id) + '" data-exam-title="' + escapeHtml(exam.title) + '">Delete</button></td>' +
           '</tr>';
       }).join("");
     }
     if (summary) summary.textContent = exams.length + " examination(s) found. The list is limited to your own examinations.";
   } catch (error) {
-    tbody.innerHTML = '<tr><td colspan="7" class="teacher-table-empty error">' + escapeHtml(error.message) + '</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="teacher-table-empty error">' + escapeHtml(error.message) + '</td></tr>';
     $("teacher-exam-count").textContent = "—";
+  }
+}
+
+async function deleteExamination(examId, examTitle, button) {
+  if (!examId || !button) return;
+  const confirmed = window.confirm(
+    'Delete "' + examTitle + '"?\n\nThis permanently removes this examination and its imported questions. It is allowed only when no candidate has ever started an attempt. Examinations with candidate sessions or results are protected.\n\nThis action cannot be undone.'
+  );
+  if (!confirmed) return;
+
+  const row = button.closest("tr");
+  button.disabled = true;
+  button.textContent = "Deleting…";
+  try {
+    const result = await callTeacherService({
+      action: "delete_examination",
+      exam_id: examId,
+      confirmation: "DELETE"
+    });
+    if (row) row.remove();
+    say(result.message || "Examination deleted successfully.");
+    await loadExaminations();
+  } catch (error) {
+    button.disabled = false;
+    button.textContent = "Delete";
+    say(error.message || "The examination could not be deleted.");
   }
 }
 
@@ -365,6 +392,11 @@ $("teacher-create-exam-form")?.addEventListener("submit", createExamination);
 $("google-connect-button")?.addEventListener("click", connectGoogleAccount);
 $("google-disconnect-button")?.addEventListener("click", disconnectGoogleAccount);
 $("teacher-refresh-exams")?.addEventListener("click", loadExaminations);
+$("teacher-exams-body")?.addEventListener("click", event => {
+  const button = event.target.closest("[data-delete-exam]");
+  if (!button) return;
+  deleteExamination(button.dataset.deleteExam, button.dataset.examTitle || "this examination", button);
+});
 
 async function init() {
   if (!window.supabaseClient) {
