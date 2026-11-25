@@ -17,6 +17,7 @@ function showPanel(name){
  if(name==="manage-students")loadManageStudents();
  if(name==="teachers")loadTeachers();
  if(name==="live-candidates")loadLiveCandidates();
+ if(name==="examinations")loadExamManagement();
 }
 document.querySelectorAll("[data-panel]").forEach(b=>b.addEventListener("click",()=>showPanel(b.dataset.panel)));
 async function session(){
@@ -65,7 +66,7 @@ function renderExamRows(rows){
  rows.forEach(exam=>{
   const tr=document.createElement("tr"),subject=document.createElement("td"),klass=document.createElement("td"),controls=document.createElement("td"),status=document.createElement("td"),count=document.createElement("td");
   subject.textContent=exam.subject||exam.title||"—";klass.textContent=exam.class_name||exam.class_label||"—";
-  const accepting=exam.accepts_new_candidates===true,canStart=["ready","active"].includes(String(exam.status||"").toLowerCase());
+  const accepting=exam.accepts_new_candidates===true,canStart=["ready","active","completed"].includes(String(exam.status||"").toLowerCase());
   const wrap=document.createElement("div");wrap.className="exam-controls";const action=document.createElement("button");action.type="button";action.className="exam-action "+(accepting?"close":"start");action.textContent=accepting?"Close to New Candidates":"Start Exam";action.disabled=!canStart;action.addEventListener("click",()=>setExamEntry(exam.id,!accepting,action));wrap.appendChild(action);controls.appendChild(wrap);
   const pill=document.createElement("span");pill.className="exam-status "+String(exam.status||"draft").toLowerCase();pill.textContent=String(exam.status||"draft").replaceAll("_"," ");status.appendChild(pill);
   count.textContent=Number(exam.candidate_count??exam.candidates_count??0).toLocaleString();
@@ -81,9 +82,100 @@ async function loadExaminations(){
 }
 async function setExamEntry(examId,accepting,button){
  button.disabled=true;const original=button.textContent;button.textContent="Saving…";
- try{const {data,error}=await window.supabaseClient.functions.invoke("admin-examinations",{body:{action:"set_candidate_entry",exam_id:examId,accepts_new_candidates:accepting}});if(error)throw error;if(!data||data.success===false)throw new Error(data?.message||"Exam setting was not updated.");setNotice(data.message||"Examination entry setting updated.");await loadExaminations();}
+ try{const {data,error}=await window.supabaseClient.functions.invoke("admin-examinations",{body:{action:"set_candidate_entry",exam_id:examId,accepts_new_candidates:accepting}});if(error)throw error;if(!data||data.success===false)throw new Error(data?.message||"Exam setting was not updated.");setNotice(data.message||"Examination entry setting updated.");await loadExaminations();if($("panel-examinations")?.classList.contains("active"))await loadExamManagement();}
  catch(err){setNotice(err.message||"Unable to update examination entry.");button.disabled=false;button.textContent=original;}
 }
+
+
+let managementExams=[],managementCandidates=[],selectedManagementExam=null;
+function safeCell(value){const td=document.createElement("td");td.textContent=value??"—";return td;}
+function renderManagementExams(){
+ const body=$("management-exam-body");body.replaceChildren();
+ if(!managementExams.length){const tr=document.createElement("tr"),td=safeCell("No examinations found.");td.colSpan=7;td.className="table-empty";tr.appendChild(td);body.appendChild(tr);return;}
+ managementExams.forEach(exam=>{
+  const tr=document.createElement("tr"),title=safeCell(exam.subject||exam.title||"—"),klass=safeCell(exam.class_label||exam.class_name||"—"),status=safeCell(String(exam.status||"—").replaceAll("_"," ")),entry=safeCell(exam.accepts_new_candidates?"Open":"Closed"),count=safeCell(String(exam.candidate_count??0)),attempted=safeCell(String(exam.attempted_count??0)),action=safeCell("");
+  const btn=document.createElement("button");btn.type="button";btn.className="exam-action "+(exam.accepts_new_candidates?"close":"start");btn.textContent=exam.accepts_new_candidates?"Close Entry":"Open / Reopen";btn.disabled=!["ready","active","completed"].includes(String(exam.status||"").toLowerCase());btn.addEventListener("click",()=>setExamEntry(exam.id,!exam.accepts_new_candidates,btn));action.appendChild(btn);
+  [title,klass,status,entry,count,attempted,action].forEach(x=>tr.appendChild(x));body.appendChild(tr);
+ });
+ const select=$("exam-candidate-select"),previous=select.value;select.replaceChildren(new Option("Choose an examination",""));
+ managementExams.forEach(e=>select.add(new Option((e.subject||e.title||"Examination")+" — "+(e.class_label||e.class_name||"Class"),e.id)));
+ if(managementExams.some(e=>e.id===previous))select.value=previous;
+}
+async function loadExamManagement(){
+ if(!context)return;
+ const body=$("management-exam-body"),btn=$("refresh-exam-management");
+ if(btn){btn.disabled=true;btn.textContent="Loading…";}
+ body.innerHTML='<tr><td colspan="7" class="table-empty">Loading examination records…</td></tr>';
+ try{
+  const {data,error}=await window.supabaseClient.functions.invoke("admin-examinations",{body:{action:"list_examinations"}});
+  if(error)throw error;if(!data||data.success!==true)throw new Error(data?.message||"Examination records could not be loaded.");
+  managementExams=data.examinations||[];renderManagementExams();
+  if($("exam-candidate-select").value)await loadExamCandidates($("exam-candidate-select").value);
+ }catch(err){body.innerHTML='<tr><td colspan="7" class="table-empty"></td></tr>';body.querySelector("td").textContent=err.message||"Unable to load examinations.";setNotice(err.message||"Examination management could not be loaded.");}
+ finally{if(btn){btn.disabled=false;btn.textContent="Refresh Examinations";}}
+}
+async function loadExamCandidates(examId){
+ const body=$("exam-candidates-body");selectedManagementExam=examId;managementCandidates=[];
+ if(!examId){body.innerHTML='<tr><td colspan="7" class="table-empty">Choose an examination above.</td></tr>';return;}
+ body.innerHTML='<tr><td colspan="7" class="table-empty">Loading candidate attempts…</td></tr>';
+ try{
+  const {data,error}=await window.supabaseClient.functions.invoke("admin-examinations",{body:{action:"list_exam_candidates",exam_id:examId}});
+  if(error)throw error;if(!data||data.success!==true)throw new Error(data?.message||"Candidate histories could not be loaded.");
+  managementCandidates=data.candidates||[];renderExamCandidates();
+ }catch(err){body.innerHTML='<tr><td colspan="7" class="table-empty"></td></tr>';body.querySelector("td").textContent=err.message||"Unable to load candidate histories.";}
+}
+function renderExamCandidates(){
+ const body=$("exam-candidates-body");body.replaceChildren();
+ if(!managementCandidates.length){body.innerHTML='<tr><td colspan="7" class="table-empty">No candidates are registered in this examination class.</td></tr>';return;}
+ managementCandidates.forEach(record=>{
+  const s=record.student||{},attempts=record.attempts||[],auths=record.authorizations||[],pending=auths.find(a=>a.status==="pending"),latest=[...attempts].sort((a,b)=>Number(b.attempt_number)-Number(a.attempt_number))[0];
+  const tr=document.createElement("tr"),name=s.full_name||"—",admission=s.admission_number||"—",active=s.active===false?"Inactive":"Active";
+  const attemptsText=attempts.length?attempts.length+" attempt(s)":"No attempt";
+  const result=latest?(String(latest.status||"").replaceAll("_"," ")+" • "+(latest.score===null||latest.score===undefined?"Score pending":Number(latest.score).toFixed(2))):"Not attempted";
+  const approval=pending?"Approved — pending use":auths.length?String(auths[0].status||"").replaceAll("_"," "):"None";
+  const action=safeCell("");
+  const view=document.createElement("button");view.type="button";view.className="secondary-button";view.textContent="History";view.addEventListener("click",()=>showCandidateHistory(record));
+  action.appendChild(view);
+  if(pending){const revoke=document.createElement("button");revoke.type="button";revoke.className="secondary-button";revoke.textContent="Revoke";revoke.addEventListener("click",()=>revokeCandidateRetake(pending));action.appendChild(revoke);}
+  else if(attempts.length&&s.active!==false){const authorize=document.createElement("button");authorize.type="button";authorize.className="exam-action start";authorize.textContent="Authorise Retake";authorize.addEventListener("click",()=>authorizeCandidateRetake(s));action.appendChild(authorize);}
+  [safeCell(name),safeCell(admission),safeCell(active),safeCell(attemptsText),safeCell(result),safeCell(approval),action].forEach(x=>tr.appendChild(x));body.appendChild(tr);
+ });
+}
+function showCandidateHistory(record){
+ const s=record.student||{},attempts=record.attempts||[],auths=record.authorizations||[];
+ $("exam-history-title").textContent=s.full_name||"Candidate Attempt History";
+ $("exam-history-subtitle").textContent=(s.admission_number||"")+" • "+attempts.length+" recorded attempt(s)";
+ const area=$("exam-history-content");area.replaceChildren();
+ const table=document.createElement("table");table.className="staff-table";
+ const head=document.createElement("tr");["Attempt","Status","Started","Submitted","Answered","Score"].forEach(x=>{const th=document.createElement("th");th.textContent=x;head.appendChild(th);});table.appendChild(head);
+ attempts.forEach(a=>{const tr=document.createElement("tr");[String(a.attempt_number??"—"),String(a.status||"—").replaceAll("_"," "),a.started_at?new Date(a.started_at).toLocaleString():"—",a.submitted_at?new Date(a.submitted_at).toLocaleString():"—",String(a.answered_count??0),a.score===null||a.score===undefined?"—":Number(a.score).toFixed(2)].forEach(v=>tr.appendChild(safeCell(v)));table.appendChild(tr);});
+ area.appendChild(table);
+ const heading=document.createElement("h4");heading.textContent="Retake authorisation history";area.appendChild(heading);
+ if(!auths.length){const p=document.createElement("p");p.className="form-help";p.textContent="No retake approvals have been recorded.";area.appendChild(p);}
+ auths.forEach(a=>{const p=document.createElement("p");p.className="exam-auth-history";p.textContent=(a.status||"").toUpperCase()+" • "+(a.reason||"No reason supplied")+" • "+(a.authorized_at?new Date(a.authorized_at).toLocaleString():"");area.appendChild(p);});
+ $("exam-candidate-history").hidden=false;
+}
+async function authorizeCandidateRetake(student){
+ if(!selectedManagementExam)return;
+ const reason=window.prompt("Enter the reason for authorising this candidate to retake the examination:");
+ if(reason===null)return;if(!reason.trim()){setNotice("A reason is required before a retake can be authorised.");return;}
+ try{
+  const {data,error}=await window.supabaseClient.functions.invoke("admin-examinations",{body:{action:"authorize_retake",exam_id:selectedManagementExam,student_id:student.id,reason:reason.trim()}});
+  if(error)throw error;if(!data||data.success!==true)throw new Error(data?.message||"Retake authorisation failed.");
+  setNotice(data.message||"Retake authorised.");await loadExamCandidates(selectedManagementExam);
+ }catch(err){setNotice(err.message||"Unable to authorise this retake.");}
+}
+async function revokeCandidateRetake(authorization){
+ if(!window.confirm("Revoke this pending retake approval? The candidate will remain locked out."))return;
+ try{
+  const {data,error}=await window.supabaseClient.functions.invoke("admin-examinations",{body:{action:"revoke_retake",authorization_id:authorization.id}});
+  if(error)throw error;if(!data||data.success!==true)throw new Error(data?.message||"Retake approval could not be revoked.");
+  setNotice(data.message||"Retake approval revoked.");await loadExamCandidates(selectedManagementExam);
+ }catch(err){setNotice(err.message||"Unable to revoke this approval.");}
+}
+$("refresh-exam-management").addEventListener("click",loadExamManagement);
+$("exam-candidate-select").addEventListener("change",ev=>loadExamCandidates(ev.target.value));
+$("exam-history-close").addEventListener("click",()=>$("exam-candidate-history").hidden=true);
 
 $("add-teacher-form").addEventListener("submit",async ev=>{
  ev.preventDefault();if(!context)return;
