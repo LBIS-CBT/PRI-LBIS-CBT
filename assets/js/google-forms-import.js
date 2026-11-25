@@ -38,18 +38,32 @@ async function callFunction(name, payload) {
 function normalizeResult(result) {
   const root = result?.data && typeof result.data === "object" ? result.data : result;
   const questions = Array.isArray(root?.questions) ? root.questions : [];
-  const stats = root?.stats || root?.summary || root || {};
-  const form = root?.form || result?.form || {};
-  return { questions, stats, form };
+  const stats = root?.extraction || root?.stats || root?.summary || root || {};
+  const form = root?.google_form || root?.form || result?.form || {};
+  const candidateFields = Array.isArray(root?.candidate_fields) ? root.candidate_fields : [];
+  return { questions, stats, form, candidateFields };
 }
 
-function renderPreview(questions, stats, form) {
+function renderPreview(questions, stats, form, candidateFields = []) {
   const preview = $("google-import-preview");
   const list = $("google-import-question-list");
   const summary = $("google-import-summary");
   if (!preview || !list || !summary) return;
 
   list.replaceChildren();
+  const identityPreview = $("google-import-identity-preview");
+  const identityList = $("google-import-identity-list");
+  if (identityPreview && identityList) {
+    identityList.replaceChildren();
+    const labels = { full_name: "Candidate Full Name", admission_number: "Admission Number" };
+    candidateFields.forEach(field => {
+      const li = document.createElement("li");
+      li.textContent = (labels[field.key] || field.title || field.key) + " — " +
+        (field.title || "Untitled field") + " (" + (field.question_type || "TEXT") + ")";
+      identityList.appendChild(li);
+    });
+    identityPreview.hidden = candidateFields.length === 0;
+  }
   questions.forEach((question, index) => {
     const article = document.createElement("article");
     article.className = "google-import-question";
@@ -79,8 +93,9 @@ function renderPreview(questions, stats, form) {
 
   const title = form.title ? "Form: " + form.title + " · " : "";
   summary.textContent = title +
-    questions.length + " supported question(s) · " +
+    questions.length + " supported MCQ(s) · " +
     (Number(stats.total_form_items ?? questions.length)) + " total form item(s) · " +
+    (Number(stats.candidate_identity_field_count ?? candidateFields.length)) + " identity field(s) detected · " +
     (Number(stats.unsupported_question_count ?? stats.unsupported_items?.length ?? 0)) +
     " unsupported · " + (Number(stats.total_marks ?? questions.reduce((sum, q) => sum + (Number(q.marks) || 0), 0))) + " total marks.";
   preview.hidden = false;
@@ -132,15 +147,17 @@ async function extractQuestions() {
       form_url: formUrl
     });
     const normalized = normalizeResult(result);
-    if (!normalized.questions.length) {
-      throw new Error("No supported questions were extracted. Check the form and its question types.");
+    if (!normalized.questions.length && !normalized.candidateFields.length) {
+      throw new Error("No supported MCQs or candidate identity fields were extracted. Check the Form question types and titles.");
     }
     extractedQuestions = normalized.questions;
     selectedExamId = examId;
     extractionFormUrl = formUrl;
-    renderPreview(normalized.questions, normalized.stats, normalized.form);
-    $("google-import-save").disabled = false;
-    setMessage("Extraction complete. Review every question and correct answer below before saving.", "success");
+    renderPreview(normalized.questions, normalized.stats, normalized.form, normalized.candidateFields);
+    $("google-import-save").disabled = normalized.questions.length === 0;
+    setMessage(normalized.questions.length
+      ? "Extraction complete. Review every question and correct answer below before saving."
+      : "Candidate identity fields were detected, but no MCQs were extracted. Add MCQs before saving questions.", "success");
   } catch (error) {
     setMessage(error.message, "error");
   } finally {
