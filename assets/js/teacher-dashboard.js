@@ -351,7 +351,7 @@ async function createExamination(event) {
   }
 
   button.disabled = true;
-  button.textContent = "Saving Draft…";
+  button.textContent = "Saving Examination…";
   feedback.textContent = "";
   feedback.classList.remove("success");
 
@@ -366,7 +366,7 @@ async function createExamination(event) {
       ends_at: endsAt ? endsAt.toISOString() : null
     };
     const result = await callTeacherService(payload);
-    feedback.textContent = result.message || "Examination draft created successfully.";
+    feedback.textContent = result.message || "Examination created successfully and is ready for question extraction.";
     feedback.classList.add("success");
     form.reset();
     $("exam-duration").value = "60";
@@ -381,7 +381,7 @@ async function createExamination(event) {
     feedback.classList.remove("success");
   } finally {
     button.disabled = false;
-    button.textContent = "Save Examination Draft";
+    button.textContent = "Save Examination";
   }
 }
 
