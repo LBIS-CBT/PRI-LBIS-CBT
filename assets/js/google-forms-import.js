@@ -41,10 +41,11 @@ function normalizeResult(result) {
   const stats = root?.extraction || root?.stats || root?.summary || root || {};
   const form = root?.google_form || root?.form || result?.form || {};
   const candidateFields = Array.isArray(root?.candidate_fields) ? root.candidate_fields : [];
-  return { questions, stats, form, candidateFields };
+  const textFields = Array.isArray(root?.text_fields) ? root.text_fields : [];
+  return { questions, stats, form, candidateFields, textFields };
 }
 
-function renderPreview(questions, stats, form, candidateFields = []) {
+function renderPreview(questions, stats, form, candidateFields = [], textFields = []) {
   const preview = $("google-import-preview");
   const list = $("google-import-question-list");
   const summary = $("google-import-summary");
@@ -55,14 +56,17 @@ function renderPreview(questions, stats, form, candidateFields = []) {
   const identityList = $("google-import-identity-list");
   if (identityPreview && identityList) {
     identityList.replaceChildren();
-    const labels = { full_name: "Candidate Full Name", admission_number: "Admission Number" };
-    candidateFields.forEach(field => {
+    const labels = { full_name: "Candidate Full Name", admission_number: "Admission Number", other: "Text field" };
+    const fieldsToShow = textFields.length ? textFields : candidateFields;
+    fieldsToShow.forEach(field => {
       const li = document.createElement("li");
-      li.textContent = (labels[field.key] || field.title || field.key) + " — " +
-        (field.title || "Untitled field") + " (" + (field.question_type || "TEXT") + ")";
+      const label = labels[field.key] || field.title || "Text field";
+      li.textContent = label + " — " + (field.title || "Untitled field") +
+        " (" + (field.question_type || "TEXT") + ")" +
+        (field.is_required ? " · Required" : " · Optional");
       identityList.appendChild(li);
     });
-    identityPreview.hidden = candidateFields.length === 0;
+    identityPreview.hidden = fieldsToShow.length === 0;
   }
   questions.forEach((question, index) => {
     const article = document.createElement("article");
@@ -95,7 +99,8 @@ function renderPreview(questions, stats, form, candidateFields = []) {
   summary.textContent = title +
     questions.length + " supported MCQ(s) · " +
     (Number(stats.total_form_items ?? questions.length)) + " total form item(s) · " +
-    (Number(stats.candidate_identity_field_count ?? candidateFields.length)) + " identity field(s) detected · " +
+    (Number(stats.candidate_identity_field_count ?? candidateFields.length)) + " candidate identity field(s) · " +
+    textFields.length + " text field(s) detected · " +
     (Number(stats.unsupported_question_count ?? stats.unsupported_items?.length ?? 0)) +
     " unsupported · " + (Number(stats.total_marks ?? questions.reduce((sum, q) => sum + (Number(q.marks) || 0), 0))) + " total marks.";
   preview.hidden = false;
@@ -147,13 +152,13 @@ async function extractQuestions() {
       form_url: formUrl
     });
     const normalized = normalizeResult(result);
-    if (!normalized.questions.length && !normalized.candidateFields.length) {
+    if (!normalized.questions.length && !normalized.candidateFields.length && !normalized.textFields.length) {
       throw new Error("No supported MCQs or candidate identity fields were extracted. Check the Form question types and titles.");
     }
     extractedQuestions = normalized.questions;
     selectedExamId = examId;
     extractionFormUrl = formUrl;
-    renderPreview(normalized.questions, normalized.stats, normalized.form, normalized.candidateFields);
+    renderPreview(normalized.questions, normalized.stats, normalized.form, normalized.candidateFields, normalized.textFields);
     $("google-import-save").disabled = normalized.questions.length === 0;
     setMessage(normalized.questions.length
       ? "Extraction complete. Review every question and correct answer below before saving."
