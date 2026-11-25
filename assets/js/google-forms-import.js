@@ -89,6 +89,7 @@ function renderPreview(questions, stats, form) {
 async function loadExamOptions() {
   const select = $("google-import-exam");
   if (!select) return;
+  const previousExamId = select.value;
   select.innerHTML = '<option value="">Loading your examinations…</option>';
   try {
     const result = await callFunction("teacher-examinations", { action: "list_teacher_examinations" });
@@ -101,6 +102,7 @@ async function loadExamOptions() {
         (exam.class?.name ? " · " + exam.class.name : "");
       select.appendChild(option);
     });
+    if (exams.some(exam => exam.id === previousExamId)) select.value = previousExamId;
     if (!exams.length) setMessage("No examinations found. Create an examination first.", "info");
   } catch (error) {
     select.innerHTML = '<option value="">Unable to load examinations</option>';
@@ -177,6 +179,7 @@ function init() {
   $("google-import-extract")?.addEventListener("click", extractQuestions);
   $("google-import-save")?.addEventListener("click", saveQuestions);
   $("google-import-refresh-exams")?.addEventListener("click", loadExamOptions);
+  window.addEventListener("lbis:refresh-google-import-exams", loadExamOptions);
   $("google-import-exam")?.addEventListener("change", () => {
     extractedQuestions = [];
     selectedExamId = "";
