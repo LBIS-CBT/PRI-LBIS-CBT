@@ -134,31 +134,61 @@ Deno.serve(async (req: Request) => {
     if (examIds.length) {
       const { data, error } = await db
         .from("exam_sessions")
-        .select("id, exam_id, status, started_at, deadline_at, submitted_at, answered_count, score")
+        .select("id, exam_id, status, attempt_number, started_at, deadline_at, submitted_at, answered_count, score")
         .eq("student_id", student.id)
         .in("exam_id", examIds);
       if (error) throw error;
       attempts = data || [];
     }
 
-    const attemptMap = new Map(attempts.map((attempt) => [attempt.exam_id, attempt]));
+    const attemptsByExam = new Map<string, any[]>();
+    for (const attempt of attempts) {
+      if (!attemptsByExam.has(attempt.exam_id)) attemptsByExam.set(attempt.exam_id, []);
+      attemptsByExam.get(attempt.exam_id)!.push(attempt);
+    }
+
+    let pendingAuthorizations: any[] = [];
+    if (examIds.length) {
+      const { data, error } = await db
+        .from("exam_retake_authorizations")
+        .select("id, exam_id, status, reason, authorized_at")
+        .eq("student_id", student.id)
+        .in("exam_id", examIds)
+        .eq("status", "pending");
+      if (error) throw error;
+      pendingAuthorizations = data || [];
+    }
+    const authorizationMap = new Map(pendingAuthorizations.map((item) => [item.exam_id, item]));
     const now = Date.now();
 
     const dashboardExaminations = examRows.map((exam) => {
-      const attempt = attemptMap.get(exam.id) || null;
+      const examAttempts = (attemptsByExam.get(exam.id) || []).sort(
+        (a, b) => Number(b.attempt_number || 0) - Number(a.attempt_number || 0),
+      );
+      const activeAttempt = examAttempts.find((item) => item.status === "in_progress") || null;
+      const latestAttempt = activeAttempt || examAttempts[0] || null;
+      const pendingAuthorization = authorizationMap.get(exam.id) || null;
       const start = exam.starts_at ? new Date(exam.starts_at).getTime() : null;
       const end = exam.ends_at ? new Date(exam.ends_at).getTime() : null;
+      const scheduleOpen = (start === null || now >= start) && (end === null || now < end);
       let availability = "unavailable";
       let availability_message = "This examination is not currently available.";
 
-      if (attempt?.status === "in_progress") {
+      if (activeAttempt) {
         availability = "resume";
         availability_message = "You have an examination session in progress.";
-      } else if (attempt) {
+      } else if (examAttempts.length > 0 && pendingAuthorization && exam.status === "active" &&
+        exam.accepts_new_candidates === true && scheduleOpen) {
+        availability = "retake_available";
+        availability_message = "The school has authorised one additional attempt for you. This approval can be used once.";
+      } else if (examAttempts.length > 0 && pendingAuthorization) {
+        availability = "retake_waiting";
+        availability_message = "A retake has been authorised, but the examination is not currently accepting candidates.";
+      } else if (examAttempts.length > 0) {
         availability = "attempted";
-        availability_message = attempt.status === "submitted"
-          ? "You have already submitted this examination."
-          : "Your examination attempt has ended.";
+        availability_message = latestAttempt?.status === "submitted"
+          ? "You have already submitted this examination. Further attempts require individual school approval."
+          : "Your previous examination attempt has ended. Contact the school if a retake is required.";
       } else if (exam.status === "completed") {
         availability = "closed";
         availability_message = "This examination has been completed.";
@@ -191,14 +221,29 @@ Deno.serve(async (req: Request) => {
         ends_at: exam.ends_at,
         total_marks: exam.total_marks,
         question_count: exam.extracted_question_count,
-        attempt: attempt ? {
-          id: attempt.id,
-          status: attempt.status,
-          started_at: attempt.started_at,
-          deadline_at: attempt.deadline_at,
-          submitted_at: attempt.submitted_at,
-          answered_count: attempt.answered_count,
-          score: attempt.score,
+        attempts_count: examAttempts.length,
+        attempts: examAttempts.map((item) => ({
+          attempt_number: item.attempt_number,
+          status: item.status,
+          started_at: item.started_at,
+          submitted_at: item.submitted_at,
+          score: item.score,
+          answered_count: item.answered_count,
+        })),
+        retake_authorization: pendingAuthorization ? {
+          id: pendingAuthorization.id,
+          authorized_at: pendingAuthorization.authorized_at,
+          reason: pendingAuthorization.reason,
+        } : null,
+        attempt: latestAttempt ? {
+          id: latestAttempt.id,
+          attempt_number: latestAttempt.attempt_number,
+          status: latestAttempt.status,
+          started_at: latestAttempt.started_at,
+          deadline_at: latestAttempt.deadline_at,
+          submitted_at: latestAttempt.submitted_at,
+          answered_count: latestAttempt.answered_count,
+          score: latestAttempt.score,
         } : null,
       };
     });
