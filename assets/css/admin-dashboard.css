@@ -228,3 +228,16 @@
   .form-grid { grid-template-columns: 1fr; }
   .student-pagination { flex-wrap: wrap; }
 }
+
+
+/* Examination management and candidate attempt history */
+.exam-management-card { margin-bottom: 28px; }
+.exam-candidate-heading { align-items: end; }
+.exam-select-label { display:flex; flex-direction:column; gap:7px; min-width:260px; color:#555158; font-size:12px; font-weight:700; }
+.exam-select-label select { min-height:40px; padding:8px 10px; border:1px solid #d9d6d9; border-radius:7px; background:#fff; color:var(--ink); font:inherit; }
+.exam-history-card { width:min(900px,calc(100vw - 40px)); max-height:85vh; overflow:auto; }
+.exam-auth-history { padding:9px 11px; border:1px solid var(--line); border-radius:6px; font-size:12px; color:var(--ink); }
+.exam-history-card h4 { margin:22px 0 10px; font-size:14px; }
+.exam-history-card .secondary-button { margin-right:6px; }
+.exam-candidate-heading .section-title { margin-bottom:0; }
+@media(max-width:650px){.exam-select-label{width:100%;min-width:0}.exam-history-card{width:calc(100vw - 24px)}}
