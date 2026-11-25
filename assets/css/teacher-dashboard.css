@@ -114,3 +114,9 @@
 .teacher-google-message{min-height:16px;margin:12px 0 0;color:#a3263e;font-size:11px;line-height:1.5}
 .teacher-extraction-next-step{margin-top:18px}
 @media(max-width:700px){.teacher-google-card__heading{align-items:flex-start;flex-direction:column}.teacher-google-connected{align-items:flex-start;flex-wrap:wrap}.teacher-google-connected>div{min-width:calc(100% - 48px)}}
+
+
+/* Safe examination deletion action */
+.teacher-delete-exam-button{min-height:32px;padding:0 11px;border:1px solid #e2bfc5;border-radius:6px;background:#fff7f7;color:#a3263e;font-size:11px;font-weight:800;cursor:pointer}
+.teacher-delete-exam-button:hover{border-color:#b94a5a;background:#fcebed}
+.teacher-delete-exam-button:disabled{opacity:.6;cursor:wait}
