@@ -42,14 +42,14 @@
     return Number.isNaN(date.getTime()) ? "Not specified" : date.toLocaleString();
   }
   function statusLabel(value) {
-    return ({available:"Available",resume:"In Progress",upcoming:"Upcoming",closed:"Closed",attempted:"Attempted",unavailable:"Unavailable"})[value] || "Unavailable";
+    return ({available:"Available",resume:"In Progress",retake_available:"Retake Approved",retake_waiting:"Retake Approved",upcoming:"Upcoming",closed:"Closed",attempted:"Attempted",unavailable:"Unavailable"})[value] || "Unavailable";
   }
   async function openExam(exam, button) {
     const token = getSession();
     if (!token) { signOut(); return; }
     button.disabled = true;
     const original = button.textContent;
-    button.textContent = exam.availability === "resume" ? "Resuming…" : "Preparing…";
+    button.textContent = exam.availability === "resume" ? "Resuming…" : (exam.availability === "retake_available" ? "Starting retake…" : "Preparing…");
     try {
       const response = await fetch(`${SUPABASE_URL}/functions/v1/student-exam-room`, {
         method: "POST",
@@ -94,7 +94,8 @@
     [
       `Duration: ${Number(exam.duration_minutes) || 0} minutes`,
       `Questions: ${Number(exam.question_count) || 0}`,
-      `Total marks: ${Number(exam.total_marks) || 0}`
+      `Total marks: ${Number(exam.total_marks) || 0}`,
+      `Attempts used: ${Number(exam.attempts_count) || 0}`
     ].forEach((value) => {
       const item = document.createElement("span");
       item.textContent = value;
@@ -107,11 +108,26 @@
     schedule.className = "exam-description";
     schedule.textContent = `Starts: ${safeDate(exam.starts_at)} · Ends: ${safeDate(exam.ends_at)}`;
     card.append(top, subject, meta, description, schedule);
+    if (exam.attempts_count > 0) {
+      const history = document.createElement("p");
+      history.className = "exam-description";
+      const latest = Array.isArray(exam.attempts) ? exam.attempts[0] : null;
+      history.textContent = latest
+        ? `Latest attempt: #${latest.attempt_number || 1} · ${String(latest.status || "ended").replaceAll("_", " ")}${latest.score !== null && latest.score !== undefined ? ` · Score: ${latest.score}` : ""}`
+        : `Previous attempts: ${exam.attempts_count}`;
+      card.appendChild(history);
+    }
+    if (exam.retake_authorization?.reason && exam.availability === "retake_available") {
+      const approval = document.createElement("p");
+      approval.className = "exam-description";
+      approval.textContent = "School approval: " + exam.retake_authorization.reason;
+      card.appendChild(approval);
+    }
 
     const button = document.createElement("button");
     button.type = "button";
-    button.textContent = exam.availability === "resume" ? "Resume Examination" : "Start Examination";
-    const canStart = ["available", "resume"].includes(exam.availability) && !!exam.id;
+    button.textContent = exam.availability === "resume" ? "Resume Examination" : (exam.availability === "retake_available" ? "Start Authorised Retake" : "Start Examination");
+    const canStart = ["available", "resume", "retake_available"].includes(exam.availability) && !!exam.id;
     button.disabled = !canStart;
     button.title = canStart ? "" : "This examination is not currently available.";
     button.setAttribute("aria-label", `${button.textContent}: ${exam.title || "examination"}`);
