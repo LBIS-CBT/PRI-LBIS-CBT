@@ -137,7 +137,7 @@ function renderExamCandidates(){
   const view=document.createElement("button");view.type="button";view.className="secondary-button";view.textContent="History";view.addEventListener("click",()=>showCandidateHistory(record));
   action.appendChild(view);
   if(pending){const revoke=document.createElement("button");revoke.type="button";revoke.className="secondary-button";revoke.textContent="Revoke";revoke.addEventListener("click",()=>revokeCandidateRetake(pending));action.appendChild(revoke);}
-  else if(attempts.length&&s.active!==false){const authorize=document.createElement("button");authorize.type="button";authorize.className="exam-action start";authorize.textContent="Authorise Retake";authorize.addEventListener("click",()=>authorizeCandidateRetake(s));action.appendChild(authorize);}
+  else if(attempts.length&&s.active!==false&&!attempts.some(a=>a.status==="in_progress")){const authorize=document.createElement("button");authorize.type="button";authorize.className="exam-action start";authorize.textContent="Authorise Retake";authorize.addEventListener("click",()=>authorizeCandidateRetake(s));action.appendChild(authorize);}
   [safeCell(name),safeCell(admission),safeCell(active),safeCell(attemptsText),safeCell(result),safeCell(approval),action].forEach(x=>tr.appendChild(x));body.appendChild(tr);
  });
 }
