@@ -36,7 +36,10 @@ function showPanel(name) {
   say("");
   if (name === "create-exam") loadClasses();
   if (name === "my-exams") loadExaminations();
-  if (name === "question-bank") loadGoogleConnectionStatus();
+  if (name === "question-bank") {
+    loadGoogleConnectionStatus();
+    window.dispatchEvent(new Event("lbis:refresh-google-import-exams"));
+  }
 }
 
 async function callTeacherService(payload) {
@@ -368,6 +371,7 @@ async function createExamination(event) {
     form.reset();
     $("exam-duration").value = "60";
     await loadExaminations();
+    window.dispatchEvent(new Event("lbis:refresh-google-import-exams"));
     const exam = result.examination;
     if (exam?.id) {
       showPanel("my-exams");
