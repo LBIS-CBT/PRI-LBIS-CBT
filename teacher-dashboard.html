@@ -48,7 +48,7 @@
    <div class="teacher-notice teacher-notice-info"><strong>Important</strong><p>Teachers prepare and publish examination content for review. Examination admission is controlled from the LBIS Administration Portal. Publishing an examination does not automatically open it to candidates.</p></div>
   </section>
   <section class="teacher-panel" id="teacher-panel-create-exam">
-   <div class="teacher-section-heading"><div><p class="teacher-eyebrow">EXAMINATION SETUP</p><h3>Create Examination</h3><p>Enter the details below to create a draft examination.</p></div></div>
+   <div class="teacher-section-heading"><div><p class="teacher-eyebrow">EXAMINATION SETUP</p><h3>Create Examination</h3><p>Enter the details below to create an examination ready for question extraction.</p></div></div>
    <form id="teacher-create-exam-form" class="teacher-form-card">
     <div class="teacher-form-grid">
      <label class="teacher-field teacher-field-wide">Examination title<input id="exam-title" name="title" type="text" maxlength="160" placeholder="e.g. First Term Mathematics Examination" required></label>
@@ -58,9 +58,9 @@
      <label class="teacher-field">Scheduled start (optional)<input id="exam-starts-at" name="starts_at" type="datetime-local"><small>Leave blank if the date has not been decided.</small></label>
      <label class="teacher-field">Scheduled end (optional)<input id="exam-ends-at" name="ends_at" type="datetime-local"><small>If supplied, the end must be after the start.</small></label>
     </div>
-    <div class="teacher-form-actions"><p id="teacher-create-message" class="teacher-form-message" role="status" aria-live="polite"></p><button id="teacher-create-submit" class="teacher-primary-button" type="submit">Save Examination Draft</button></div>
+    <div class="teacher-form-actions"><p id="teacher-create-message" class="teacher-form-message" role="status" aria-live="polite"></p><button id="teacher-create-submit" class="teacher-primary-button" type="submit">Save Examination</button></div>
    </form>
-   <div class="teacher-notice teacher-notice-info"><strong>Draft only</strong><p>Saving creates a draft. It does not publish, activate or open the examination to candidates. You will add and review the Google Forms questions in the next workflow stage.</p></div>
+   <div class="teacher-notice teacher-notice-info"><strong>Ready for question extraction</strong><p>Saving creates the examination with Ready status and adds it to your Extract Questions list. This does not publish, activate or open the examination to candidates. You can extract and review its questions in the next workflow stage.</p></div>
   </section>
   <section class="teacher-panel" id="teacher-panel-my-exams">
    <div class="teacher-section-heading teacher-section-heading-row"><div><p class="teacher-eyebrow">YOUR ASSESSMENTS</p><h3>My Examinations</h3><p>Only examinations created by your teacher account are shown here.</p></div><button id="teacher-refresh-exams" class="teacher-secondary-button" type="button">↻ Refresh List</button></div>
@@ -73,7 +73,7 @@
     <article><span>01</span><h4>Provide Google Form</h4><p>Paste the Google Forms link or Form ID for the examination.</p></article>
     <article><span>02</span><h4>Extract Questions</h4><p>The bridge reads supported single-answer MCQ items and identifies unsupported items.</p></article>
     <article><span>03</span><h4>Review Preview</h4><p>Check question text, answer choices, correct answers and marks before saving.</p></article>
-    <article><span>04</span><h4>Save or Publish</h4><p>Save a draft or publish the reviewed examination for administrator activation.</p></article>
+    <article><span>04</span><h4>Extract and Review</h4><p>Extract questions into the saved examination, review them, then submit it for administrator activation.</p></article>
    </div>
    <div class="teacher-notice teacher-notice-info"><strong>Review is mandatory</strong><p>Extracted questions will not be published automatically. The teacher must inspect the extraction preview first. The initial release supports single-correct-answer MCQs only.</p></div>
    <div class="teacher-google-card" aria-labelledby="google-connection-heading">
