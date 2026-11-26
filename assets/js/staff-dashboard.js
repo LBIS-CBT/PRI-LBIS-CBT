@@ -61,6 +61,11 @@
       return;
     }
 
+    if (profile.role !== "teacher") {
+      window.location.replace("admin-dashboard.html");
+      return;
+    }
+
     const displayName = profile.full_name || "Staff Member";
     const label = profile.role === "teacher" && profile.admin_level && profile.admin_level !== "none" ? "Teacher + " + (profile.admin_level === "super_admin" ? "Super Admin" : "Admin") : roleLabel(profile.role);
 
@@ -74,6 +79,7 @@
     const switchAdmin = document.getElementById("switch-admin-dashboard");
     if (profile.role === "teacher" && ["admin", "super_admin"].includes(profile.admin_level || "none")) {
       switchAdmin.hidden = false;
+      switchAdmin.textContent = profile.admin_level === "super_admin" ? "Switch to Super Admin Dashboard" : "Switch to Admin Dashboard";
       switchAdmin.addEventListener("click", () => window.location.assign("admin-dashboard.html"));
     }
     if (profile.role === "admin" || profile.role === "super_admin") {
