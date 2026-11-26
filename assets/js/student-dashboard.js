@@ -255,5 +255,16 @@
   resultsButton.addEventListener("click",()=>{resultsSection.hidden=!resultsSection.hidden;if(!resultsSection.hidden){resultsSection.scrollIntoView({behavior:"smooth",block:"start"});loadStudentResults();}});resultsRefresh.addEventListener("click",loadStudentResults);
   logoutButton.addEventListener("click", signOut);
   refreshButton.addEventListener("click", loadDashboard);
+
+  // A dashboard restored from browser history must still have a valid student token.
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) {
+      if (!getSession()) signOut();
+      else loadDashboard();
+    }
+  });
+  window.addEventListener("popstate", () => {
+    if (!getSession()) signOut();
+  });
   loadDashboard();
 })();
