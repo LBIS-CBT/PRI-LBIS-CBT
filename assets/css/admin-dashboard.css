@@ -269,3 +269,28 @@
   background-color: #f0b1bd !important;
 }
 .panel-view { background: transparent; }
+
+ 
+/* Neutral grey workspace and subtle depth for dashboard cards. */
+.admin-body,
+.admin-layout,
+.main-area,
+.content-area {
+  background-color: #aba6a7 !important;
+}
+.panel-view { background: transparent; }
+.stat-card,
+.table-card,
+.form-card,
+.security-note,
+.shortcut-card,
+.results-table-card,
+.results-detail-card,
+.results-release-control,
+.live-stat-grid,
+.live-table-card,
+.student-modal-card {
+  box-shadow: 0 5px 18px rgba(35, 29, 31, .12), 0 1px 3px rgba(35, 29, 31, .08) !important;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
