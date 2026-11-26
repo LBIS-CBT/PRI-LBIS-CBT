@@ -133,3 +133,13 @@
 
 /* Requested dashboard canvas colour */
 .teacher-body { background: #f0b1bd; }
+
+
+/* Lighten the full teacher workspace canvas; keep cards and sidebar unchanged. */
+.teacher-body,
+.teacher-layout,
+.teacher-main,
+.teacher-content {
+  background-color: #f0b1bd !important;
+}
+.teacher-panel { background: transparent; }
