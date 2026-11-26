@@ -407,3 +407,40 @@ body.admin-body #admin-layout .content-area .security-note,
 body.admin-body #admin-layout .content-area .shortcut-card{
   color:#292629;
 }
+
+
+/* High-contrast text for the dark-grey administrative workspace canvas.
+   White cards, tables, forms, and their controls retain dark readable text. */
+body.admin-body #admin-layout .content-area,
+body.admin-body #admin-layout .content-area .panel-view {
+  color: #fff !important;
+}
+body.admin-body #admin-layout .content-area .welcome-row h2,
+body.admin-body #admin-layout .content-area .welcome-row p,
+body.admin-body #admin-layout .content-area .section-title h3,
+body.admin-body #admin-layout .content-area .section-title p,
+body.admin-body #admin-layout .content-area .section-title .form-help,
+body.admin-body #admin-layout .content-area .panel-view > h2,
+body.admin-body #admin-layout .content-area .panel-view > h3,
+body.admin-body #admin-layout .content-area .panel-view > p,
+body.admin-body #admin-layout .content-area .panel-view > label,
+body.admin-body #admin-layout .content-area .panel-view > .form-help {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+}
+body.admin-body #admin-layout .content-area .table-card,
+body.admin-body #admin-layout .content-area .form-card,
+body.admin-body #admin-layout .content-area .stat-card,
+body.admin-body #admin-layout .content-area .security-note,
+body.admin-body #admin-layout .content-area .shortcut-card,
+body.admin-body #admin-layout .content-area .student-modal-card {
+  color: #292629 !important;
+}
+body.admin-body #admin-layout .content-area .table-card *,
+body.admin-body #admin-layout .content-area .form-card *,
+body.admin-body #admin-layout .content-area .stat-card *,
+body.admin-body #admin-layout .content-area .security-note *,
+body.admin-body #admin-layout .content-area .shortcut-card *,
+body.admin-body #admin-layout .content-area .student-modal-card * {
+  -webkit-text-fill-color: currentColor;
+}
