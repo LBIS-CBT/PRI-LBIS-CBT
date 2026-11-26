@@ -326,3 +326,20 @@ body.admin-body .content-area .panel-heading p {
 body.admin-body .content-area > .welcome-row .eyebrow {
   color: #f2c5d2 !important;
 }
+
+
+/* Definitive text contrast override for the dark Admin Dashboard workspace.
+   Scope is limited to headings and descriptions outside white cards. */
+body.admin-body #admin-layout .content-area .welcome-row .eyebrow,
+body.admin-body #admin-layout .content-area .welcome-row h2,
+body.admin-body #admin-layout .content-area .welcome-row h2 span,
+body.admin-body #admin-layout .content-area .welcome-row p:not(.eyebrow),
+body.admin-body #admin-layout .content-area .panel-view .section-title h3,
+body.admin-body #admin-layout .content-area .panel-view .section-title p,
+body.admin-body #admin-layout .content-area .panel-view > .panel-heading h2,
+body.admin-body #admin-layout .content-area .panel-view > .panel-heading h3,
+body.admin-body #admin-layout .content-area .panel-view > .panel-heading p {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+}
