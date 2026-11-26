@@ -333,3 +333,27 @@
   .dashboard-header .header-actions{gap:9px}
   .dashboard-header .connection-indicator{display:none}
 }
+
+
+/* Combined Teacher + Admin workspace actions. */
+.workspace-card .card-action{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:auto;
+  min-height:36px;
+  margin:2px 0 0;
+  padding:8px 13px;
+  border:1px solid #781d37;
+  border-radius:7px;
+  background:#781d37;
+  color:#fff;
+  font-size:11px;
+  font-weight:700;
+  cursor:pointer;
+}
+.workspace-card .card-action:hover{background:#591326;border-color:#591326}
+.workspace-card .card-action[hidden]{display:none!important}
+.workspace-card .card-status{display:block;margin:0 0 10px;color:#781d37}
+.workspace-card p{color:#555158}
+.workspace-card h3{color:#292629}
