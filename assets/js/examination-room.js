@@ -121,8 +121,9 @@
     if (phase === "theory") {
       layout.hidden = true;
       ui.theoryStage.hidden = false;
-      ui.theoryHeading.textContent = "THEORY QUESTIONS";
+      ui.theoryHeading.textContent = theoryQuestions.length ? "THEORY QUESTIONS" : "EXAMINATION COMPLETE";
       ui.theoryList.replaceChildren();
+      if (!theoryQuestions.length) { const note = document.createElement("p"); note.className = "theory-stage-heading"; note.textContent = "You have completed all objective questions. You may now submit your examination."; ui.theoryList.appendChild(note); }
       theoryQuestions.forEach((q, i) => {
         const article = document.createElement("article");
         article.className = "theory-question-card";
@@ -366,7 +367,7 @@
       const savedIndex = objectiveQuestions.findIndex(q => q.id === preferred);
       currentIndex = savedIndex >= 0 ? savedIndex : 0;
       const allMcqsAnswered = objectiveQuestions.every(q => answers.has(q.id));
-      phase = (objectiveQuestions.length === 0 || allMcqsAnswered) && theoryQuestions.length > 0 ? "theory" : "mcq";
+      phase = objectiveQuestions.length === 0 || allMcqsAnswered ? "theory" : "mcq";
       deadlineMs = data.session.deadline_at ? Date.parse(data.session.deadline_at) : null;
       updateClock(data.server_time);
       const candidateName = document.getElementById("candidate-full-name");
