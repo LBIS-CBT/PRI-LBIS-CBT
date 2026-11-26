@@ -395,7 +395,9 @@
 
   ui.previous.addEventListener("click", () => goToQuestion(currentIndex - 1));
   ui.next.addEventListener("click", () => {
-    if (currentIndex < questions.length - 1) goToQuestion(currentIndex + 1);
+    if (phase !== "mcq") return;
+    if (currentIndex < objectiveQuestions.length - 1) goToQuestion(currentIndex + 1);
+    else continueFromMcq();
   });
   ui.submit.addEventListener("click", askSubmit);
   ui.confirm.addEventListener("click", () => submitNow(false));
