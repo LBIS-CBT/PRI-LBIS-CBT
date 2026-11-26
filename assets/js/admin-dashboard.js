@@ -537,7 +537,20 @@ $("refresh-live").addEventListener("click",loadLiveCandidates);
 $("live-search").addEventListener("input",renderLiveCandidates);
 $("live-exam-filter").addEventListener("change",renderLiveCandidates);
 setInterval(()=>{if(context&&$("panel-live-candidates").classList.contains("active"))loadLiveCandidates();},15000);
-$("sign-out-button").addEventListener("click",async()=>{const b=$("sign-out-button");b.disabled=true;b.textContent="Signing out…";const {error}=await window.supabaseClient.auth.signOut();if(error){b.disabled=false;b.textContent="↪  Sign Out";setNotice("Unable to sign out. Please retry.");return;}sessionStorage.removeItem("lbis_staff_profile");location.replace("admin-login.html");});
+$("sign-out-button").addEventListener("click",async()=>{
+ const b=$("sign-out-button");b.disabled=true;b.textContent="Signing out…";
+ try{
+  const {error}=await window.supabaseClient.auth.signOut({scope:"global"});
+  if(error)throw error;
+  sessionStorage.removeItem("lbis_staff_profile");
+  sessionStorage.removeItem("lbis_last_dashboard");
+  location.replace("admin-login.html");
+ }catch(error){
+  console.error("LBIS administrator sign-out failed:",error);
+  b.disabled=false;b.textContent="↪  Sign Out";
+  setNotice("Unable to sign out. Please retry.");
+ }
+});
 // Results Centre
 let resultsExams=[],resultsRows=[];const rb=$("results-body"),rs=$("results-exam-select");
 function updateResultsReleaseControl(){const exam=resultsExams.find(x=>x.id===rs.value),status=$("results-release-status"),button=$("results-release-toggle");if(!exam){status.textContent="Select an examination to manage parent/student viewing.";button.disabled=true;button.textContent="Release Results";return;}status.textContent=exam.results_released?"Results are RELEASED. Students and parents can view submitted results.":"Results are LOCKED. Students and parents cannot view results yet.";button.disabled=false;button.textContent=exam.results_released?"Lock Results":"Release Results";}
@@ -558,5 +571,15 @@ function showResult(r){$("results-detail-modal").dataset.resultId=r.id;let s=r.s
 rs.addEventListener("change",e=>{updateResultsReleaseControl();loadResultRows(e.target.value);});$("results-release-toggle").addEventListener("click",toggleResultsRelease);$("results-search").addEventListener("input",renderResults);$("results-attempt-filter").addEventListener("change",renderResults);$("results-refresh").addEventListener("click",loadResultsExams);$("results-detail-close").addEventListener("click",()=>$("results-detail-modal").hidden=true);$("results-detail-modal").addEventListener("click",e=>{if(e.target===$("results-detail-modal"))$("results-detail-modal").hidden=true;});
 
 session().then(v=>{context=v;if(context)loadExaminations();}).catch(e=>{console.error(e);setNotice("Dashboard initialization failed. Reload the page.");});
+window.addEventListener("pageshow",event=>{
+ if(event.persisted){
+  session().then(v=>{context=v;if(context)loadExaminations();}).catch(()=>location.replace("admin-login.html"));
+ }
+});
+window.addEventListener("popstate",()=>{
+ window.supabaseClient?.auth.getSession().then(({data,error})=>{
+  if(error||!data?.session)location.replace("admin-login.html");
+ }).catch(()=>location.replace("admin-login.html"));
+});
 $("refresh-examinations").addEventListener("click",loadExaminations);
 })();
