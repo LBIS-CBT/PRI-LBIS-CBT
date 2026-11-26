@@ -143,3 +143,27 @@
   background-color: #f0b1bd !important;
 }
 .teacher-panel { background: transparent; }
+
+ 
+/* Neutral grey workspace and subtle depth for dashboard cards. */
+.teacher-body,
+.teacher-layout,
+.teacher-main,
+.teacher-content {
+  background-color: #aba6a7 !important;
+}
+.teacher-panel { background: transparent; }
+.teacher-info-card,
+.teacher-action-card,
+.teacher-table-card,
+.teacher-form-card,
+.teacher-google-card,
+.teacher-empty-state,
+.teacher-results-filter-card,
+.teacher-results-stat-grid article,
+.teacher-result-modal-card,
+.teacher-result-question {
+  box-shadow: 0 5px 18px rgba(35, 29, 31, .12), 0 1px 3px rgba(35, 29, 31, .08) !important;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
