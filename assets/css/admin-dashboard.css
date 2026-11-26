@@ -307,3 +307,22 @@ body.admin-body #admin-layout .content-area {
 body.admin-body #admin-layout .content-area .panel-view {
   background: transparent !important;
 }
+
+
+/* Improve contrast for headings and supporting text on the dark admin workspace.
+   White card typography remains dark for readability. */
+body.admin-body .content-area > .welcome-row h2,
+body.admin-body .content-area > .welcome-row > div > p:not(.eyebrow),
+body.admin-body .content-area .section-title h3,
+body.admin-body .content-area .section-title p,
+body.admin-body .content-area .panel-view > h2,
+body.admin-body .content-area .panel-view > h3,
+body.admin-body .content-area .panel-view > p,
+body.admin-body .content-area .panel-heading h2,
+body.admin-body .content-area .panel-heading h3,
+body.admin-body .content-area .panel-heading p {
+  color: #ffffff !important;
+}
+body.admin-body .content-area > .welcome-row .eyebrow {
+  color: #f2c5d2 !important;
+}
