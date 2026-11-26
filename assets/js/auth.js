@@ -83,13 +83,14 @@
         id: staff.id,
         full_name: staff.full_name,
         staff_code: staff.staff_code,
-        role: staff.role
+        role: staff.role,
+        admin_level: staff.admin_level || "none"
       }));
 
       return {
         success: true,
         staff,
-        redirectUrl: staff.role === "teacher" ? "teacher-dashboard.html" : "admin-dashboard.html"
+        redirectUrl: staff.role === "teacher" && role !== "admin" ? "teacher-dashboard.html" : "admin-dashboard.html"
       };
     } catch (error) {
       return {
