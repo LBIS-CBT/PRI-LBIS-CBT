@@ -286,7 +286,7 @@
     ui.cancel.disabled = true;
     try {
       await saving;
-      const data = await api("submit");
+      const data = await api("submit", {automatic:isAutomatic});
       finished = true;
       clearInterval(timerHandle);
       clearInterval(heartbeatHandle);
