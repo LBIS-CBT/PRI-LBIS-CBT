@@ -24,7 +24,7 @@
   let questions = [];
   let answers = new Map();
   let currentIndex = 0;
-  let deadlineMs = 0;
+  let deadlineMs = null;
   let serverOffsetMs = 0;
   let timerHandle = null;
   let heartbeatHandle = null;
@@ -198,7 +198,7 @@
     try {
       const data = await api("heartbeat");
       updateClock(data.server_time);
-      deadlineMs = Date.parse(data.deadline_at);
+      deadlineMs = data.deadline_at ? Date.parse(data.deadline_at) : null;
       lastHeartbeat = Date.now();
       updateProgress();
     } catch (error) {
@@ -319,7 +319,7 @@
       const preferred = data.session.current_question_id;
       const savedIndex = questions.findIndex((q) => q.id === preferred);
       currentIndex = savedIndex >= 0 ? savedIndex : 0;
-      deadlineMs = Date.parse(data.session.deadline_at);
+      deadlineMs = data.session.deadline_at ? Date.parse(data.session.deadline_at) : null;
       updateClock(data.server_time);
       const candidateName = document.getElementById("candidate-full-name");
       const candidateAdmission = document.getElementById("candidate-admission-number");
@@ -335,7 +335,7 @@
       startClock();
       heartbeatHandle = setInterval(heartbeat, 25000);
       lastHeartbeat = Date.now();
-      if (deadlineMs <= serverNow()) {
+      if (deadlineMs !== null && deadlineMs <= serverNow()) {
         await autoSubmit("Your examination time has ended. Submitting your saved answers.");
       }
     } catch (error) {
