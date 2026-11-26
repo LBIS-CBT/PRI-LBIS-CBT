@@ -45,7 +45,7 @@
 
     const { data: profile, error: profileError } = await window.supabaseClient
       .from("user_profiles")
-      .select("id, full_name, staff_code, role, active")
+      .select("id, full_name, staff_code, role, admin_level, active")
       .eq("id", sessionData.session.user.id)
       .single();
 
@@ -62,7 +62,7 @@
     }
 
     const displayName = profile.full_name || "Staff Member";
-    const label = roleLabel(profile.role);
+    const label = profile.role === "teacher" && profile.admin_level && profile.admin_level !== "none" ? "Teacher + " + (profile.admin_level === "super_admin" ? "Super Admin" : "Admin") : roleLabel(profile.role);
 
     document.getElementById("staff-name").textContent = displayName;
     document.getElementById("staff-code").textContent = profile.staff_code || "—";
@@ -71,6 +71,11 @@
     document.getElementById("account-status").textContent = "Active";
 
     const staffManagementCard = document.getElementById("staff-management-card");
+    const switchAdmin = document.getElementById("switch-admin-dashboard");
+    if (profile.role === "teacher" && ["admin", "super_admin"].includes(profile.admin_level || "none")) {
+      switchAdmin.hidden = false;
+      switchAdmin.addEventListener("click", () => window.location.assign("admin-dashboard.html"));
+    }
     if (profile.role === "admin" || profile.role === "super_admin") {
       document.getElementById("workspace-title").textContent =
         profile.role === "super_admin" ? "Super Admin Workspace" : "Admin Workspace";
