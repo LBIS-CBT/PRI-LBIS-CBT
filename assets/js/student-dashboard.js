@@ -16,6 +16,7 @@
   const listEl = document.getElementById("examination-list");
   const refreshButton = document.getElementById("refresh-examinations");
   const logoutButton = document.getElementById("student-logout");
+  const resultsButton=document.getElementById("student-results-button");const resultsSection=document.getElementById("student-results-section");const resultsMessage=document.getElementById("student-results-message");const resultsList=document.getElementById("student-results-list");const resultsRefresh=document.getElementById("student-results-refresh");let releasedResults=[];
 
   function clearSession() {
     [tokenKey, expiryKey, profileKey, activeExamKey, "lbis_active_exam_session_id"]
@@ -135,6 +136,8 @@
     card.appendChild(button);
     return card;
   }
+  function renderStudentResults(){resultsList.replaceChildren();if(!releasedResults.length){resultsMessage.textContent="No results have been released by the school yet. Please check again later.";resultsMessage.hidden=false;return;}resultsMessage.textContent="The following subject results have been officially released by the school.";resultsMessage.hidden=false;releasedResults.forEach(result=>{const card=document.createElement("article");card.className="student-result-card";const head=document.createElement("div");head.className="student-result-card-head";const title=document.createElement("h3");title.textContent=result.subject||result.title||"Examination";const status=document.createElement("span");status.className="student-result-published";status.textContent="PUBLISHED";head.append(title,status);const exam=document.createElement("p");exam.textContent=result.title||"";const stats=document.createElement("div");stats.className="student-result-stats";[["Score",String(result.score)+" / "+String(result.total_marks)],["Percentage",result.percentage==null?"—":Number(result.percentage).toFixed(1)+"%"],["Attempt","Attempt "+result.attempt_number]].forEach(([label,value])=>{const item=document.createElement("div"),small=document.createElement("span"),strong=document.createElement("strong");small.textContent=label;strong.textContent=value;item.append(small,strong);stats.append(item);});const submitted=document.createElement("p");submitted.className="student-result-date";submitted.textContent="Submitted: "+safeDate(result.submitted_at);card.append(head,exam,stats,submitted);resultsList.appendChild(card);});}
+  async function loadStudentResults(){const token=getSession();if(!token){signOut();return;}resultsRefresh.disabled=true;resultsRefresh.textContent="Loading…";try{const response=await fetch(`${SUPABASE_URL}/functions/v1/student-dashboard`,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_PUBLISHABLE_KEY,"Authorization":`Bearer ${token}`},body:JSON.stringify({action:"load_dashboard"}),cache:"no-store"});const data=await response.json().catch(()=>({}));if(response.status===401){signOut();return;}if(!response.ok||data.success!==true)throw new Error(data.message||"Results could not be loaded.");releasedResults=Array.isArray(data.released_results)?data.released_results:[];renderStudentResults();}catch(error){resultsMessage.textContent=error.message||"Unable to load results.";resultsMessage.className="dashboard-message error";}finally{resultsRefresh.disabled=false;resultsRefresh.textContent="Refresh Results";}}
   async function loadDashboard() {
     const token = getSession();
     if (!token) { signOut(); return; }
@@ -169,6 +172,7 @@
       refreshButton.textContent = "Refresh";
     }
   }
+  resultsButton.addEventListener("click",()=>{resultsSection.hidden=!resultsSection.hidden;if(!resultsSection.hidden){resultsSection.scrollIntoView({behavior:"smooth",block:"start"});loadStudentResults();}});resultsRefresh.addEventListener("click",loadStudentResults);
   logoutButton.addEventListener("click", signOut);
   refreshButton.addEventListener("click", loadDashboard);
   loadDashboard();
