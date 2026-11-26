@@ -367,3 +367,7 @@ body.admin-body #admin-layout .content-area > .panel-view > h3 {
   -webkit-text-fill-color:#fff!important;
   opacity:1!important;
 }
+
+
+/* Super Admin staff role promotion controls. */
+.teacher-role-form{margin-top:18px;padding:16px;border:1px solid var(--line);border-left:4px solid var(--lbis-maroon);border-radius:9px;background:#faf7f8}.teacher-role-form h4{margin:0 0 8px;color:var(--ink);font-size:14px}.teacher-role-form p{margin:0 0 12px}.teacher-role-form label{display:flex;flex-direction:column;gap:7px;margin-bottom:12px;color:#555158;font-size:12px;font-weight:700}.teacher-role-form select{min-height:42px;padding:9px 11px;border:1px solid #d9d6d9;border-radius:7px;background:#fff;color:var(--ink);font:inherit}.role-change-button{border-color:#c9aab4;color:var(--lbis-maroon);font-weight:700}
