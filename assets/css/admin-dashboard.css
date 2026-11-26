@@ -343,3 +343,27 @@ body.admin-body #admin-layout .content-area .panel-view > .panel-heading p {
   -webkit-text-fill-color: #ffffff !important;
   opacity: 1 !important;
 }
+
+
+/* Permanent delete actions in student and teacher management tables. */
+.delete-record-button{background:#fff0f1!important;color:#a32235!important;border:1px solid #edc5ca!important}
+.delete-record-button:hover{background:#fbdfe3!important;border-color:#d99aa4!important}
+.student-table-card td:last-child button,.teacher-table-card td:last-child button{margin:2px}
+
+/* Make all descriptive headings on the charcoal admin target canvas readable.
+   White cards and tables retain their own dark typography. */
+body.admin-body #admin-layout .content-area > .welcome-row .eyebrow,
+body.admin-body #admin-layout .content-area > .welcome-row h2,
+body.admin-body #admin-layout .content-area > .welcome-row h2 span,
+body.admin-body #admin-layout .content-area > .welcome-row > div > p:not(.eyebrow),
+body.admin-body #admin-layout .content-area > .panel-view > .section-title h3,
+body.admin-body #admin-layout .content-area > .panel-view > .section-title p,
+body.admin-body #admin-layout .content-area > .panel-view > .section-title .form-help,
+body.admin-body #admin-layout .content-area > .panel-view > .section-title .empty-state,
+body.admin-body #admin-layout .content-area > .panel-view > p:not(.form-help),
+body.admin-body #admin-layout .content-area > .panel-view > h2,
+body.admin-body #admin-layout .content-area > .panel-view > h3 {
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+  opacity:1!important;
+}
