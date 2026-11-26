@@ -18,6 +18,13 @@
     message.dataset.state = type;
   }
 
+  const existingToken = sessionStorage.getItem("lbis_student_session_token");
+  const existingExpiry = sessionStorage.getItem("lbis_student_session_expires_at");
+  if (existingToken && existingExpiry && Date.parse(existingExpiry) > Date.now()) {
+    window.location.replace("student-dashboard.html");
+    return;
+  }
+
   function clearStudentSession() {
     sessionStorage.removeItem("lbis_student_session_token");
     sessionStorage.removeItem("lbis_student_session_expires_at");
