@@ -286,3 +286,7 @@
   .dashboard-header { padding: 12px 16px; }
   .dashboard-main { width: calc(100% - 32px); }
 }
+
+
+/* Dashboard switcher for staff with administrative access. */
+.switch-dashboard-button{width:auto;min-height:38px;padding:8px 13px;border:1px solid rgba(255,255,255,.75);border-radius:7px;background:#fff;color:#64172d;font-size:12px;font-weight:700;cursor:pointer}.switch-dashboard-button:hover{background:#f7edf0}
