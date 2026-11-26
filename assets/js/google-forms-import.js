@@ -75,29 +75,38 @@ function renderPreview(questions, stats, form, candidateFields = [], textFields 
     heading.textContent = (index + 1) + ". " + (question.question_text || "Untitled question");
     article.appendChild(heading);
 
-    const options = document.createElement("ol");
-    options.type = "A";
-    (Array.isArray(question.options) ? question.options : []).forEach((option, optionIndex) => {
-      const item = document.createElement("li");
-      item.textContent = String(option);
-      if (optionIndex === Number(question.correct_option_index)) {
-        item.className = "correct-answer";
-        item.append(" — Correct answer");
-      }
-      options.appendChild(item);
-    });
-    article.appendChild(options);
+    const isTheoryMcq = Array.isArray(question.options) && question.options.length === 1;
+    if (isTheoryMcq) {
+      const theoryNote = document.createElement("p");
+      theoryNote.className = "google-import-question-meta";
+      theoryNote.textContent = "MCQ — THEORY · No answer option will be shown to students · 0 CBT marks";
+      article.appendChild(theoryNote);
+    } else {
+      const options = document.createElement("ol");
+      options.type = "A";
+      (Array.isArray(question.options) ? question.options : []).forEach((option, optionIndex) => {
+        const item = document.createElement("li");
+        item.textContent = String(option);
+        if (optionIndex === Number(question.correct_option_index)) {
+          item.className = "correct-answer";
+          item.append(" — Correct answer");
+        }
+        options.appendChild(item);
+      });
+      article.appendChild(options);
 
-    const meta = document.createElement("p");
-    meta.className = "google-import-question-meta";
-    meta.textContent = (Number(question.marks) || 0) + " mark(s)";
-    article.appendChild(meta);
+      const meta = document.createElement("p");
+      meta.className = "google-import-question-meta";
+      meta.textContent = (Number(question.marks) || 0) + " mark(s)";
+      article.appendChild(meta);
+    }
     list.appendChild(article);
   });
 
   const title = form.title ? "Form: " + form.title + " · " : "";
   summary.textContent = title +
-    questions.length + " supported MCQ(s) · " +
+    questions.length + " supported MCQ(s), including " +
+    questions.filter(q => Array.isArray(q.options) && q.options.length === 1).length + " theory · " +
     (Number(stats.total_form_items ?? questions.length)) + " total form item(s) · " +
     (Number(stats.candidate_identity_field_count ?? candidateFields.length)) + " candidate identity field(s) · " +
     textFields.length + " text field(s) detected · " +
