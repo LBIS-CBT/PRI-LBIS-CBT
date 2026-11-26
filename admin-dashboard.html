@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#64172d"><title>LBIS CBT | Administration</title>
-<link rel="stylesheet" href="assets/css/app.css?v=20261124-brand3"><link rel="stylesheet" href="assets/css/admin-dashboard.css?v=20261126-role1">
+<link rel="stylesheet" href="assets/css/app.css?v=20261124-brand3"><link rel="stylesheet" href="assets/css/admin-dashboard.css?v=20261126-dualrole1">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/js/auth.js?v=20261124-2" defer></script><script src="assets/js/admin-dashboard.js?v=20261126-role1" defer></script>
+<script src="assets/js/auth.js?v=20261124-2" defer></script><script src="assets/js/admin-dashboard.js?v=20261126-dualrole1" defer></script>
 </head>
 <body class="admin-body">
 <div id="unsupported-device" class="device-message" role="alert" hidden><div class="device-message__panel"><h1>Device not supported</h1><p>LBIS CBT is designed for laptops, desktop computers and tablets. Please access the system using a supported device.</p></div></div>
@@ -34,7 +34,7 @@
  <div class="sidebar-bottom"><button id="sign-out-button" class="logout-button">↪ &nbsp; Sign Out</button></div>
 </aside>
 <main class="main-area">
- <header class="topbar"><div><span class="topbar-label">LEAD BRITISH INTERNATIONAL SCHOOL</span><h1 id="page-title">Dashboard</h1></div><div class="topbar-user"><span class="online-dot"></span><span id="top-user">Loading account…</span><span class="avatar" id="user-initials">LB</span></div></header>
+ <header class="topbar"><div><span class="topbar-label">LEAD BRITISH INTERNATIONAL SCHOOL</span><h1 id="page-title">Dashboard</h1></div><div class="topbar-user"><button id="switch-teacher-dashboard" class="secondary-button dashboard-switch-button" type="button" hidden>Switch to Teacher Dashboard</button><span class="online-dot"></span><span id="top-user">Loading account…</span><span class="avatar" id="user-initials">LB</span></div></header>
  <section class="content-area">
   <div class="welcome-row"><div><p class="eyebrow" style="color:#ffffff !important;-webkit-text-fill-color:#ffffff !important;">ADMINISTRATIVE WORKSPACE</p><h2 style="color:#ffffff !important;-webkit-text-fill-color:#ffffff !important;">Welcome, <span id="staff-name" style="color:#ffffff !important;-webkit-text-fill-color:#ffffff !important;">…</span></h2><p style="color:#ffffff !important;-webkit-text-fill-color:#ffffff !important;">Manage staff, examinations and candidate activity from one place.</p></div><span class="role-pill" id="staff-role">Verifying access</span></div>
   <div id="dashboard-message" class="notice" role="status" aria-live="polite"></div>
@@ -115,9 +115,9 @@
     <form id="teacher-reset-form" class="teacher-reset-form"><label>New temporary password<input name="password" type="password" minlength="12" required autocomplete="new-password" placeholder="At least 12 characters"></label><button class="secondary-button" id="reset-teacher-password" type="submit">Reset Password</button><p class="form-help">Existing passwords cannot be viewed. This action sets a new password.</p></form>
     <form id="teacher-role-form" class="teacher-role-form" hidden>
      <h4>Staff Role Management</h4>
-     <p class="form-help">Promote this existing account to Admin or Super Admin. Login credentials, staff code and examination history will remain unchanged. Only an active Super Admin can perform this action.</p>
-     <label>New role<select name="role" required><option value="admin">Admin</option><option value="super_admin">Super Admin</option></select></label>
-     <button class="primary-button" id="save-teacher-role" type="submit">Confirm Role Change</button>
+     <p class="form-help">Grant or remove administrative access for this existing teacher account. The Teacher role, teaching assignments, login credentials and examination history remain unchanged. Only an active Super Admin can perform this action.</p>
+     <label>Administrative access<select name="admin_level" required><option value="none">No administrative access</option><option value="admin">Admin</option><option value="super_admin">Super Admin</option></select></label>
+     <button class="primary-button" id="save-teacher-role" type="submit">Save Administrative Access</button>
     </form>
    </div></div>
   </section>
