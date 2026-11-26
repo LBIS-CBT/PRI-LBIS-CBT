@@ -114,7 +114,7 @@
       history.className = "exam-description";
       const latest = Array.isArray(exam.attempts) ? exam.attempts[0] : null;
       history.textContent = latest
-        ? `Latest attempt: #${latest.attempt_number || 1} · ${String(latest.status || "ended").replaceAll("_", " ")}${latest.score !== null && latest.score !== undefined ? ` · Score: ${latest.score}` : ""}`
+        ? `Latest attempt: #${latest.attempt_number || 1} · ${String(latest.status || "ended").replaceAll("_", " ")}`
         : `Previous attempts: ${exam.attempts_count}`;
       card.appendChild(history);
     }
