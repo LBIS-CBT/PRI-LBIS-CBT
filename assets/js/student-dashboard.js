@@ -136,73 +136,76 @@
     card.appendChild(button);
     return card;
   }
+  let openedResultId=null;
+  function escapeReport(value){
+    return String(value??"—").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+  function buildStudentResultReport(result){
+    const questions=Array.isArray(result.questions)?result.questions:[];
+    const rows=questions.map((q,i)=>'<tr><td>'+(i+1)+'</td><td>'+escapeReport(q.question_text)+'</td><td>'+escapeReport(q.selected_answer??"Not answered")+'</td><td>'+escapeReport(q.correct_answer??"Not available")+'</td><td>'+escapeReport(q.response_status==="correct"?"Correct":q.response_status==="incorrect"?"Incorrect":"Not answered")+'</td><td>'+escapeReport(q.marks_awarded??0)+' / '+escapeReport(q.marks??0)+'</td></tr>').join("");
+    return '<!doctype html><html><head><meta charset="utf-8"><title>LBIS Result - '+escapeReport(result.subject||result.title)+'</title><style>body{font-family:Arial,sans-serif;color:#20232a;margin:28px;font-size:12px;line-height:1.5}header{background:#781d37;color:#fff;padding:22px;text-align:center}h1{font-size:20px;margin:0 0 5px}.sub{font-size:12px}.summary{display:flex;gap:12px;margin:18px 0}.summary div{flex:1;border:1px solid #ddd;padding:12px;border-radius:7px}.summary b{display:block;font-size:17px;margin-top:4px}table{width:100%;border-collapse:collapse;margin-top:12px}th,td{border:1px solid #d8d8d8;padding:8px;text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#302d2e;color:#fff}tr:nth-child(even){background:#f7f7f7}.footer{margin-top:24px;border-top:1px solid #ddd;padding-top:10px;color:#666;font-size:10px}@page{size:A4;margin:14mm}@media print{body{margin:0}thead{display:table-header-group}tr{break-inside:avoid}}</style></head><body><header><h1>LEAD BRITISH INTERNATIONAL SCHOOL</h1><div class="sub">CONFIDENTIAL STUDENT EXAMINATION RESULT</div></header><h2>'+escapeReport(result.subject||result.title||"Examination")+'</h2><p>'+escapeReport(result.title||"")+' | Attempt '+escapeReport(result.attempt_number)+' | Submitted: '+escapeReport(safeDate(result.submitted_at))+'</p><div class="summary"><div>Score<b>'+escapeReport(result.score)+' / '+escapeReport(result.total_marks)+'</b></div><div>Percentage<b>'+escapeReport(result.percentage==null?"—":Number(result.percentage).toFixed(1)+"%")+'</b></div></div><h3>Question and Answer Review</h3><table><thead><tr><th>#</th><th>Question</th><th>Student Response</th><th>Correct Answer</th><th>Outcome</th><th>Marks</th></tr></thead><tbody>'+rows+'</tbody></table><div class="footer">Confidential Student Record • Designed by TUPS Technologies</div></body></html>';
+  }
+  function openStudentResultDocument(result,download){
+    const win=window.open("","_blank");
+    if(!win){resultsMessage.textContent="Please allow pop-ups to print or save this result.";return;}
+    win.document.open();win.document.write(buildStudentResultReport(result));win.document.close();win.focus();
+    if(download){
+      const hint=win.document.createElement("p");
+      hint.textContent="To download this report as a PDF, choose “Save as PDF” or “Microsoft Print to PDF” in the print destination.";
+      hint.style.cssText="font:12px Arial;color:#555;margin:16px 0;";
+      win.document.body.insertBefore(hint,win.document.body.querySelector("h2"));
+    }
+    setTimeout(()=>{try{win.print();}catch(_){}},500);
+  }
   function renderStudentResults(){
     resultsList.replaceChildren();
+    openedResultId=null;
     if(!releasedResults.length){
       resultsMessage.textContent="No results have been released by the school yet. Please check again later.";
-      resultsMessage.hidden=false;
-      return;
+      resultsMessage.hidden=false;return;
     }
-    resultsMessage.textContent="The following examination results and answer reviews have been officially released by the school.";
+    resultsMessage.textContent="Select a subject and choose View Result. Only one result is displayed at a time.";
     resultsMessage.hidden=false;
-    releasedResults.forEach(result=>{
-      const card=document.createElement("article");
-      card.className="student-result-card";
-      const head=document.createElement("div");
-      head.className="student-result-card-head";
-      const title=document.createElement("h3");
-      title.textContent=result.subject||result.title||"Examination";
-      const status=document.createElement("span");
-      status.className="student-result-published";
-      status.textContent="PUBLISHED";
-      head.append(title,status);
-      const exam=document.createElement("p");
-      exam.textContent=result.title||"";
-      const stats=document.createElement("div");
-      stats.className="student-result-stats";
+    releasedResults.forEach((result,index)=>{
+      const row=document.createElement("article");row.className="student-result-subject-row";
+      const subject=document.createElement("div");subject.className="student-result-subject-name";
+      const heading=document.createElement("strong");heading.textContent=result.subject||result.title||"Examination";
+      const sub=document.createElement("small");sub.textContent=(result.title||"")+" • Attempt "+(result.attempt_number||1);
+      subject.append(heading,sub);
+      const button=document.createElement("button");button.type="button";button.className="student-result-view-button";button.textContent="View Result";
+      const panel=document.createElement("div");panel.className="student-result-detail";panel.hidden=true;
+      button.addEventListener("click",()=>{
+        const isOpen=!panel.hidden;
+        resultsList.querySelectorAll(".student-result-detail").forEach(el=>el.hidden=true);
+        resultsList.querySelectorAll(".student-result-view-button").forEach(el=>el.textContent="View Result");
+        if(isOpen){openedResultId=null;return;}
+        panel.hidden=false;button.textContent="Close Result";openedResultId=result.exam_id||String(index);
+      });
+      const stats=document.createElement("div");stats.className="student-result-stats";
       [["Score",String(result.score)+" / "+String(result.total_marks)],["Percentage",result.percentage==null?"—":Number(result.percentage).toFixed(1)+"%"],["Attempt","Attempt "+result.attempt_number]].forEach(([label,value])=>{
         const item=document.createElement("div"),small=document.createElement("span"),strong=document.createElement("strong");
         small.textContent=label;strong.textContent=value;item.append(small,strong);stats.append(item);
       });
-      const submitted=document.createElement("p");
-      submitted.className="student-result-date";
-      submitted.textContent="Submitted: "+safeDate(result.submitted_at);
-      const reviewHeading=document.createElement("h4");
-      reviewHeading.className="student-answer-review-heading";
-      reviewHeading.textContent="Question and Answer Review";
-      const review=document.createElement("div");
-      review.className="student-answer-review";
+      const submitted=document.createElement("p");submitted.className="student-result-date";submitted.textContent="Submitted: "+safeDate(result.submitted_at);
+      const actions=document.createElement("div");actions.className="student-result-report-actions";
+      const print=document.createElement("button");print.type="button";print.className="secondary-button";print.textContent="Print Result";print.addEventListener("click",()=>openStudentResultDocument(result,false));
+      const download=document.createElement("button");download.type="button";download.className="primary-button";download.textContent="Download Result (PDF)";download.addEventListener("click",()=>openStudentResultDocument(result,true));
+      actions.append(print,download);
+      const reviewHeading=document.createElement("h4");reviewHeading.className="student-answer-review-heading";reviewHeading.textContent="Question and Answer Review";
+      const review=document.createElement("div");review.className="student-answer-review";
       (Array.isArray(result.questions)?result.questions:[]).forEach(question=>{
-        const item=document.createElement("section");
-        item.className="student-answer-item";
-        const qTitle=document.createElement("h4");
-        qTitle.textContent="Question "+question.question_number;
-        const prompt=document.createElement("p");
-        prompt.className="student-answer-question";
-        prompt.textContent=question.question_text||"Question text unavailable";
-        const response=document.createElement("p");
-        response.className="student-answer-response";
-        const correct=document.createElement("p");
-        correct.className="student-answer-correct";
-        const outcome=document.createElement("span");
-        const state=question.response_status||"not_answered";
-        outcome.className="student-answer-outcome "+state;
-        outcome.textContent=state==="correct"?"Correct":state==="incorrect"?"Incorrect":"Not answered";
-        response.append("Your answer: "+(question.selected_answer??"Not answered"));
-        correct.append("Correct answer: "+(question.correct_answer??"Not available"));
-        const marks=document.createElement("p");
-        marks.className="student-answer-marks";
-        marks.textContent="Marks: "+Number(question.marks_awarded||0)+" / "+Number(question.marks||0);
-        item.append(qTitle,prompt,response,correct,outcome,marks);
-        review.appendChild(item);
+        const item=document.createElement("section");item.className="student-answer-item";
+        const qTitle=document.createElement("h4");qTitle.textContent="Question "+question.question_number;
+        const prompt=document.createElement("p");prompt.className="student-answer-question";prompt.textContent=question.question_text||"Question text unavailable";
+        const response=document.createElement("p");response.className="student-answer-response";response.textContent="Your answer: "+(question.selected_answer??"Not answered");
+        const correct=document.createElement("p");correct.className="student-answer-correct";correct.textContent="Correct answer: "+(question.correct_answer??"Not available");
+        const state=question.response_status||"not_answered";const outcome=document.createElement("span");outcome.className="student-answer-outcome "+state;outcome.textContent=state==="correct"?"Correct":state==="incorrect"?"Incorrect":"Not answered";
+        const marks=document.createElement("p");marks.className="student-answer-marks";marks.textContent="Marks: "+Number(question.marks_awarded||0)+" / "+Number(question.marks||0);
+        item.append(qTitle,prompt,response,correct,outcome,marks);review.appendChild(item);
       });
-      if(!review.childElementCount){
-        const empty=document.createElement("p");
-        empty.textContent="The school has released the score, but question-by-question review is not available for this examination.";
-        review.appendChild(empty);
-      }
-      card.append(head,exam,stats,submitted,reviewHeading,review);
-      resultsList.appendChild(card);
+      if(!review.childElementCount){const empty=document.createElement("p");empty.textContent="Question-by-question review is not available for this examination.";review.appendChild(empty);}
+      panel.append(stats,submitted,actions,reviewHeading,review);
+      row.append(subject,button);resultsList.append(row,panel);
     });
   }
   async function loadStudentResults(){const token=getSession();if(!token){signOut();return;}resultsRefresh.disabled=true;resultsRefresh.textContent="Loading…";try{const response=await fetch(`${SUPABASE_URL}/functions/v1/student-dashboard`,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_PUBLISHABLE_KEY,"Authorization":`Bearer ${token}`},body:JSON.stringify({action:"load_dashboard"}),cache:"no-store"});const data=await response.json().catch(()=>({}));if(response.status===401){signOut();return;}if(!response.ok||data.success!==true)throw new Error(data.message||"Results could not be loaded.");releasedResults=Array.isArray(data.released_results)?data.released_results:[];renderStudentResults();}catch(error){resultsMessage.textContent=error.message||"Unable to load results.";resultsMessage.className="dashboard-message error";}finally{resultsRefresh.disabled=false;resultsRefresh.textContent="Refresh Results";}}
