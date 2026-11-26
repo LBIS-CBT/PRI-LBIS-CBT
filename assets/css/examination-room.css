@@ -64,7 +64,7 @@
 .theory-question-card .question-topline{display:flex;justify-content:space-between;gap:12px;color:#781d37;font-size:11px;font-weight:800;letter-spacing:.4px}
 .theory-question-card h3{margin:14px 0 10px;color:#282428;font-size:17px;line-height:1.55;white-space:pre-wrap}
 .theory-question-card p{margin:0;color:#6e6870;font-size:12px;line-height:1.6}
-.theory-submit-row{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:24px;padding-top:20px;border-top:1px solid #e9e6e8}
-.theory-submit-row p{margin:0;color:#625d63;font-size:13px;line-height:1.6}
-.theory-submit-row button{flex-shrink:0}
-@media(max-width:650px){.theory-stage{padding:18px}.theory-submit-row{align-items:stretch;flex-direction:column}.theory-submit-row button{width:100%}}
+.theory-submit-row{display:flex;align-items:flex-start;flex-direction:column;justify-content:flex-start;gap:14px;margin-top:24px;padding-top:20px;border-top:1px solid #e9e6e8}
+.theory-submit-row p{display:block;width:100%;max-width:none;margin:0;color:#625d63;font-size:13px;line-height:1.6}
+.theory-submit-row button{display:inline-flex;align-self:flex-start;flex:0 0 auto;width:auto;min-width:220px;max-width:280px}
+@media(max-width:650px){.theory-stage{padding:18px}.theory-submit-row{align-items:flex-start;flex-direction:column}.theory-submit-row button{width:auto;max-width:100%}}
