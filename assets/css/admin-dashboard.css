@@ -294,3 +294,16 @@
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
 }
+
+
+/* Final admin workspace background override: target the visible content canvas directly. */
+body.admin-body #admin-layout,
+body.admin-body #admin-layout > .main-area,
+body.admin-body #admin-layout > .main-area > .content-area,
+body.admin-body #admin-layout .content-area {
+  background: #aba6a7 !important;
+  background-color: #aba6a7 !important;
+}
+body.admin-body #admin-layout .content-area .panel-view {
+  background: transparent !important;
+}
