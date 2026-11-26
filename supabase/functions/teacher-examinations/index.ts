@@ -148,8 +148,8 @@ Deno.serve(async (req: Request) => {
       if (!title || title.length > 160) return jsonResponse({ success: false, message: "Enter a valid examination title (maximum 160 characters)." }, 400);
       if (!subject || subject.length > 100) return jsonResponse({ success: false, message: "Enter a valid subject name (maximum 100 characters)." }, 400);
       if (!validUuid(classId)) return jsonResponse({ success: false, message: "Select a valid class." }, 400);
-      if (!Number.isInteger(duration) || duration < 1 || duration > 300) {
-        return jsonResponse({ success: false, message: "Duration must be between 1 and 300 whole minutes." }, 400);
+      if (!Number.isInteger(duration) || duration < 0 || duration > 300) {
+        return jsonResponse({ success: false, message: "Duration must be 0 (untimed) or between 1 and 300 whole minutes." }, 400);
       }
 
       const startsAt = parseOptionalDate(body.starts_at);
