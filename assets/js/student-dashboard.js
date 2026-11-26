@@ -189,7 +189,7 @@
       const submitted=document.createElement("p");submitted.className="student-result-date";submitted.textContent="Submitted: "+safeDate(result.submitted_at);
       const actions=document.createElement("div");actions.className="student-result-report-actions";
       const print=document.createElement("button");print.type="button";print.className="secondary-button";print.textContent="Print Result";print.addEventListener("click",()=>openStudentResultDocument(result,false));
-      const download=document.createElement("button");download.type="button";download.className="primary-button";download.textContent="Download Result (PDF)";download.addEventListener("click",()=>openStudentResultDocument(result,true));
+      const download=document.createElement("button");download.type="button";download.className="primary-button";download.textContent="Save as PDF";download.addEventListener("click",()=>openStudentResultDocument(result,true));
       actions.append(print,download);
       const reviewHeading=document.createElement("h4");reviewHeading.className="student-answer-review-heading";reviewHeading.textContent="Question and Answer Review";
       const review=document.createElement("div");review.className="student-answer-review";
