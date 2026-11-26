@@ -255,3 +255,7 @@
 
 /* Slightly darker dashboard canvas makes white cards stand out clearly. */
 .admin-body { background: #302d2e; }
+
+
+/* Requested dashboard canvas colour */
+.admin-body { background: #f0b1bd; }
