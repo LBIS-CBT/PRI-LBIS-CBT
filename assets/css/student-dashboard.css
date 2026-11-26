@@ -160,3 +160,8 @@
 .student-result-detail .student-answer-review{grid-template-columns:1fr}
 .student-result-subject-row{order:0}
 @media(max-width:520px){.student-result-subject-row{align-items:flex-start;flex-direction:column}.student-result-view-button{align-self:flex-start}.student-result-detail{padding:13px}}
+
+/* Answer review colors: correct answer green; student's wrong answer maroon. */
+.student-answer-correct{color:#198044!important;font-weight:700}
+.student-answer-response.correct{color:#198044!important;font-weight:700}
+.student-answer-response.incorrect{color:#781d37!important;font-weight:700}
