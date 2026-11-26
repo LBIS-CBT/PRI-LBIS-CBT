@@ -4,9 +4,9 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#64172d">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate"><title>LBIS CBT | Administration</title>
-<link rel="stylesheet" href="assets/css/app.css?v=20261124-brand3"><link rel="stylesheet" href="assets/css/admin-dashboard.css?v=20261126-dualrole1">
+<link rel="stylesheet" href="assets/css/app.css?v=20261124-brand3"><link rel="stylesheet" href="assets/css/admin-dashboard.css?v=20261126-signouttop">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/js/auth.js?v=20261126-session2" defer></script><script src="assets/js/admin-dashboard.js?v=20261126-session2" defer></script>
+<script src="assets/js/auth.js?v=20261126-session2" defer></script><script src="assets/js/admin-dashboard.js?v=20261126-signouttop" defer></script>
 </head>
 <body class="admin-body">
 <div id="unsupported-device" class="device-message" role="alert" hidden><div class="device-message__panel"><h1>Device not supported</h1><p>LBIS CBT is designed for laptops, desktop computers and tablets. Please access the system using a supported device.</p></div></div>
@@ -32,10 +32,10 @@
   <button class="nav-button" data-panel="exam-password"><span>⌑</span> Reset Examination Password</button>
   <button class="nav-button" data-panel="view-passwords"><span>◎</span> Password Access & Recovery</button>
  </nav>
- <div class="sidebar-bottom"><button id="sign-out-button" class="logout-button">↪ &nbsp; Sign Out</button></div>
+ <div class="sidebar-bottom"></div>
 </aside>
 <main class="main-area">
- <header class="topbar"><div><span class="topbar-label">LEAD BRITISH INTERNATIONAL SCHOOL</span><h1 id="page-title">Dashboard</h1></div><div class="topbar-user"><button id="switch-teacher-dashboard" class="secondary-button dashboard-switch-button" type="button" hidden>Switch to Teacher Dashboard</button><span class="online-dot"></span><span id="top-user">Loading account…</span><span class="avatar" id="user-initials">LB</span></div></header>
+ <header class="topbar"><div><span class="topbar-label">LEAD BRITISH INTERNATIONAL SCHOOL</span><h1 id="page-title">Dashboard</h1></div><div class="topbar-user"><button id="switch-teacher-dashboard" class="secondary-button dashboard-switch-button" type="button" hidden>Switch to Teacher Dashboard</button><span class="online-dot"></span><span id="top-user">Loading account…</span><span class="avatar" id="user-initials">LB</span><button id="sign-out-button" class="topbar-signout" type="button">↪ Sign Out</button></div></header>
  <section class="content-area">
   <div class="welcome-row"><div><p class="eyebrow" style="color:#ffffff !important;-webkit-text-fill-color:#ffffff !important;">ADMINISTRATIVE WORKSPACE</p><h2 style="color:#ffffff !important;-webkit-text-fill-color:#ffffff !important;">Welcome, <span id="staff-name" style="color:#ffffff !important;-webkit-text-fill-color:#ffffff !important;">…</span></h2><p style="color:#ffffff !important;-webkit-text-fill-color:#ffffff !important;">Manage staff, examinations and candidate activity from one place.</p></div><span class="role-pill" id="staff-role">Verifying access</span></div>
   <div id="dashboard-message" class="notice" role="status" aria-live="polite"></div>
