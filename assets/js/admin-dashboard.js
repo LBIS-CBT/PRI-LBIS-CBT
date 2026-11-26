@@ -18,6 +18,7 @@ function showPanel(name){
  if(name==="teachers")loadTeachers();
  if(name==="live-candidates")loadLiveCandidates();
  if(name==="examinations")loadExamManagement();
+ if(name==="results")loadResultsExams();
 }
 document.querySelectorAll("[data-panel]").forEach(b=>b.addEventListener("click",()=>showPanel(b.dataset.panel)));
 async function session(){
