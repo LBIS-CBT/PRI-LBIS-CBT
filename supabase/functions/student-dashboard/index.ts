@@ -1,3 +1,4 @@
+
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -94,8 +95,7 @@ Deno.serve(async (req: Request) => {
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
-    // Recheck the student and class on every dashboard request. This means a
-    // deactivated student or class cannot continue using an old browser token.
+    // Recheck the student and class on every dashboard request.
     const { data: student, error: studentError } = await db
       .from("students")
       .select("id, admission_number, full_name, class_id, active")
@@ -120,7 +120,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: examinations, error: examError } = await db
       .from("examinations")
-      .select("id, title, subject, status, accepts_new_candidates, duration_minutes, starts_at, ends_at, total_marks, extracted_question_count")
+      .select("id, title, subject, status, accepts_new_candidates, duration_minutes, starts_at, ends_at, total_marks, extracted_question_count, results_released")
       .eq("class_id", assignedClass.id)
       .in("status", ["ready", "active", "completed"])
       .order("created_at", { ascending: false });
@@ -158,6 +158,7 @@ Deno.serve(async (req: Request) => {
       if (error) throw error;
       pendingAuthorizations = data || [];
     }
+
     const authorizationMap = new Map(pendingAuthorizations.map((item) => [item.exam_id, item]));
     const now = Date.now();
 
@@ -165,20 +166,28 @@ Deno.serve(async (req: Request) => {
       const examAttempts = (attemptsByExam.get(exam.id) || []).sort(
         (a, b) => Number(b.attempt_number || 0) - Number(a.attempt_number || 0),
       );
+
       const activeAttempt = examAttempts.find((item) => item.status === "in_progress") || null;
       const latestAttempt = activeAttempt || examAttempts[0] || null;
       const pendingAuthorization = authorizationMap.get(exam.id) || null;
+
       const start = exam.starts_at ? new Date(exam.starts_at).getTime() : null;
       const end = exam.ends_at ? new Date(exam.ends_at).getTime() : null;
       const scheduleOpen = (start === null || now >= start) && (end === null || now < end);
+
       let availability = "unavailable";
       let availability_message = "This examination is not currently available.";
 
       if (activeAttempt) {
         availability = "resume";
         availability_message = "You have an examination session in progress.";
-      } else if (examAttempts.length > 0 && pendingAuthorization && exam.status === "active" &&
-        exam.accepts_new_candidates === true && scheduleOpen) {
+      } else if (
+        examAttempts.length > 0 &&
+        pendingAuthorization &&
+        exam.status === "active" &&
+        exam.accepts_new_candidates === true &&
+        scheduleOpen
+      ) {
         availability = "retake_available";
         availability_message = "The school has authorised one additional attempt for you. This approval can be used once.";
       } else if (examAttempts.length > 0 && pendingAuthorization) {
@@ -248,6 +257,65 @@ Deno.serve(async (req: Request) => {
       };
     });
 
+    // Only released examinations may expose answer keys and candidate responses.
+    const releasedExams=examRows.filter((exam)=>exam.results_released===true);
+    const releasedLatest:any[]=[];
+    for(const exam of releasedExams){
+      const submitted=(attemptsByExam.get(exam.id)||[]).filter((a)=>a.status==="submitted").sort((a,b)=>Number(b.attempt_number||0)-Number(a.attempt_number||0));
+      if(submitted.length)releasedLatest.push({exam,session:submitted[0]});
+    }
+    const releasedResults:any[]=[];
+    if(releasedLatest.length){
+      const releasedExamIds=releasedLatest.map((x)=>x.exam.id);
+      const releasedSessionIds=releasedLatest.map((x)=>x.session.id);
+      const [questionResult,answerResult]=await Promise.all([
+        db.from("questions").select("id,exam_id,question_text,options,correct_option_index,marks,display_order").in("exam_id",releasedExamIds).order("display_order",{ascending:true}).limit(5000),
+        db.from("answers").select("session_id,question_id,selected_option_index,is_correct,marks_awarded").in("session_id",releasedSessionIds).limit(30000),
+      ]);
+      if(questionResult.error)throw questionResult.error;
+      if(answerResult.error)throw answerResult.error;
+      const answersBySession=new Map<string,any[]>();
+      for(const answer of (answerResult.data||[])){
+        if(!answersBySession.has(answer.session_id))answersBySession.set(answer.session_id,[]);
+        answersBySession.get(answer.session_id)!.push(answer);
+      }
+      const questionsByExam=new Map<string,any[]>();
+      for(const question of (questionResult.data||[])){
+        if(!questionsByExam.has(question.exam_id))questionsByExam.set(question.exam_id,[]);
+        questionsByExam.get(question.exam_id)!.push(question);
+      }
+      for(const item of releasedLatest){
+        const exam=item.exam,session=item.session;
+        const questions=questionsByExam.get(exam.id)||[];
+        const saved=answersBySession.get(session.id)||[];
+        const review=questions.map((q:any,index:number)=>{
+          const answer=saved.find((a:any)=>a.question_id===q.id);
+          const options=Array.isArray(q.options)?q.options:[];
+          const selectedIndex=answer?.selected_option_index??null;
+          const correctIndex=q.correct_option_index;
+          const selected=selectedIndex===null?null:(options[selectedIndex]??String(selectedIndex));
+          const correct=correctIndex===null||correctIndex===undefined?"Not available":(options[correctIndex]??String(correctIndex));
+          const isCorrect=selectedIndex===null?null:(answer?.is_correct??(selectedIndex===correctIndex));
+          return {
+            question_number:index+1,
+            question_text:q.question_text,
+            options,
+            selected_answer:selected,
+            correct_answer:correct,
+            response_status:selectedIndex===null?"not_answered":(isCorrect?"correct":"incorrect"),
+            marks_awarded:answer?.marks_awarded??(isCorrect?Number(q.marks||0):0),
+            marks:Number(q.marks||0),
+          };
+        });
+        const total=questions.filter((q:any)=>Array.isArray(q.options)&&q.options.length>1).reduce((sum:number,q:any)=>sum+Number(q.marks||0),0);
+        const score=Number(session.score||0);
+        releasedResults.push({
+          exam_id:exam.id,title:exam.title,subject:exam.subject,attempt_number:session.attempt_number,
+          score,total_marks:total,percentage:total>0?score/total*100:null,submitted_at:session.submitted_at,
+          questions:review,
+        });
+      }
+    }
     return jsonResponse({
       success: true,
       generated_at: new Date().toISOString(),
@@ -262,6 +330,7 @@ Deno.serve(async (req: Request) => {
         level: assignedClass.level,
       },
       examinations: dashboardExaminations,
+      released_results: releasedResults,
     });
   } catch (error) {
     console.error("student-dashboard error:", error);
