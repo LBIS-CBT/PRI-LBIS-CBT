@@ -101,8 +101,9 @@
     timerHandle = setInterval(renderTimer, 500);
   }
   function updateProgress() {
-    const count = answers.size;
-    const total = questions.length;
+    const requiredQuestions = questions.filter(q => Array.isArray(q.options) && q.options.length > 1);
+    const count = requiredQuestions.filter(q => answers.has(q.id)).length;
+    const total = requiredQuestions.length;
     ui.answered.textContent = `${count} / ${total} answered`;
     ui.progress.style.width = total ? `${Math.min(100, count / total * 100)}%` : "0%";
     ui.navigatorTotal.textContent = `${total} questions`;
@@ -118,10 +119,13 @@
     ui.number.textContent = `QUESTION ${currentIndex + 1} OF ${questions.length}`;
     ui.marks.textContent = `${Number(q.marks) || 0} ${Number(q.marks) === 1 ? "mark" : "marks"}`;
     ui.question.textContent = q.question_text || "Question text unavailable.";
-    ui.instruction.textContent = q.is_required === false ? "This question is optional. Select one answer." : "Select one answer.";
     ui.options.replaceChildren();
     const choices = Array.isArray(q.options) ? q.options : [];
-    choices.forEach((choice, index) => {
+    const isTheory = choices.length === 1;
+    ui.instruction.textContent = isTheory
+      ? "THEORY QUESTION — Read the question and answer on paper. No option is required in the CBT."
+      : q.is_required === false ? "This question is optional. Select one answer." : "Select one answer.";
+    (isTheory ? [] : choices).forEach((choice, index) => {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "answer-option";
@@ -158,7 +162,7 @@
   function selectAnswer(index) {
     if (finished || submitting) return;
     const q = questions[currentIndex];
-    if (!q || index < 0 || index >= (Array.isArray(q.options) ? q.options.length : 0)) return;
+    if (!q || !Array.isArray(q.options) || q.options.length <= 1 || index < 0 || index >= q.options.length) return;
     answers.set(q.id, index);
     [...ui.options.children].forEach((button, i) => {
       const selected = i === index;
@@ -274,7 +278,8 @@
   }
   function askSubmit() {
     if (finished || submitting) return;
-    const unanswered = questions.length - answers.size;
+    const requiredQuestions = questions.filter(q => Array.isArray(q.options) && q.options.length > 1);
+    const unanswered = requiredQuestions.filter(q => !answers.has(q.id)).length;
     ui.dialogMessage.textContent = unanswered > 0
       ? `You have ${unanswered} unanswered question(s). If you submit now, you cannot change your answers. Continue?`
       : "You have answered all questions. Once submitted, you cannot change your answers.";
@@ -308,7 +313,8 @@
       questions = data.questions;
       if (!questions.length) throw new Error("There are no questions available in this examination.");
       (data.answers || []).forEach((answer) => {
-        if (Number.isInteger(answer.selected_option_index)) answers.set(answer.question_id, answer.selected_option_index);
+        const question = questions.find(q => q.id === answer.question_id);
+        if (question && Array.isArray(question.options) && question.options.length > 1 && Number.isInteger(answer.selected_option_index)) answers.set(answer.question_id, answer.selected_option_index);
       });
       const preferred = data.session.current_question_id;
       const savedIndex = questions.findIndex((q) => q.id === preferred);
