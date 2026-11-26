@@ -8,10 +8,10 @@
   <meta name="description" content="LBIS CBT staff dashboard">
   <title>LBIS CBT | Staff Dashboard</title>
   <link rel="stylesheet" href="assets/css/app.css?v=20261124-brand3">
-  <link rel="stylesheet" href="assets/css/staff-dashboard.css?v=20261126-teacherlogout2">
+  <link rel="stylesheet" href="assets/css/staff-dashboard.css?v=20261126-combined3">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/auth.js?v=20261126-session2" defer></script>
-  <script src="assets/js/staff-dashboard.js?v=20261126-session2" defer></script>
+  <script src="assets/js/staff-dashboard.js?v=20261126-combined3" defer></script>
 </head>
 <body class="dashboard-body">
   <div id="unsupported-device" class="device-message" role="alert" hidden>
@@ -76,16 +76,18 @@
             <div class="card-icon">EX</div>
             <div>
               <h3>Examinations</h3>
-              <p>Exam creation and management tools will appear here.</p>
-              <span class="card-status">Coming next</span>
+              <p id="examinations-card-description">Exam creation and management tools will appear here.</p>
+              <span class="card-status" id="examinations-card-status">Coming next</span>
+              <button class="card-action" id="open-examinations" type="button" hidden>Open Examinations</button>
             </div>
           </article>
           <article class="workspace-card" id="staff-management-card" hidden>
             <div class="card-icon">ST</div>
             <div>
               <h3>Staff Management</h3>
-              <p>Manage staff accounts and access permissions.</p>
-              <span class="card-status">Coming next</span>
+              <p>Manage staff accounts and administrative permissions.</p>
+              <span class="card-status">Administrative access available</span>
+              <button class="card-action" id="open-staff-management" type="button">Open Staff Management</button>
             </div>
           </article>
           <article class="workspace-card">
