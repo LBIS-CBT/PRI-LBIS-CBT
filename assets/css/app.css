@@ -281,7 +281,8 @@ body::before {
   content: "";
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: 0;
+  pointer-events: none;
   background-image:
     linear-gradient(rgba(255,255,255,.76), rgba(255,255,255,.82)),
     url("https://lbis.org/img/about/Sec.png");
