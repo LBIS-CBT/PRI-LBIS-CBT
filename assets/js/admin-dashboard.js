@@ -292,7 +292,7 @@ $("add-student-form").addEventListener("submit",async ev=>{
  }catch(err){setNotice(err.message||"Unable to add student. Please try again.");}
  finally{btn.disabled=false;btn.textContent="Add Student";}
 });
-let studentRecords=[],studentPage=1,studentPageSize=25,studentClasses=[];
+let studentRecords=[],studentPage=1,studentPageSize=10,studentClasses=[];
 function classLabel(id){const c=studentClasses.find(x=>x.id===id);return c?c.name+(c.level?" — "+c.level:""):"—";}
 function renderManageStudents(){
  const tbody=$("manage-students-body");tbody.replaceChildren();
@@ -367,7 +367,7 @@ $("manage-student-edit-form").addEventListener("submit",async ev=>{
  catch(err){setNotice(err.message||"Unable to save student changes.");}
  finally{btn.disabled=false;btn.textContent="Save Changes";}
 });
-let teacherRecords=[],teacherPage=1,teacherPageSize=25,selectedTeacher=null;
+let teacherRecords=[],teacherPage=1,teacherPageSize=10,selectedTeacher=null;
 function renderTeachers(){
  const body=$("teachers-table-body");body.replaceChildren();
  const q=$("teacher-search").value.trim().toLowerCase(),status=$("teacher-status-filter").value;
