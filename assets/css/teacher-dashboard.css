@@ -129,3 +129,7 @@
 
 /* Slightly darker dashboard canvas makes white cards stand out clearly. */
 .teacher-body { background: #302d2e; }
+
+
+/* Requested dashboard canvas colour */
+.teacher-body { background: #f0b1bd; }
