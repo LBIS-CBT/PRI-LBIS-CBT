@@ -275,3 +275,40 @@ footer {
 @media (max-width: 420px) {
   .login-panel { padding: 30px 22px 26px; }
 }
+
+/* LBIS login-page visual refresh — official school imagery and crest */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(255,255,255,.76), rgba(255,255,255,.82)),
+    url("https://lbis.org/img/about/Sec.png");
+  background-size: cover;
+  background-position: center 38%;
+  background-repeat: no-repeat;
+}
+body { position: relative; isolation: isolate; background: #f4f1f2; }
+.page-shell { position: relative; z-index: 1; background: transparent; }
+.login-panel {
+  background: rgba(255,255,255,.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,.82);
+  border-top: 5px solid var(--lbis-maroon);
+  box-shadow: 0 22px 65px rgba(45,18,29,.18);
+}
+.school-logo {
+  display: block;
+  width: 104px;
+  height: 104px;
+  object-fit: contain;
+  margin: 0 auto 16px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.92);
+}
+@media (max-width: 600px) {
+  body::before { background-position: center; }
+  .school-logo { width: 88px; height: 88px; }
+}
