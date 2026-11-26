@@ -203,10 +203,14 @@
         options.appendChild(optionsHeading);
         const optionList=document.createElement("ol");optionList.type="A";
         (Array.isArray(question.options)?question.options:[]).forEach(option=>{
-          const li=document.createElement("li");li.textContent=typeof option==="string"?option:(option&&(option.text||option.label||option.value))||String(option??"");optionList.appendChild(li);
+          // The ordered list supplies A/B/C/D; remove letters already included in option text.
+          let text=typeof option==="string"?option:(option&&(option.text||option.label||option.value))||String(option??"");
+          text=String(text).replace(/^\\s*[A-D]\\s*[.)-]\\s*/i,"");
+          const li=document.createElement("li");li.textContent=text;optionList.appendChild(li);
         });
         if(optionList.childElementCount)options.appendChild(optionList);else options.appendChild(document.createTextNode(" No options available."));
-        const response=document.createElement("p");response.className="student-answer-response";response.textContent="Your answer: "+(question.selected_answer??"Not answered");
+        const isCorrect=question.response_status==="correct";
+        const response=document.createElement("p");response.className="student-answer-response "+(isCorrect?"correct":"incorrect");response.textContent="Your answer: "+(question.selected_answer??"Not answered");
         const correct=document.createElement("p");correct.className="student-answer-correct";correct.textContent="Correct answer: "+(question.correct_answer??"Not available");
         const state=question.response_status||"not_answered";const outcome=document.createElement("span");outcome.className="student-answer-outcome "+state;outcome.textContent=state==="correct"?"Correct":state==="incorrect"?"Incorrect":"Not answered";
         const marks=document.createElement("p");marks.className="student-answer-marks";marks.textContent="Marks: "+Number(question.marks_awarded||0)+" / "+Number(question.marks||0);
