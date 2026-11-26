@@ -350,3 +350,12 @@ body {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
+
+
+/* Requested LBIS login canvas colour — match all dashboards. */
+:root { background: #302d2e; }
+html, body { background: #302d2e !important; }
+body { color: #292629; }
+.page-shell { background: #302d2e !important; }
+footer { color: #e4e0e2; }
+.device-message { background: #302d2e !important; }
