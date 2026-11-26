@@ -18,6 +18,13 @@
     message.textContent = text;
   }
 
+  function normalizeAdminLevel(value) {
+    const level = String(value || "none").trim().toLowerCase().replace(/[\s-]+/g, "_");
+    if (["superadmin", "super_admin"].includes(level)) return "super_admin";
+    if (level === "admin" || level === "administrator") return "admin";
+    return "none";
+  }
+
   function roleLabel(role) {
     if (role === "super_admin") return "Super Administrator";
     if (role === "admin") return "Administrator";
@@ -73,7 +80,8 @@
 
     rememberDashboard();
     const displayName = profile.full_name || "Staff Member";
-    const label = profile.role === "teacher" && profile.admin_level && profile.admin_level !== "none" ? "Teacher + " + (profile.admin_level === "super_admin" ? "Super Admin" : "Admin") : roleLabel(profile.role);
+    const adminLevel = normalizeAdminLevel(profile.admin_level);
+    const label = profile.role === "teacher" && adminLevel !== "none" ? "Teacher + " + (adminLevel === "super_admin" ? "Super Admin" : "Admin") : roleLabel(profile.role);
 
     document.getElementById("staff-name").textContent = displayName;
     document.getElementById("staff-code").textContent = profile.staff_code || "—";
@@ -83,14 +91,14 @@
 
     const staffManagementCard = document.getElementById("staff-management-card");
     const switchAdmin = document.getElementById("switch-admin-dashboard");
-    const hasAdminAccess = ["admin", "super_admin"].includes(profile.admin_level || "none");
+    const hasAdminAccess = ["admin", "super_admin"].includes(adminLevel);
     const openExaminations = document.getElementById("open-examinations");
     const openStaffManagement = document.getElementById("open-staff-management");
 
     // Dual-role accounts keep their Teacher workspace while exposing direct links
     // to the administrative tools they are separately authorized to use.
     if (hasAdminAccess) {
-      const adminLabel = profile.admin_level === "super_admin" ? "Super Admin" : "Admin";
+      const adminLabel = adminLevel === "super_admin" ? "Super Admin" : "Admin";
       document.getElementById("examinations-card-description").textContent =
         "Open examination management, start or close exams, and monitor candidate activity.";
       document.getElementById("examinations-card-status").textContent = "Available";
@@ -107,11 +115,11 @@
     }
     if (profile.role === "teacher" && ["admin", "super_admin"].includes(profile.admin_level || "none")) {
       switchAdmin.hidden = false;
-      switchAdmin.textContent = profile.admin_level === "super_admin" ? "Switch to Super Admin Dashboard" : "Switch to Admin Dashboard";
+      switchAdmin.textContent = adminLevel === "super_admin" ? "Switch to Super Admin Dashboard" : "Switch to Admin Dashboard";
       switchAdmin.addEventListener("click", () => window.location.assign("admin-dashboard.html"));
     }
     document.getElementById("workspace-title").textContent =
-      hasAdminAccess ? "Teacher + " + (profile.admin_level === "super_admin" ? "Super Admin Workspace" : "Admin Workspace") : "Teacher Workspace";
+      hasAdminAccess ? "Teacher + " + (adminLevel === "super_admin" ? "Super Admin Workspace" : "Admin Workspace") : "Teacher Workspace";
     document.getElementById("workspace-description").textContent =
       hasAdminAccess
         ? "Your teaching workspace and the administrative tools assigned to your account are available here."
