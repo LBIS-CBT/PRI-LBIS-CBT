@@ -55,7 +55,7 @@
      <label class="teacher-field teacher-field-wide">Examination title<input id="exam-title" name="title" type="text" maxlength="160" placeholder="e.g. First Term Mathematics Examination" required></label>
      <label class="teacher-field">Subject<input id="exam-subject" name="subject" type="text" maxlength="100" placeholder="e.g. Mathematics" required></label>
      <label class="teacher-field">Class<select id="exam-class" name="class_id" required><option value="">Loading classes…</option></select></label>
-     <label class="teacher-field">Duration (minutes)<input id="exam-duration" name="duration_minutes" type="number" min="1" max="300" step="1" value="60" required><small>Enter a whole number from 1 to 300.</small></label>
+     <label class="teacher-field">Duration (minutes)<input id="exam-duration" name="duration_minutes" type="number" min="0" max="300" step="1" value="60" required><small>Enter 0 for an untimed examination, or 1 to 300 minutes.</small></label>
      <label class="teacher-field">Scheduled start (optional)<input id="exam-starts-at" name="starts_at" type="datetime-local"><small>Leave blank if the date has not been decided.</small></label>
      <label class="teacher-field">Scheduled end (optional)<input id="exam-ends-at" name="ends_at" type="datetime-local"><small>If supplied, the end must be after the start.</small></label>
     </div>
