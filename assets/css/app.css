@@ -318,7 +318,7 @@ body { position: relative; isolation: isolate; background: #f4f1f2; }
 /* LBIS login background — dark maroon cinematic treatment */
 body::before {
   background-image:
-    linear-gradient(115deg, rgba(20, 19, 22, .68), rgba(75, 17, 37, .70)),
+    linear-gradient(115deg, rgba(8, 7, 10, .93), rgba(43, 7, 20, .91)),
     url("https://sabiabuja.com/wp-content/uploads/2024/07/Exceptional-Faculty.png");
   background-size: cover;
   background-position: center center;
