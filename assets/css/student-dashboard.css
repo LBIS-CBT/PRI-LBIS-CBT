@@ -38,3 +38,27 @@
 @media(max-width:420px){.dashboard-summary{grid-template-columns:1fr}.section-heading h2{font-size:18px}}
 
 .student-section-actions{display:flex;gap:9px}.student-results-section{margin-top:22px;padding:26px 28px;border:1px solid #e2dfe1;border-radius:12px;background:#fff}.results-intro{margin:8px 0 0;color:#77727a;font-size:12px}.student-results-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:16px}.student-result-card{padding:18px;border:1px solid #e2dfe1;border-radius:9px;background:#fff}.student-result-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.student-result-card h3{margin:0;text-align:left;font-size:16px;color:#292629}.student-result-published{padding:5px 8px;border-radius:20px;background:#e8f5ed;color:#21643b;font-size:9px;font-weight:800;letter-spacing:.5px}.student-result-card>p{color:#77727a;font-size:11px}.student-result-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}.student-result-stats div{padding:10px;border-radius:7px;background:#f7edf0}.student-result-stats span,.student-result-stats strong{display:block}.student-result-stats span{font-size:9px;color:#77727a;text-transform:uppercase}.student-result-stats strong{margin-top:5px;font-size:15px;color:#781d37}.student-result-date{margin-bottom:0}.student-results-section[hidden]{display:none}@media(max-width:700px){.student-results-section{padding:20px 16px}.student-results-list{grid-template-columns:1fr}.student-section-actions{flex-wrap:wrap}}
+
+
+/* Make the published Results action prominent in the student dashboard. */
+.student-section-actions #student-results-button {
+  min-height: 46px;
+  padding: 11px 25px;
+  border: 1px solid #781d37;
+  border-radius: 8px;
+  background: #781d37;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: .2px;
+  box-shadow: 0 3px 8px rgba(120, 29, 55, .18);
+}
+.student-section-actions #student-results-button:hover {
+  background: #5f142a;
+  border-color: #5f142a;
+  color: #fff;
+}
+.student-section-actions #student-results-button:focus-visible {
+  outline: 3px solid rgba(120, 29, 55, .28);
+  outline-offset: 3px;
+}
