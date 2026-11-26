@@ -7,10 +7,10 @@
   <meta name="description" content="LBIS CBT staff dashboard">
   <title>LBIS CBT | Staff Dashboard</title>
   <link rel="stylesheet" href="assets/css/app.css?v=20261124-brand3">
-  <link rel="stylesheet" href="assets/css/staff-dashboard.css?v=20261124-brand3">
+  <link rel="stylesheet" href="assets/css/staff-dashboard.css?v=20261126-dualrole1">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/auth.js" defer></script>
-  <script src="assets/js/staff-dashboard.js" defer></script>
+  <script src="assets/js/staff-dashboard.js?v=20261126-dualrole1" defer></script>
 </head>
 <body class="dashboard-body">
   <div id="unsupported-device" class="device-message" role="alert" hidden>
@@ -31,6 +31,7 @@
       </a>
       <div class="header-actions">
         <span class="connection-indicator"><span></span> Secure session</span>
+        <button id="switch-admin-dashboard" class="switch-dashboard-button" type="button" hidden>Switch to Super Admin Dashboard</button>
         <button id="sign-out-button" class="sign-out-button" type="button">Sign Out</button>
       </div>
     </header>
