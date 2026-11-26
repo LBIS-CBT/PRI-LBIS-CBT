@@ -26,7 +26,12 @@
   }
 
   async function redirectToLogin() {
+    window.sessionStorage.removeItem("lbis_staff_profile");
     window.location.replace("admin-login.html");
+  }
+
+  function rememberDashboard() {
+    window.sessionStorage.setItem("lbis_last_dashboard", "staff-dashboard.html");
   }
 
   async function loadDashboard() {
@@ -66,6 +71,7 @@
       return;
     }
 
+    rememberDashboard();
     const displayName = profile.full_name || "Staff Member";
     const label = profile.role === "teacher" && profile.admin_level && profile.admin_level !== "none" ? "Teacher + " + (profile.admin_level === "super_admin" ? "Super Admin" : "Admin") : roleLabel(profile.role);
 
@@ -99,17 +105,31 @@
   signOutButton.addEventListener("click", async () => {
     signOutButton.disabled = true;
     signOutButton.textContent = "Signing Out…";
-
-    const { error } = await window.supabaseClient.auth.signOut();
-    if (error) {
+    try {
+      const { error } = await window.supabaseClient.auth.signOut({ scope: "global" });
+      if (error) throw error;
+      window.sessionStorage.removeItem("lbis_staff_profile");
+      window.sessionStorage.removeItem("lbis_last_dashboard");
+      window.location.replace("admin-login.html");
+    } catch (error) {
+      console.error("LBIS teacher sign-out failed:", error);
       signOutButton.disabled = false;
       signOutButton.textContent = "Sign Out";
       showMessage("Unable to sign out right now. Please try again.");
-      return;
     }
+  });
 
-    window.sessionStorage.removeItem("lbis_staff_profile");
-    window.location.replace("admin-login.html");
+  // Revalidate protected pages restored from the browser's back/forward cache.
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) loadDashboard().catch((error) => {
+      console.error("LBIS staff session revalidation failed:", error);
+      redirectToLogin();
+    });
+  });
+  window.addEventListener("popstate", () => {
+    window.supabaseClient?.auth.getSession().then(({ data, error }) => {
+      if (error || !data?.session) redirectToLogin();
+    }).catch(redirectToLogin);
   });
 
   loadDashboard().catch((error) => {
