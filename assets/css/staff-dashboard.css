@@ -290,3 +290,46 @@
 
 /* Dashboard switcher for staff with administrative access. */
 .switch-dashboard-button{width:auto;min-height:38px;padding:8px 13px;border:1px solid rgba(255,255,255,.75);border-radius:7px;background:#fff;color:#64172d;font-size:12px;font-weight:700;cursor:pointer}.switch-dashboard-button:hover{background:#f7edf0}
+
+
+/* Explicitly keep Teacher Dashboard sign-out visible at the top-right. */
+.dashboard-header .header-actions{
+  display:flex !important;
+  align-items:center;
+  justify-content:flex-end;
+  gap:14px;
+  flex-wrap:nowrap;
+  margin-left:auto;
+}
+.dashboard-header #sign-out-button.sign-out-button{
+  display:inline-flex !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  position:relative;
+  z-index:2;
+  width:auto !important;
+  min-width:92px;
+  min-height:40px;
+  padding:9px 17px;
+  border:1px solid #fff;
+  border-radius:7px;
+  background:#fff;
+  color:#64172d !important;
+  font-size:13px;
+  font-weight:700;
+  line-height:1.2;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.dashboard-header #sign-out-button.sign-out-button:hover{
+  background:#f7edf0;
+  border-color:#f7edf0;
+}
+@media(max-width:800px){
+  .dashboard-header{gap:12px}
+  .dashboard-header .header-actions{gap:9px}
+  .dashboard-header .connection-indicator{display:none}
+}
