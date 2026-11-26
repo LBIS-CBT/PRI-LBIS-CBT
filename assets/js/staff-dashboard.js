@@ -83,23 +83,39 @@
 
     const staffManagementCard = document.getElementById("staff-management-card");
     const switchAdmin = document.getElementById("switch-admin-dashboard");
+    const hasAdminAccess = ["admin", "super_admin"].includes(profile.admin_level || "none");
+    const openExaminations = document.getElementById("open-examinations");
+    const openStaffManagement = document.getElementById("open-staff-management");
+
+    // Dual-role accounts keep their Teacher workspace while exposing direct links
+    // to the administrative tools they are separately authorized to use.
+    if (hasAdminAccess) {
+      const adminLabel = profile.admin_level === "super_admin" ? "Super Admin" : "Admin";
+      document.getElementById("examinations-card-description").textContent =
+        "Open examination management, start or close exams, and monitor candidate activity.";
+      document.getElementById("examinations-card-status").textContent = "Available";
+      openExaminations.hidden = false;
+      openExaminations.addEventListener("click", () => {
+        window.location.assign("admin-dashboard.html?panel=examinations");
+      });
+      staffManagementCard.hidden = false;
+      staffManagementCard.querySelector("p").textContent =
+        "Open staff accounts and administrative permissions. Your access level: " + adminLabel + ".";
+      openStaffManagement.addEventListener("click", () => {
+        window.location.assign("admin-dashboard.html?panel=teachers");
+      });
+    }
     if (profile.role === "teacher" && ["admin", "super_admin"].includes(profile.admin_level || "none")) {
       switchAdmin.hidden = false;
       switchAdmin.textContent = profile.admin_level === "super_admin" ? "Switch to Super Admin Dashboard" : "Switch to Admin Dashboard";
       switchAdmin.addEventListener("click", () => window.location.assign("admin-dashboard.html"));
     }
-    if (profile.role === "admin" || profile.role === "super_admin") {
-      document.getElementById("workspace-title").textContent =
-        profile.role === "super_admin" ? "Super Admin Workspace" : "Admin Workspace";
-      document.getElementById("workspace-description").textContent =
-        "Administrative tools assigned to your account.";
-      staffManagementCard.hidden = false;
-    } else {
-      document.getElementById("workspace-title").textContent = "Teacher Workspace";
-      document.getElementById("workspace-description").textContent =
-        "Teaching and examination tools assigned to your account.";
-      staffManagementCard.hidden = true;
-    }
+    document.getElementById("workspace-title").textContent =
+      hasAdminAccess ? "Teacher + " + (profile.admin_level === "super_admin" ? "Super Admin Workspace" : "Admin Workspace") : "Teacher Workspace";
+    document.getElementById("workspace-description").textContent =
+      hasAdminAccess
+        ? "Your teaching workspace and the administrative tools assigned to your account are available here."
+        : "Teaching and examination tools assigned to your account.";
   }
 
   signOutButton.addEventListener("click", async () => {
