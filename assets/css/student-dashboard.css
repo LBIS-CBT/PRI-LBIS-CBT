@@ -62,3 +62,26 @@
   outline: 3px solid rgba(120, 29, 55, .28);
   outline-offset: 3px;
 }
+
+
+/* Student dashboard action buttons: equal sizing with contrasting Refresh action. */
+.student-section-actions #student-results-button,
+.student-section-actions #refresh-examinations {
+  min-height: 42px;
+  padding: 9px 19px;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+.student-section-actions #refresh-examinations {
+  border: 1px solid #171717;
+  border-radius: 8px;
+  background: #171717;
+  color: #fff;
+}
+.student-section-actions #refresh-examinations:hover {
+  border-color: #333;
+  background: #333;
+  color: #fff;
+}
+.student-dashboard-page { background: #e5e3e5; }
