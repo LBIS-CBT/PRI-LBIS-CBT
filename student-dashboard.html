@@ -7,8 +7,8 @@
   <meta name="description" content="LBIS CBT Student Dashboard">
   <title>LBIS CBT | Student Dashboard</title>
   <link rel="stylesheet" href="assets/css/app.css?v=20261124-student-dashboard1">
-  <link rel="stylesheet" href="assets/css/student-dashboard.css?v=20261124-student-dashboard1">
-  <script src="assets/js/student-dashboard.js?v=20261124-retake2" defer></script>
+  <link rel="stylesheet" href="assets/css/student-dashboard.css?v=20261125-results-release1">
+  <script src="assets/js/student-dashboard.js?v=20261125-results-release1" defer></script>
 </head>
 <body class="student-dashboard-page">
   <header class="student-topbar">
@@ -53,11 +53,12 @@
           <p class="eyebrow">YOUR CLASS</p>
           <h2>My Examinations</h2>
         </div>
-        <button id="refresh-examinations" class="refresh-button" type="button">Refresh</button>
+        <div class="student-section-actions"><button id="student-results-button" class="refresh-button" type="button">Results</button><button id="refresh-examinations" class="refresh-button" type="button">Refresh</button></div>
       </div>
       <div id="dashboard-message" class="dashboard-message" role="status" aria-live="polite">Loading your examinations…</div>
       <div id="examination-list" class="examination-list" aria-live="polite"></div>
     </section>
+    <section class="student-results-section" id="student-results-section" hidden><div class="section-heading"><div><p class="eyebrow">PUBLISHED RESULTS</p><h2>My Results</h2><p class="results-intro">Only results officially released by the school are displayed here.</p></div><button id="student-results-refresh" class="refresh-button" type="button">Refresh Results</button></div><div id="student-results-message" class="dashboard-message">Results are locked until the school releases them.</div><div id="student-results-list" class="student-results-list"></div></section>
   </main>
 
   <footer class="student-footer">Designed by TUPS Technologies</footer>
