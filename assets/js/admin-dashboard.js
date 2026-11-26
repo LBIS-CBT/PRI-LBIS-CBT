@@ -386,6 +386,10 @@ function renderTeachers(){
   remove.classList.add("delete-record-button");
   view.addEventListener("click",()=>openTeacherModal(s,false));edit.addEventListener("click",()=>openTeacherModal(s,true));
   reset.addEventListener("click",()=>openTeacherModal(s,true,true));toggle.addEventListener("click",()=>toggleTeacherActive(s,toggle));remove.addEventListener("click",()=>deleteTeacherRecord(s,remove));
+  if(context?.profile?.role==="super_admin"){
+   const promote=document.createElement("button");promote.type="button";promote.className="secondary-button role-change-button";promote.textContent="Change Role";
+   promote.addEventListener("click",()=>openTeacherRoleModal(s));td.append(promote);
+  }
   td.append(view,edit,reset,toggle,remove);tr.appendChild(td);body.appendChild(tr);
  });
  $("teacher-page-info").textContent="Page "+teacherPage+" of "+pages+" • "+rows.length+" teacher(s)";
@@ -424,6 +428,19 @@ function openTeacherModal(s,editing,resetOnly=false){
  $("save-teacher-edit").hidden=!editing||resetOnly;
  $("teacher-modal-status").textContent="Account status: "+(s.active===false?"Inactive":"Active")+" • Role: "+label(s.role);
  $("teacher-reset-form").hidden=!resetOnly;
+ $("teacher-role-form").hidden=true;
+ $("teacher-modal").hidden=false;
+}
+function openTeacherRoleModal(s){
+ if(context?.profile?.role!=="super_admin"){setNotice("Only an active Super Admin can change staff roles.");return;}
+ selectedTeacher=s;
+ const form=$("teacher-role-form");form.elements.role.value="admin";
+ $("teacher-modal-title").textContent="Change Staff Role";
+ $("teacher-modal-status").textContent="Account: "+(s.full_name||"Staff member")+" • Current role: "+label(s.role);
+ $("teacher-edit-form").querySelectorAll("input:not([type=hidden])").forEach(el=>el.disabled=true);
+ $("save-teacher-edit").hidden=true;
+ $("teacher-reset-form").hidden=true;
+ form.hidden=false;
  $("teacher-modal").hidden=false;
 }
 async function toggleTeacherActive(s,button){
@@ -450,6 +467,24 @@ $("teacher-edit-form").addEventListener("submit",async ev=>{
   $("teacher-modal").hidden=true;setNotice(data.message||"Teacher profile updated.");await loadTeachers();
  }catch(err){setNotice(err.message||"Unable to update teacher profile.");}
  finally{btn.disabled=false;btn.textContent="Save Changes";}
+});
+$("teacher-role-form").addEventListener("submit",async ev=>{
+ ev.preventDefault();
+ if(!selectedTeacher||context?.profile?.role!=="super_admin"){setNotice("Only an active Super Admin can change staff roles.");return;}
+ const form=ev.currentTarget,btn=$("save-teacher-role"),newRole=form.elements.role.value;
+ if(!["admin","super_admin"].includes(newRole)){setNotice("Select a valid staff role.");return;}
+ const roleName=newRole==="super_admin"?"Super Admin":"Admin";
+ if(!window.confirm("Promote "+(selectedTeacher.full_name||"this teacher")+" to "+roleName+"?\n\nThe existing login, password, staff code and examination history will remain unchanged."))return;
+ btn.disabled=true;btn.textContent="Updating Role…";
+ try{
+  const {data,error}=await window.supabaseClient.functions.invoke("staff-management",{body:{action:"change_staff_role",staff_id:selectedTeacher.id,role:newRole}});
+  if(error)throw error;
+  if(!data||data.success!==true)throw new Error(data?.error||data?.message||"Staff role could not be changed.");
+  $("teacher-modal").hidden=true;
+  setNotice((data.message||"Staff role updated.")+" "+(selectedTeacher.full_name||"The staff member")+" is now "+roleName+".");
+  await loadTeachers();
+ }catch(err){setNotice(err.message||"Unable to change staff role.");}
+ finally{btn.disabled=false;btn.textContent="Confirm Role Change";}
 });
 $("teacher-reset-form").addEventListener("submit",async ev=>{
  ev.preventDefault();if(!selectedTeacher)return;const form=ev.currentTarget,btn=$("reset-teacher-password"),password=form.elements.password.value;
