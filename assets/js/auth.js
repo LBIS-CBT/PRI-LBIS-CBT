@@ -24,6 +24,46 @@
 
   const STAFF_LOGIN_URL = `${SUPABASE_URL}/functions/v1/staff-login`;
 
+  // Restore the previous workspace when an authenticated staff member
+  // reaches the login page through browser Back navigation.
+  async function restoreStaffDashboard() {
+    const page = window.location.pathname.split("/").pop();
+    if (page !== "admin-login.html") return;
+    try {
+      const { data, error } = await window.supabaseClient.auth.getSession();
+      if (error || !data?.session) return;
+      const { data: profile, error: profileError } = await window.supabaseClient
+        .from("user_profiles")
+        .select("role, admin_level, active")
+        .eq("id", data.session.user.id)
+        .single();
+      if (profileError || !profile || profile.active !== true) {
+        await window.supabaseClient.auth.signOut();
+        sessionStorage.removeItem("lbis_staff_profile");
+        sessionStorage.removeItem("lbis_last_dashboard");
+        return;
+      }
+      const canAdmin = ["admin", "super_admin"].includes(profile.role) ||
+        ["admin", "super_admin"].includes(profile.admin_level || "none");
+      const canTeach = profile.role === "teacher";
+      const last = sessionStorage.getItem("lbis_last_dashboard");
+      const destination = last === "staff-dashboard.html" && canTeach
+        ? "staff-dashboard.html"
+        : last === "admin-dashboard.html" && canAdmin
+          ? "admin-dashboard.html"
+          : canTeach ? "staff-dashboard.html" : canAdmin ? "admin-dashboard.html" : null;
+      if (destination) window.location.replace(destination);
+    } catch (error) {
+      console.warn("Unable to restore the previous staff dashboard:", error);
+    }
+  }
+
+  restoreStaffDashboard();
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) restoreStaffDashboard();
+  });
+
+
   async function callStaffLogin(payload) {
     const response = await fetch(STAFF_LOGIN_URL, {
       method: "POST",
