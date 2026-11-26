@@ -388,7 +388,7 @@ function renderTeachers(){
   view.addEventListener("click",()=>openTeacherModal(s,false));edit.addEventListener("click",()=>openTeacherModal(s,true));
   reset.addEventListener("click",()=>openTeacherModal(s,true,true));toggle.addEventListener("click",()=>toggleTeacherActive(s,toggle));remove.addEventListener("click",()=>deleteTeacherRecord(s,remove));
   if(context?.profile?.role==="super_admin"||context?.profile?.admin_level==="super_admin"){
-   const promote=document.createElement("button");promote.type="button";promote.className="secondary-button role-change-button";promote.textContent="Change Role";
+   const promote=document.createElement("button");promote.type="button";promote.className="secondary-button role-change-button";promote.textContent="Admin Access";
    promote.addEventListener("click",()=>openTeacherRoleModal(s));td.append(promote);
   }
   td.append(view,edit,reset,toggle,remove);tr.appendChild(td);body.appendChild(tr);
@@ -427,7 +427,7 @@ function openTeacherModal(s,editing,resetOnly=false){
  $("teacher-modal-title").textContent=resetOnly?"Reset Teacher Password":editing?"Edit Teacher":"Teacher Details";
  form.querySelectorAll("input:not([type=hidden])").forEach(el=>el.disabled=!editing||resetOnly);
  $("save-teacher-edit").hidden=!editing||resetOnly;
- $("teacher-modal-status").textContent="Account status: "+(s.active===false?"Inactive":"Active")+" • Role: "+label(s.role);
+ $("teacher-modal-status").textContent="Account status: "+(s.active===false?"Inactive":"Active")+" • Role: "+label(s);
  $("teacher-reset-form").hidden=!resetOnly;
  $("teacher-role-form").hidden=true;
  $("teacher-modal").hidden=false;
@@ -485,7 +485,7 @@ $("teacher-role-form").addEventListener("submit",async ev=>{
   setNotice((data.message||"Staff role updated.")+" "+(selectedTeacher.full_name||"The staff member")+" now has "+roleName+" access. Teacher access is unchanged.");
   await loadTeachers();
  }catch(err){setNotice(err.message||"Unable to change staff role.");}
- finally{btn.disabled=false;btn.textContent="Confirm Role Change";}
+ finally{btn.disabled=false;btn.textContent="Save Administrative Access";}
 });
 $("teacher-reset-form").addEventListener("submit",async ev=>{
  ev.preventDefault();if(!selectedTeacher)return;const form=ev.currentTarget,btn=$("reset-teacher-password"),password=form.elements.password.value;
