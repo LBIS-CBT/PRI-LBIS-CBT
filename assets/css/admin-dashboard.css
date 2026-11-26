@@ -375,3 +375,9 @@ body.admin-body #admin-layout .content-area > .panel-view > h3 {
 
 /* Dashboard switcher for teacher accounts with admin access. */
 .dashboard-switch-button{width:auto;min-height:34px;padding:7px 11px;font-size:11px}
+
+
+/* Sign out stays in the top-right dashboard header for Admin and Super Admin. */
+.topbar-signout{width:auto;min-height:38px;margin:0 0 0 8px;padding:8px 14px;border:1px solid #781d37;border-radius:7px;background:#781d37;color:#fff;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.topbar-signout:hover{background:#5f142b;border-color:#5f142b}
+@media(max-width:900px){.topbar-user{gap:8px}.topbar-signout{padding:7px 10px;font-size:11px}}
