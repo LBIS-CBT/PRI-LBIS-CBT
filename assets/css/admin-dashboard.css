@@ -248,3 +248,6 @@
 .results-actions{display:flex;gap:8px;flex-wrap:wrap}.results-detail-card .section-title .results-actions{display:flex;gap:8px;align-items:center}@media(max-width:700px){.results-actions{flex-wrap:wrap}}
 
 .results-release-control{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 15px;margin-top:12px;border:1px solid var(--line);border-radius:9px;background:#fff}.results-release-control span{font-size:12px;color:var(--muted)}.results-release-control button.danger-button{border-color:#c77;color:#9d263e}@media(max-width:700px){.results-release-control{align-items:flex-start;flex-direction:column}}
+
+/* Live candidate monitoring */
+.live-progress{display:flex;align-items:center;gap:7px;min-width:92px}.live-progress__bar{height:7px;width:58px;border-radius:99px;background:#ece7e9;overflow:hidden}.live-progress__fill{height:100%;background:#287a53;border-radius:99px}.live-progress small{font-size:10px;color:var(--muted)}.live-stat-grid{margin-bottom:16px}
