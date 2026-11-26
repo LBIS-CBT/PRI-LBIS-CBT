@@ -303,14 +303,25 @@ function renderManageStudents(){
  visible.forEach(s=>{
   const tr=document.createElement("tr");
   [s.admission_number||"—",s.full_name||"—",classLabel(s.class_id),s.active===false?"Inactive":"Active"].forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.appendChild(td);});
-  const td=document.createElement("td"),view=document.createElement("button"),edit=document.createElement("button"),toggle=document.createElement("button");
-  view.className=edit.className=toggle.className="secondary-button";view.type=edit.type=toggle.type="button";
-  view.textContent="View";edit.textContent="Edit";toggle.textContent=s.active===false?"Activate":"Deactivate";
-  view.addEventListener("click",()=>openStudentModal(s,false));edit.addEventListener("click",()=>openStudentModal(s,true));toggle.addEventListener("click",()=>toggleStudentActive(s,toggle));
-  td.append(view,edit,toggle);tr.appendChild(td);tbody.appendChild(tr);
+  const td=document.createElement("td"),view=document.createElement("button"),edit=document.createElement("button"),toggle=document.createElement("button"),remove=document.createElement("button");
+  [view,edit,toggle,remove].forEach(b=>{b.className="secondary-button";b.type="button";});
+  view.textContent="View";edit.textContent="Edit";toggle.textContent=s.active===false?"Activate":"Deactivate";remove.textContent="Delete";
+  remove.classList.add("delete-record-button");
+  view.addEventListener("click",()=>openStudentModal(s,false));edit.addEventListener("click",()=>openStudentModal(s,true));toggle.addEventListener("click",()=>toggleStudentActive(s,toggle));remove.addEventListener("click",()=>deleteStudentRecord(s,remove));
+  td.append(view,edit,toggle,remove);tr.appendChild(td);tbody.appendChild(tr);
  });
  $("student-page-info").textContent="Page "+studentPage+" of "+pages+" • "+rows.length+" student(s)";
  $("student-prev").disabled=studentPage<=1;$("student-next").disabled=studentPage>=pages;
+}
+async function deleteStudentRecord(student,button){
+ const label=student.full_name+" ("+student.admission_number+")";
+ if(!window.confirm("Permanently delete "+label+"?\n\nThis is allowed only when the student has no examination history. Records with examination history must be deactivated to preserve results."))return;
+ button.disabled=true;button.textContent="Deleting…";
+ try{
+  const {data,error}=await window.supabaseClient.functions.invoke("admin-students",{body:{action:"delete_student",student_id:student.id}});
+  if(error)throw error;if(!data||data.success!==true)throw new Error(data?.message||"Student could not be deleted.");
+  setNotice(data.message||"Student deleted.");await loadManageStudents();
+ }catch(err){setNotice(err.message||"Unable to delete student.");button.disabled=false;button.textContent="Delete";}
 }
 async function loadManageStudents(){
  if(!context)return;const body=$("manage-students-body");body.innerHTML='<tr><td colspan="5" class="table-empty">Loading student records…</td></tr>';
@@ -369,15 +380,25 @@ function renderTeachers(){
  visible.forEach(s=>{
   const tr=document.createElement("tr");
   [s.full_name||"—",s.staff_code||"—",s.email||"—",s.active===false?"Inactive":"Active"].forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.appendChild(td);});
-  const td=document.createElement("td"),view=document.createElement("button"),edit=document.createElement("button"),reset=document.createElement("button"),toggle=document.createElement("button");
-  [view,edit,reset,toggle].forEach(b=>{b.type="button";b.className="secondary-button";});
-  view.textContent="View";edit.textContent="Edit";reset.textContent="Reset Password";toggle.textContent=s.active===false?"Reactivate":"Deactivate";
+  const td=document.createElement("td"),view=document.createElement("button"),edit=document.createElement("button"),reset=document.createElement("button"),toggle=document.createElement("button"),remove=document.createElement("button");
+  [view,edit,reset,toggle,remove].forEach(b=>{b.type="button";b.className="secondary-button";});
+  view.textContent="View";edit.textContent="Edit";reset.textContent="Reset Password";toggle.textContent=s.active===false?"Reactivate":"Deactivate";remove.textContent="Delete";
+  remove.classList.add("delete-record-button");
   view.addEventListener("click",()=>openTeacherModal(s,false));edit.addEventListener("click",()=>openTeacherModal(s,true));
-  reset.addEventListener("click",()=>openTeacherModal(s,true,true));toggle.addEventListener("click",()=>toggleTeacherActive(s,toggle));
-  td.append(view,edit,reset,toggle);tr.appendChild(td);body.appendChild(tr);
+  reset.addEventListener("click",()=>openTeacherModal(s,true,true));toggle.addEventListener("click",()=>toggleTeacherActive(s,toggle));remove.addEventListener("click",()=>deleteTeacherRecord(s,remove));
+  td.append(view,edit,reset,toggle,remove);tr.appendChild(td);body.appendChild(tr);
  });
  $("teacher-page-info").textContent="Page "+teacherPage+" of "+pages+" • "+rows.length+" teacher(s)";
  $("teacher-prev").disabled=teacherPage<=1;$("teacher-next").disabled=teacherPage>=pages;
+}
+async function deleteTeacherRecord(teacher,button){
+ if(!window.confirm("Permanently delete teacher account for "+teacher.full_name+" ("+teacher.staff_code+")?\n\nTeachers who created examinations cannot be deleted; deactivate those accounts instead to preserve ownership and audit history."))return;
+ button.disabled=true;button.textContent="Deleting…";
+ try{
+  const {data,error}=await window.supabaseClient.functions.invoke("staff-management",{body:{action:"delete_staff",staff_id:teacher.id}});
+  if(error)throw error;if(!data||data.success!==true)throw new Error(data?.error||data?.message||"Teacher could not be deleted.");
+  setNotice(data.message||"Teacher account deleted.");await loadTeachers();
+ }catch(err){setNotice(err.message||"Unable to delete teacher account.");button.disabled=false;button.textContent="Delete";}
 }
 async function loadTeachers(){
  if(!context)return;const btn=$("reload-teachers"),body=$("teachers-table-body");btn.disabled=true;btn.textContent="Loading…";
