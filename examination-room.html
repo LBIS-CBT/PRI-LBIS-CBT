@@ -8,7 +8,7 @@
   <title>LBIS CBT | Examination Room</title>
   <link rel="stylesheet" href="assets/css/app.css?v=20261124-examroom1">
   <link rel="stylesheet" href="assets/css/examination-room.css?v=20261125-candidateidentity1">
-  <script src="assets/js/examination-room.js?v=20261126-unlimited1" defer></script>
+  <script src="assets/js/examination-room.js?v=20261126-mcqtheory1" defer></script>
 </head>
 <body class="exam-room-page">
   <header class="exam-topbar">
@@ -89,9 +89,20 @@
             <span><i class="legend-dot current"></i> Current</span>
             <span><i class="legend-dot unanswered"></i> Not answered</span>
           </div>
-          <button id="submit-exam" class="submit-exam-button" type="button">Submit Examination</button>
         </aside>
       </div>
+      <section id="theory-stage" class="theory-stage" hidden aria-label="Theory questions">
+        <div class="theory-stage-heading">
+          <p class="eyebrow">SECOND PART OF EXAMINATION</p>
+          <h2 id="theory-heading">THEORY QUESTIONS</h2>
+          <p>All objective questions have been completed. The theory questions below are to be answered on your examination paper. There is no Next button because all theory questions are displayed together.</p>
+        </div>
+        <div id="theory-question-list" class="theory-question-list"></div>
+        <div class="theory-submit-row">
+          <p>When you have finished writing all your theory answers on paper, submit your examination.</p>
+          <button id="submit-exam" class="submit-exam-button" type="button">Submit Examination</button>
+        </div>
+      </section>
       <p class="exam-security-note">Your answers are saved automatically. Do not close this page until you have submitted your examination.</p>
     </section>
 
