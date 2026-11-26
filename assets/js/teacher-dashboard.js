@@ -340,6 +340,12 @@ async function createExamination(event) {
   const button = $("teacher-create-submit");
   const feedback = $("teacher-create-message");
   if (!form.reportValidity()) return;
+  const durationValue = Number($("exam-duration").value);
+  if (!Number.isInteger(durationValue) || durationValue < 0 || durationValue > 300) {
+    feedback.textContent = "Duration must be 0 (untimed) or between 1 and 300 whole minutes.";
+    feedback.classList.remove("success");
+    return;
+  }
 
   const startsValue = $("exam-starts-at").value;
   const endsValue = $("exam-ends-at").value;
@@ -363,7 +369,7 @@ async function createExamination(event) {
       title: $("exam-title").value,
       subject: $("exam-subject").value,
       class_id: $("exam-class").value,
-      duration_minutes: Number($("exam-duration").value),
+      duration_minutes: durationValue,
       starts_at: startsAt ? startsAt.toISOString() : null,
       ends_at: endsAt ? endsAt.toISOString() : null
     };
