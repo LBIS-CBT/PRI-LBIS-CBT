@@ -85,3 +85,61 @@
   color: #fff;
 }
 .student-dashboard-page { background: #302d2e; }
+
+
+/* Released examination answer review */
+.student-answer-review-heading {
+  margin: 22px 0 12px;
+  color: #781d37;
+  font-size: 17px;
+  font-weight: 800;
+}
+.student-answer-review {
+  display: grid;
+  gap: 12px;
+}
+.student-answer-item {
+  padding: 15px 16px;
+  border: 1px solid #e5dfe1;
+  border-radius: 10px;
+  background: #fff;
+}
+.student-answer-item h4 {
+  margin: 0 0 8px;
+  color: #292326;
+  font-size: 14px;
+}
+.student-answer-question {
+  margin: 0 0 12px;
+  color: #292326;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.student-answer-response,
+.student-answer-correct,
+.student-answer-marks {
+  margin: 7px 0;
+  color: #51484b;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.student-answer-outcome {
+  display: inline-block;
+  margin-top: 5px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 800;
+}
+.student-answer-outcome.correct {
+  background: #e7f5ec;
+  color: #176638;
+}
+.student-answer-outcome.incorrect {
+  background: #fdebed;
+  color: #a32235;
+}
+.student-answer-outcome.not_answered {
+  background: #f1eff0;
+  color: #5d5558;
+}
