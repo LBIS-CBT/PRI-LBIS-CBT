@@ -259,3 +259,13 @@
 
 /* Requested dashboard canvas colour */
 .admin-body { background: #f0b1bd; }
+
+
+/* Lighten the full admin workspace canvas; keep cards and sidebar unchanged. */
+.admin-body,
+.admin-layout,
+.main-area,
+.content-area {
+  background-color: #f0b1bd !important;
+}
+.panel-view { background: transparent; }
