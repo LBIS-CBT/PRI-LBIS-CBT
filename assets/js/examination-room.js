@@ -16,12 +16,15 @@
     previous:$("previous-question"), next:$("next-question"), navigator:$("question-navigator"),
     navigatorTotal:$("navigator-total"), submit:$("submit-exam"), dialog:$("submit-dialog"),
     dialogMessage:$("submit-dialog-message"), confirm:$("confirm-submit"), cancel:$("cancel-submit"),
-    exit:$("exam-exit")
+    exit:$("exam-exit"), theoryStage:$("theory-stage"), theoryList:$("theory-question-list"), theoryHeading:$("theory-heading")
   };
   let token = "";
   let examId = "";
   let sessionId = "";
   let questions = [];
+  let objectiveQuestions = [];
+  let theoryQuestions = [];
+  let phase = "mcq";
   let answers = new Map();
   let currentIndex = 0;
   let deadlineMs = null;
@@ -101,31 +104,57 @@
     timerHandle = setInterval(renderTimer, 500);
   }
   function updateProgress() {
-    const requiredQuestions = questions.filter(q => Array.isArray(q.options) && q.options.length > 1);
-    const count = requiredQuestions.filter(q => answers.has(q.id)).length;
-    const total = requiredQuestions.length;
-    ui.answered.textContent = `${count} / ${total} answered`;
-    ui.progress.style.width = total ? `${Math.min(100, count / total * 100)}%` : "0%";
-    ui.navigatorTotal.textContent = `${total} questions`;
+    const count = objectiveQuestions.filter(q => answers.has(q.id)).length;
+    const total = objectiveQuestions.length;
+    ui.answered.textContent = phase === "theory" ? `${total} / ${total} MCQs completed · Theory section` : `${count} / ${total} MCQs answered`;
+    ui.progress.style.width = total ? `${Math.min(100, count / total * 100)}%` : "100%";
+    ui.navigatorTotal.textContent = `${total} MCQs`;
     [...ui.navigator.children].forEach((button, index) => {
-      button.classList.toggle("answered", answers.has(questions[index].id));
-      button.classList.toggle("current", index === currentIndex);
-      button.setAttribute("aria-current", index === currentIndex ? "step" : "false");
+      const q = objectiveQuestions[index];
+      button.classList.toggle("answered", answers.has(q.id));
+      button.classList.toggle("current", phase === "mcq" && index === currentIndex);
+      button.setAttribute("aria-current", phase === "mcq" && index === currentIndex ? "step" : "false");
     });
   }
   function renderQuestion() {
-    const q = questions[currentIndex];
+    const layout = document.querySelector(".exam-layout");
+    if (phase === "theory") {
+      layout.hidden = true;
+      ui.theoryStage.hidden = false;
+      ui.theoryHeading.textContent = "THEORY QUESTIONS";
+      ui.theoryList.replaceChildren();
+      theoryQuestions.forEach((q, i) => {
+        const article = document.createElement("article");
+        article.className = "theory-question-card";
+        const top = document.createElement("div");
+        top.className = "question-topline";
+        const label = document.createElement("span");
+        label.textContent = `THEORY QUESTION ${i + 1}`;
+        const note = document.createElement("span");
+        note.textContent = "Answer on paper";
+        top.append(label, note);
+        const heading = document.createElement("h3");
+        heading.textContent = q.question_text || "Question text unavailable.";
+        const instruction = document.createElement("p");
+        instruction.textContent = "Write your answer on the examination paper. No answer is required in the CBT.";
+        article.append(top, heading, instruction);
+        ui.theoryList.appendChild(article);
+      });
+      ui.submit.disabled = false;
+      showSave("All objective MCQs are complete. Answer the theory questions on paper, then submit your examination.");
+      updateProgress();
+      return;
+    }
+    layout.hidden = false;
+    ui.theoryStage.hidden = true;
+    const q = objectiveQuestions[currentIndex];
     if (!q) return;
-    ui.number.textContent = `QUESTION ${currentIndex + 1} OF ${questions.length}`;
+    ui.number.textContent = `MCQ ${currentIndex + 1} OF ${objectiveQuestions.length}`;
     ui.marks.textContent = `${Number(q.marks) || 0} ${Number(q.marks) === 1 ? "mark" : "marks"}`;
     ui.question.textContent = q.question_text || "Question text unavailable.";
+    ui.instruction.textContent = "Select one answer. All objective questions must be answered.";
     ui.options.replaceChildren();
-    const choices = Array.isArray(q.options) ? q.options : [];
-    const isTheory = choices.length === 1;
-    ui.instruction.textContent = isTheory
-      ? "THEORY QUESTION — Read the question and answer on paper. No option is required in the CBT."
-      : q.is_required === false ? "This question is optional. Select one answer." : "Select one answer.";
-    (isTheory ? [] : choices).forEach((choice, index) => {
+    (q.options || []).forEach((choice, index) => {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "answer-option";
@@ -134,26 +163,27 @@
       const letter = document.createElement("span");
       letter.className = "option-letter";
       letter.textContent = String.fromCharCode(65 + index);
-      const text = document.createElement("span");
-      text.className = "option-text";
-      text.textContent = typeof choice === "string" ? choice : (choice && (choice.text || choice.label || choice.value)) || String(choice ?? "");
-      button.append(letter, text);
+      const value = document.createElement("span");
+      value.className = "option-text";
+      value.textContent = typeof choice === "string" ? choice : (choice && (choice.text || choice.label || choice.value)) || String(choice ?? "");
+      button.append(letter, value);
       button.addEventListener("click", () => selectAnswer(index));
       ui.options.appendChild(button);
     });
     ui.previous.disabled = currentIndex === 0;
-    ui.next.textContent = currentIndex === questions.length - 1 ? "Last Question" : "Next Question";
-    showSave(answers.has(q.id) ? "Answer selected. Saving status is shown here." : "Your answers are saved automatically.");
+    ui.next.textContent = currentIndex === objectiveQuestions.length - 1 ? (theoryQuestions.length ? "Continue to Theory" : "Finish MCQs") : "Next Question";
+    ui.submit.disabled = true;
     updateProgress();
+    showSave(answers.has(q.id) ? "Answer selected. Saving status is shown here." : "Your answers are saved automatically.");
   }
   function renderNavigator() {
     ui.navigator.replaceChildren();
-    questions.forEach((q, index) => {
+    objectiveQuestions.forEach((q, index) => {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "question-number";
       button.textContent = String(index + 1);
-      button.setAttribute("aria-label", `Go to question ${index + 1}`);
+      button.setAttribute("aria-label", `Go to MCQ ${index + 1}`);
       button.addEventListener("click", () => goToQuestion(index));
       ui.navigator.appendChild(button);
     });
@@ -161,7 +191,8 @@
   }
   function selectAnswer(index) {
     if (finished || submitting) return;
-    const q = questions[currentIndex];
+    if (phase !== "mcq") return;
+    const q = objectiveQuestions[currentIndex];
     if (!q || !Array.isArray(q.options) || q.options.length <= 1 || index < 0 || index >= q.options.length) return;
     answers.set(q.id, index);
     [...ui.options.children].forEach((button, i) => {
@@ -174,7 +205,7 @@
     // Serialize saves so rapid answer changes cannot arrive out of order.
     saving = saving.then(async () => {
       const result = await api("save_answer", {question_id:q.id, selected_option_index:index});
-      if (currentIndex < questions.length && questions[currentIndex]?.id === q.id && answers.get(q.id) === index) {
+      if (phase === "mcq" && currentIndex < objectiveQuestions.length && objectiveQuestions[currentIndex]?.id === q.id && answers.get(q.id) === index) {
         showSave("Answer saved successfully.", "saved");
       }
       return result;
@@ -183,15 +214,25 @@
     });
   }
   async function goToQuestion(index) {
-    if (index < 0 || index >= questions.length || index === currentIndex || finished) return;
+    if (phase !== "mcq" || index < 0 || index >= objectiveQuestions.length || index === currentIndex || finished) return;
     currentIndex = index;
     renderQuestion();
     try {
-      await api("set_current_question", {question_id:questions[index].id});
+      await api("set_current_question", {question_id:objectiveQuestions[index].id});
     } catch (error) {
       if (error.status === 409) await handleEnded(error.message);
       else showSave(error.message || "Unable to update question position.", "error");
     }
+  }
+  async function continueFromMcq() {
+    const unanswered = objectiveQuestions.filter(q => !answers.has(q.id)).length;
+    if (unanswered > 0) {
+      showSave(`Please answer all objective MCQs first. ${unanswered} question(s) remain unanswered.`, "error");
+      return;
+    }
+    await saving;
+    phase = "theory";
+    renderQuestion();
   }
   async function heartbeat() {
     if (finished || submitting || !sessionId) return;
@@ -277,12 +318,15 @@
     }
   }
   function askSubmit() {
-    if (finished || submitting) return;
-    const requiredQuestions = questions.filter(q => Array.isArray(q.options) && q.options.length > 1);
-    const unanswered = requiredQuestions.filter(q => !answers.has(q.id)).length;
-    ui.dialogMessage.textContent = unanswered > 0
-      ? `You have ${unanswered} unanswered question(s). If you submit now, you cannot change your answers. Continue?`
-      : "You have answered all questions. Once submitted, you cannot change your answers.";
+    if (finished || submitting || phase !== "theory") return;
+    const unanswered = objectiveQuestions.filter(q => !answers.has(q.id)).length;
+    if (unanswered > 0) {
+      showSave(`You still have ${unanswered} unanswered objective MCQ(s). Complete them before submitting.`, "error");
+      return;
+    }
+    ui.dialogMessage.textContent = theoryQuestions.length
+      ? "Have you completed writing all the theory answers on your examination paper? Once submitted, you cannot return to this examination."
+      : "You have answered all objective questions. Once submitted, you cannot change your answers.";
     ui.dialog.hidden = false;
     ui.confirm.disabled = false;
     ui.cancel.disabled = false;
@@ -312,13 +356,17 @@
       sessionStorage.setItem(SESSION_KEY, sessionId);
       questions = data.questions;
       if (!questions.length) throw new Error("There are no questions available in this examination.");
+      objectiveQuestions = questions.filter(q => Array.isArray(q.options) && q.options.length > 1);
+      theoryQuestions = questions.filter(q => Array.isArray(q.options) && q.options.length === 1);
       (data.answers || []).forEach((answer) => {
         const question = questions.find(q => q.id === answer.question_id);
         if (question && Array.isArray(question.options) && question.options.length > 1 && Number.isInteger(answer.selected_option_index)) answers.set(answer.question_id, answer.selected_option_index);
       });
       const preferred = data.session.current_question_id;
-      const savedIndex = questions.findIndex((q) => q.id === preferred);
+      const savedIndex = objectiveQuestions.findIndex(q => q.id === preferred);
       currentIndex = savedIndex >= 0 ? savedIndex : 0;
+      const allMcqsAnswered = objectiveQuestions.every(q => answers.has(q.id));
+      phase = (objectiveQuestions.length === 0 || allMcqsAnswered) && theoryQuestions.length > 0 ? "theory" : "mcq";
       deadlineMs = data.session.deadline_at ? Date.parse(data.session.deadline_at) : null;
       updateClock(data.server_time);
       const candidateName = document.getElementById("candidate-full-name");
