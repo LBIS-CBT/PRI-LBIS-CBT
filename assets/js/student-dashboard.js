@@ -136,7 +136,75 @@
     card.appendChild(button);
     return card;
   }
-  function renderStudentResults(){resultsList.replaceChildren();if(!releasedResults.length){resultsMessage.textContent="No results have been released by the school yet. Please check again later.";resultsMessage.hidden=false;return;}resultsMessage.textContent="The following subject results have been officially released by the school.";resultsMessage.hidden=false;releasedResults.forEach(result=>{const card=document.createElement("article");card.className="student-result-card";const head=document.createElement("div");head.className="student-result-card-head";const title=document.createElement("h3");title.textContent=result.subject||result.title||"Examination";const status=document.createElement("span");status.className="student-result-published";status.textContent="PUBLISHED";head.append(title,status);const exam=document.createElement("p");exam.textContent=result.title||"";const stats=document.createElement("div");stats.className="student-result-stats";[["Score",String(result.score)+" / "+String(result.total_marks)],["Percentage",result.percentage==null?"—":Number(result.percentage).toFixed(1)+"%"],["Attempt","Attempt "+result.attempt_number]].forEach(([label,value])=>{const item=document.createElement("div"),small=document.createElement("span"),strong=document.createElement("strong");small.textContent=label;strong.textContent=value;item.append(small,strong);stats.append(item);});const submitted=document.createElement("p");submitted.className="student-result-date";submitted.textContent="Submitted: "+safeDate(result.submitted_at);card.append(head,exam,stats,submitted);resultsList.appendChild(card);});}
+  function renderStudentResults(){
+    resultsList.replaceChildren();
+    if(!releasedResults.length){
+      resultsMessage.textContent="No results have been released by the school yet. Please check again later.";
+      resultsMessage.hidden=false;
+      return;
+    }
+    resultsMessage.textContent="The following examination results and answer reviews have been officially released by the school.";
+    resultsMessage.hidden=false;
+    releasedResults.forEach(result=>{
+      const card=document.createElement("article");
+      card.className="student-result-card";
+      const head=document.createElement("div");
+      head.className="student-result-card-head";
+      const title=document.createElement("h3");
+      title.textContent=result.subject||result.title||"Examination";
+      const status=document.createElement("span");
+      status.className="student-result-published";
+      status.textContent="PUBLISHED";
+      head.append(title,status);
+      const exam=document.createElement("p");
+      exam.textContent=result.title||"";
+      const stats=document.createElement("div");
+      stats.className="student-result-stats";
+      [["Score",String(result.score)+" / "+String(result.total_marks)],["Percentage",result.percentage==null?"—":Number(result.percentage).toFixed(1)+"%"],["Attempt","Attempt "+result.attempt_number]].forEach(([label,value])=>{
+        const item=document.createElement("div"),small=document.createElement("span"),strong=document.createElement("strong");
+        small.textContent=label;strong.textContent=value;item.append(small,strong);stats.append(item);
+      });
+      const submitted=document.createElement("p");
+      submitted.className="student-result-date";
+      submitted.textContent="Submitted: "+safeDate(result.submitted_at);
+      const reviewHeading=document.createElement("h4");
+      reviewHeading.className="student-answer-review-heading";
+      reviewHeading.textContent="Question and Answer Review";
+      const review=document.createElement("div");
+      review.className="student-answer-review";
+      (Array.isArray(result.questions)?result.questions:[]).forEach(question=>{
+        const item=document.createElement("section");
+        item.className="student-answer-item";
+        const qTitle=document.createElement("h4");
+        qTitle.textContent="Question "+question.question_number;
+        const prompt=document.createElement("p");
+        prompt.className="student-answer-question";
+        prompt.textContent=question.question_text||"Question text unavailable";
+        const response=document.createElement("p");
+        response.className="student-answer-response";
+        const correct=document.createElement("p");
+        correct.className="student-answer-correct";
+        const outcome=document.createElement("span");
+        const state=question.response_status||"not_answered";
+        outcome.className="student-answer-outcome "+state;
+        outcome.textContent=state==="correct"?"Correct":state==="incorrect"?"Incorrect":"Not answered";
+        response.append("Your answer: "+(question.selected_answer??"Not answered"));
+        correct.append("Correct answer: "+(question.correct_answer??"Not available"));
+        const marks=document.createElement("p");
+        marks.className="student-answer-marks";
+        marks.textContent="Marks: "+Number(question.marks_awarded||0)+" / "+Number(question.marks||0);
+        item.append(qTitle,prompt,response,correct,outcome,marks);
+        review.appendChild(item);
+      });
+      if(!review.childElementCount){
+        const empty=document.createElement("p");
+        empty.textContent="The school has released the score, but question-by-question review is not available for this examination.";
+        review.appendChild(empty);
+      }
+      card.append(head,exam,stats,submitted,reviewHeading,review);
+      resultsList.appendChild(card);
+    });
+  }
   async function loadStudentResults(){const token=getSession();if(!token){signOut();return;}resultsRefresh.disabled=true;resultsRefresh.textContent="Loading…";try{const response=await fetch(`${SUPABASE_URL}/functions/v1/student-dashboard`,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_PUBLISHABLE_KEY,"Authorization":`Bearer ${token}`},body:JSON.stringify({action:"load_dashboard"}),cache:"no-store"});const data=await response.json().catch(()=>({}));if(response.status===401){signOut();return;}if(!response.ok||data.success!==true)throw new Error(data.message||"Results could not be loaded.");releasedResults=Array.isArray(data.released_results)?data.released_results:[];renderStudentResults();}catch(error){resultsMessage.textContent=error.message||"Unable to load results.";resultsMessage.className="dashboard-message error";}finally{resultsRefresh.disabled=false;resultsRefresh.textContent="Refresh Results";}}
   async function loadDashboard() {
     const token = getSession();
