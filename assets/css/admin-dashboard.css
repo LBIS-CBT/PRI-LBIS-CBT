@@ -251,3 +251,7 @@
 
 /* Live candidate monitoring */
 .live-progress{display:flex;align-items:center;gap:7px;min-width:92px}.live-progress__bar{height:7px;width:58px;border-radius:99px;background:#ece7e9;overflow:hidden}.live-progress__fill{height:100%;background:#287a53;border-radius:99px}.live-progress small{font-size:10px;color:var(--muted)}.live-stat-grid{margin-bottom:16px}
+
+
+/* Slightly darker dashboard canvas makes white cards stand out clearly. */
+.admin-body { background: #e5e3e5; }
