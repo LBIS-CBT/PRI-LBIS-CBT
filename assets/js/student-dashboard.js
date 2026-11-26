@@ -205,7 +205,7 @@
         (Array.isArray(question.options)?question.options:[]).forEach(option=>{
           // The ordered list supplies A/B/C/D; remove letters already included in option text.
           let text=typeof option==="string"?option:(option&&(option.text||option.label||option.value))||String(option??"");
-          text=String(text).replace(/^\\s*[A-D]\\s*[.)-]\\s*/i,"");
+          text=String(text).replace(/^\s*[A-D]\s*[.)-]\s*/i,"")
           const li=document.createElement("li");li.textContent=text;optionList.appendChild(li);
         });
         if(optionList.childElementCount)options.appendChild(optionList);else options.appendChild(document.createTextNode(" No options available."));
