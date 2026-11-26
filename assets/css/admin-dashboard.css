@@ -381,3 +381,29 @@ body.admin-body #admin-layout .content-area > .panel-view > h3 {
 .topbar-signout{width:auto;min-height:38px;margin:0 0 0 8px;padding:8px 14px;border:1px solid #781d37;border-radius:7px;background:#781d37;color:#fff;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
 .topbar-signout:hover{background:#5f142b;border-color:#5f142b}
 @media(max-width:900px){.topbar-user{gap:8px}.topbar-signout{padding:7px 10px;font-size:11px}}
+
+
+/* Combined Teacher + Admin account: readable labels on the grey workspace canvas.
+   White cards, forms and tables keep their own dark, high-contrast typography. */
+body.admin-body #admin-layout .content-area,
+body.admin-body #admin-layout .content-area .panel-view{
+  color:#fff;
+}
+body.admin-body #admin-layout .content-area .section-title h3,
+body.admin-body #admin-layout .content-area .section-title p,
+body.admin-body #admin-layout .content-area .section-title .form-help,
+body.admin-body #admin-layout .content-area .panel-view > h2,
+body.admin-body #admin-layout .content-area .panel-view > h3,
+body.admin-body #admin-layout .content-area .panel-view > p:not(.empty-state),
+body.admin-body #admin-layout .content-area .panel-view > label,
+body.admin-body #admin-layout .content-area .panel-view > .form-help{
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+}
+body.admin-body #admin-layout .content-area .table-card,
+body.admin-body #admin-layout .content-area .form-card,
+body.admin-body #admin-layout .content-area .stat-card,
+body.admin-body #admin-layout .content-area .security-note,
+body.admin-body #admin-layout .content-area .shortcut-card{
+  color:#292629;
+}
