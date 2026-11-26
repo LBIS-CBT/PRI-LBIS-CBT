@@ -5,7 +5,7 @@ const layout=$("admin-layout"), notice=$("dashboard-message");
 if(!layout)return;
 if(window.matchMedia("(max-width:600px)").matches){$("unsupported-device").hidden=false;return;}
 const setNotice=(s)=>{notice.textContent=s||""};
-const label=r=>r==="super_admin"?"Super Administrator":r==="admin"?"Administrator":"Staff";
+const label=p=>p.role==="teacher"?(p.admin_level==="super_admin"?"Teacher + Super Admin":p.admin_level==="admin"?"Teacher + Admin":"Teacher"):p.role==="super_admin"?"Super Administrator":p.role==="admin"?"Administrator":"Staff";
 function showPanel(name){
  document.querySelectorAll(".panel-view").forEach(p=>p.classList.toggle("active",p.id==="panel-"+name));
  document.querySelectorAll(".nav-button").forEach(b=>b.classList.toggle("active",b.dataset.panel===name));
@@ -26,7 +26,7 @@ async function session(){
  const timeout=(promise,ms,message)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(message)),ms))]);
  const paintProfile=p=>{
   $("staff-name").textContent=p.full_name||"Administrator";$("staff-code").textContent=p.staff_code||"—";
-  $("staff-role").textContent=label(p.role);$("profile-role").textContent=label(p.role);
+  $("staff-role").textContent=label(p);$("profile-role").textContent=label(p);
   $("top-user").textContent=p.full_name||p.staff_code||"Administrator";
   $("user-initials").textContent=(p.full_name||"LB").split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase();
  };
@@ -37,19 +37,20 @@ async function session(){
   if(!data?.session){location.replace("admin-login.html");return null;}
   let p=null;
   try{
-   const result=await timeout(window.supabaseClient.from("user_profiles").select("id,full_name,staff_code,role,active").eq("id",data.session.user.id).single(),10000,"Account profile check timed out.");
+   const result=await timeout(window.supabaseClient.from("user_profiles").select("id,full_name,staff_code,role,admin_level,active").eq("id",data.session.user.id).single(),10000,"Account profile check timed out.");
    if(result.error)throw result.error;
    p=result.data;
   }catch(profileError){
-   if(cached?.id===data.session.user.id&&["admin","super_admin"].includes(cached.role)){
+   if(cached?.id===data.session.user.id&&(["admin","super_admin"].includes(cached.role)||["admin","super_admin"].includes(cached.admin_level))){
     console.warn("LBIS profile refresh unavailable; using the signed-in profile for display. Protected actions remain server-authorized.",profileError);
     p={...cached,active:true};
     setNotice("Account details could not be refreshed right now. Protected actions will still be checked securely.");
    }else throw profileError;
   }
   if(!p||p.active===false){await window.supabaseClient.auth.signOut();sessionStorage.removeItem("lbis_staff_profile");location.replace("admin-login.html");return null;}
-  if(!["admin","super_admin"].includes(p.role)){location.replace("staff-dashboard.html");return null;}
+  if(!(["admin","super_admin"].includes(p.role)||["admin","super_admin"].includes(p.admin_level||"none"))){location.replace("staff-dashboard.html");return null;}
   paintProfile(p);
+  if(p.role==="teacher"){$("switch-teacher-dashboard").hidden=false;$("switch-teacher-dashboard").addEventListener("click",()=>location.assign("staff-dashboard.html"));}
   return {profile:p,session:data.session};
  }catch(error){
   console.error("LBIS dashboard account initialization failed:",error);
@@ -386,7 +387,7 @@ function renderTeachers(){
   remove.classList.add("delete-record-button");
   view.addEventListener("click",()=>openTeacherModal(s,false));edit.addEventListener("click",()=>openTeacherModal(s,true));
   reset.addEventListener("click",()=>openTeacherModal(s,true,true));toggle.addEventListener("click",()=>toggleTeacherActive(s,toggle));remove.addEventListener("click",()=>deleteTeacherRecord(s,remove));
-  if(context?.profile?.role==="super_admin"){
+  if(context?.profile?.role==="super_admin"||context?.profile?.admin_level==="super_admin"){
    const promote=document.createElement("button");promote.type="button";promote.className="secondary-button role-change-button";promote.textContent="Change Role";
    promote.addEventListener("click",()=>openTeacherRoleModal(s));td.append(promote);
   }
@@ -432,11 +433,11 @@ function openTeacherModal(s,editing,resetOnly=false){
  $("teacher-modal").hidden=false;
 }
 function openTeacherRoleModal(s){
- if(context?.profile?.role!=="super_admin"){setNotice("Only an active Super Admin can change staff roles.");return;}
+ if(!(context?.profile?.role==="super_admin"||context?.profile?.admin_level==="super_admin")){setNotice("Only an active Super Admin can change staff roles.");return;}
  selectedTeacher=s;
- const form=$("teacher-role-form");form.elements.role.value="admin";
- $("teacher-modal-title").textContent="Change Staff Role";
- $("teacher-modal-status").textContent="Account: "+(s.full_name||"Staff member")+" • Current role: "+label(s.role);
+ const form=$("teacher-role-form");form.elements.admin_level.value=s.admin_level||"none";
+ $("teacher-modal-title").textContent="Administrative Access";
+ $("teacher-modal-status").textContent="Account: "+(s.full_name||"Staff member")+" • Primary role: Teacher • Administrative access: "+(s.admin_level||"none").replace("_"," ");
  $("teacher-edit-form").querySelectorAll("input:not([type=hidden])").forEach(el=>el.disabled=true);
  $("save-teacher-edit").hidden=true;
  $("teacher-reset-form").hidden=true;
@@ -470,18 +471,18 @@ $("teacher-edit-form").addEventListener("submit",async ev=>{
 });
 $("teacher-role-form").addEventListener("submit",async ev=>{
  ev.preventDefault();
- if(!selectedTeacher||context?.profile?.role!=="super_admin"){setNotice("Only an active Super Admin can change staff roles.");return;}
- const form=ev.currentTarget,btn=$("save-teacher-role"),newRole=form.elements.role.value;
- if(!["admin","super_admin"].includes(newRole)){setNotice("Select a valid staff role.");return;}
- const roleName=newRole==="super_admin"?"Super Admin":"Admin";
- if(!window.confirm("Promote "+(selectedTeacher.full_name||"this teacher")+" to "+roleName+"?\n\nThe existing login, password, staff code and examination history will remain unchanged."))return;
+ if(!selectedTeacher||!(context?.profile?.role==="super_admin"||context?.profile?.admin_level==="super_admin")){setNotice("Only an active Super Admin can change staff roles.");return;}
+ const form=ev.currentTarget,btn=$("save-teacher-role"),newLevel=form.elements.admin_level.value;
+ if(!["none","admin","super_admin"].includes(newLevel)){setNotice("Select a valid administrative access level.");return;}
+ const roleName=newLevel==="super_admin"?"Super Admin":newLevel==="admin"?"Admin":"No administrative access";
+ if(!window.confirm("Set "+(selectedTeacher.full_name||"this teacher")+" to "+roleName+"?\n\nTheir Teacher role, assignments, login, password and examination history will remain unchanged."))return;
  btn.disabled=true;btn.textContent="Updating Role…";
  try{
-  const {data,error}=await window.supabaseClient.functions.invoke("staff-management",{body:{action:"change_staff_role",staff_id:selectedTeacher.id,role:newRole}});
+  const {data,error}=await window.supabaseClient.functions.invoke("staff-management",{body:{action:"set_staff_admin_level",staff_id:selectedTeacher.id,admin_level:newLevel}});
   if(error)throw error;
   if(!data||data.success!==true)throw new Error(data?.error||data?.message||"Staff role could not be changed.");
   $("teacher-modal").hidden=true;
-  setNotice((data.message||"Staff role updated.")+" "+(selectedTeacher.full_name||"The staff member")+" is now "+roleName+".");
+  setNotice((data.message||"Staff role updated.")+" "+(selectedTeacher.full_name||"The staff member")+" now has "+roleName+" access. Teacher access is unchanged.");
   await loadTeachers();
  }catch(err){setNotice(err.message||"Unable to change staff role.");}
  finally{btn.disabled=false;btn.textContent="Confirm Role Change";}
