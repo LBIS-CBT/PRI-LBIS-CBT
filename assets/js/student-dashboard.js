@@ -26,6 +26,15 @@
     clearSession();
     window.location.replace("student-login.html");
   }
+
+  // Five-minute timeout applies to the dashboard only. The examination room
+  // intentionally does not load this script, so active exams are exempt.
+  const studentIdleLimit=300000;let studentLastActivity=Date.now(),studentIdleTimer=null,studentIdleLoggedOut=false;
+  function resetStudentIdleTimer(){if(studentIdleLoggedOut)return;studentLastActivity=Date.now();clearTimeout(studentIdleTimer);studentIdleTimer=setTimeout(()=>{studentIdleLoggedOut=true;signOut();},studentIdleLimit);}
+  ["pointerdown","pointermove","keydown","scroll","touchstart","click"].forEach(e=>window.addEventListener(e,resetStudentIdleTimer,{passive:true}));
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden&&Date.now()-studentLastActivity>=studentIdleLimit&&!studentIdleLoggedOut){studentIdleLoggedOut=true;signOut();}});
+  resetStudentIdleTimer();
+
   function getSession() {
     const token = sessionStorage.getItem(tokenKey);
     const expiresAt = sessionStorage.getItem(expiryKey);
