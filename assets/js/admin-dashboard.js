@@ -294,6 +294,26 @@ $("add-student-form").addEventListener("submit",async ev=>{
 });
 let studentRecords=[],studentPage=1,studentPageSize=10,studentClasses=[];
 function classLabel(id){const c=studentClasses.find(x=>x.id===id);return c?c.name+(c.level?" — "+c.level:""):"—";}
+
+function exportCsv(filename,headers,rows){
+ const quote=value=>'"'+String(value??"").replace(/"/g,'""')+'"';
+ const csv=String.fromCharCode(65279)+[headers,...rows].map(row=>row.map(quote).join(",")).join(String.fromCharCode(13,10));
+ const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
+ const url=URL.createObjectURL(blob),a=document.createElement("a");
+ a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function exportFilteredStudents(){
+ const q=$("student-search").value.trim().toLowerCase(),classId=$("manage-student-class").value;
+ const rows=studentRecords.filter(s=>(!q||String(s.full_name||"").toLowerCase().includes(q)||String(s.admission_number||"").toLowerCase().includes(q))&&(!classId||s.class_id===classId));
+ exportCsv("LBIS-Filtered-Students.csv",["Name","Admission Number","Class"],rows.map(s=>[s.full_name,s.admission_number,classLabel(s.class_id)]));
+}
+function exportFilteredTeachers(){
+ const q=$("teacher-search").value.trim().toLowerCase(),status=$("teacher-status-filter").value;
+ const rows=teacherRecords.filter(s=>{const active=s.active!==false;return s.role==="teacher"&&(!q||String(s.full_name||"").toLowerCase().includes(q)||String(s.staff_code||"").toLowerCase().includes(q))&&(!status||(status==="active"?active:!active));});
+ exportCsv("LBIS-Filtered-Teachers.csv",["Name","Admin Code"],rows.map(s=>[s.full_name,s.staff_code]));
+}
+
 function renderManageStudents(){
  const tbody=$("manage-students-body");tbody.replaceChildren();
  const q=$("student-search").value.trim().toLowerCase(),classId=$("manage-student-class").value;
@@ -590,4 +610,6 @@ window.addEventListener("popstate",()=>{
  }).catch(()=>location.replace("admin-login.html"));
 });
 $("refresh-examinations").addEventListener("click",loadExaminations);
+$("export-students-csv")?.addEventListener("click",exportFilteredStudents);
+$("export-teachers-csv")?.addEventListener("click",exportFilteredTeachers);
 })();
