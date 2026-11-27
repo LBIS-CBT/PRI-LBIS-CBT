@@ -22,6 +22,20 @@
     }
   );
 
+
+  // Staff dashboards auto sign out after five minutes without activity.
+  function installStaffIdleLogout(){
+    const page=location.pathname.split("/").pop();
+    if(!["admin-dashboard.html","staff-dashboard.html","teacher-dashboard.html"].includes(page))return;
+    const limit=300000;let last=Date.now(),timer=null,done=false;
+    const logout=()=>{if(done)return;done=true;clearTimeout(timer);sessionStorage.removeItem("lbis_staff_profile");sessionStorage.removeItem("lbis_last_dashboard");Promise.resolve(window.supabaseClient?.auth?.signOut()).finally(()=>location.replace("admin-login.html"));};
+    const reset=()=>{if(done)return;last=Date.now();clearTimeout(timer);timer=setTimeout(logout,limit);};
+    ["pointerdown","pointermove","keydown","scroll","touchstart","click"].forEach(e=>window.addEventListener(e,reset,{passive:true}));
+    document.addEventListener("visibilitychange",()=>{if(!document.hidden&&Date.now()-last>=limit)logout();});
+    reset();
+  }
+  installStaffIdleLogout();
+
   const STAFF_LOGIN_URL = `${SUPABASE_URL}/functions/v1/staff-login`;
 
   // Restore the previous workspace when an authenticated staff member
