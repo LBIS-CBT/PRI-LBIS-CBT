@@ -1,6 +1,6 @@
 (() => {
  "use strict";
- const css=".lbis-password-control{position:relative;display:flex;align-items:stretch;width:100%}.lbis-password-control input{flex:1;min-width:0;padding-right:3.25rem}.lbis-password-toggle{position:absolute;right:.35rem;top:50%;transform:translateY(-50%);border:0;background:transparent;color:inherit;cursor:pointer;padding:.45rem .6rem;border-radius:.35rem;font:inherit;line-height:1}.lbis-password-toggle:focus-visible{outline:2px solid currentColor;outline-offset:2px}";
+ const css=".lbis-password-control{position:relative;display:flex;align-items:stretch;width:100%}.lbis-password-control input{flex:1;min-width:0;padding-right:3.25rem}.lbis-password-toggle,.lbis-password-toggle:hover,.lbis-password-toggle:focus,.lbis-password-toggle:active{position:absolute;right:.35rem;top:50%;transform:translateY(-50%);border:0!important;background:transparent!important;background-color:transparent!important;color:inherit!important;box-shadow:none!important;cursor:pointer;padding:.45rem .6rem;border-radius:.35rem;font:inherit;line-height:1;outline:none}.lbis-password-toggle:focus-visible{outline:2px solid currentColor!important;outline-offset:2px}";
  const style=document.createElement("style");style.textContent=css;document.head.appendChild(style);
  document.querySelectorAll('input[type="password"]').forEach(input=>{
   if(input.dataset.lbisToggleReady)return;input.dataset.lbisToggleReady="1";
