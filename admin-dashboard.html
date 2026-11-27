@@ -96,6 +96,7 @@
    <div class="form-card student-filters">
     <div class="form-grid">
      <label>Search student<input id="student-search" type="search" placeholder="Name or admission number"></label>
+     <button class="secondary-button" id="export-students-csv" type="button">Download Filtered Students CSV</button>
      <label>Filter by class<select id="manage-student-class"><option value="">All classes</option></select></label>
     </div>
    </div>
@@ -106,6 +107,7 @@
    <div class="section-title"><div><h3>Manage Teachers</h3><p>Search, view, edit and manage teacher accounts. Super Admins can promote existing teachers to Admin or Super Admin without creating another account.</p></div><button class="secondary-button" id="reload-teachers" type="button">Refresh Teachers</button></div>
    <div class="form-card teacher-filters"><div class="form-grid">
     <label>Search teacher<input id="teacher-search" type="search" placeholder="Teacher name or staff code"></label>
+    <button class="secondary-button" id="export-teachers-csv" type="button">Download Filtered Teachers CSV</button>
     <label>Filter by status<select id="teacher-status-filter"><option value="">All statuses</option><option value="active">Active</option><option value="inactive">Inactive</option></select></label>
    </div></div>
    <div class="table-card teacher-table-card"><div class="table-scroll"><table class="staff-table"><thead><tr><th>Teacher Name</th><th>Staff Code</th><th>Email</th><th>Status</th><th>Actions</th></tr></thead><tbody id="teachers-table-body"><tr><td colspan="5" class="table-empty">Select Refresh Teachers to load teacher accounts.</td></tr></tbody></table></div><div class="student-pagination"><span id="teacher-page-info">Page 0 of 0</span><div><button class="secondary-button" id="teacher-prev" type="button">Previous</button> <button class="secondary-button" id="teacher-next" type="button">Next</button></div></div></div>
