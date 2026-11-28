@@ -473,19 +473,25 @@ async function init() {
   await loadGoogleConnectionStatus();
 }
 
-$("teacher-sign-out").addEventListener("click", async () => {
-  const button = $("teacher-sign-out");
+async function handleTeacherSignOut(button) {
+  if (!button || button.disabled) return;
+  const originalText = button.textContent;
   button.disabled = true;
-  button.textContent = "Signing out…";
+  button.textContent = "Logging out…";
   const { error } = await window.supabaseClient.auth.signOut();
   if (error) {
     button.disabled = false;
-    button.textContent = "↪  Sign Out";
+    button.textContent = originalText;
     say("Unable to sign out. Please try again.");
     return;
   }
   sessionStorage.removeItem("lbis_staff_profile");
+  sessionStorage.removeItem("lbis_last_dashboard");
   location.replace("admin-login.html");
+}
+
+[$("teacher-sign-out"), $("teacher-top-sign-out")].forEach(button => {
+  button?.addEventListener("click", () => handleTeacherSignOut(button));
 });
 
 init().catch(error => {
