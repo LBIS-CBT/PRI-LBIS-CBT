@@ -417,3 +417,26 @@ footer { color: #e4e0e2; }
   .login-panel .school-name { margin-bottom: 14px; }
   .page-shell > footer { margin-top: 8px; }
 }
+
+/* Consistent, high-visibility TUPS Technologies footer across all application pages. */
+.tups-footer{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:10px;
+  width:100%;
+  box-sizing:border-box;
+  margin-top:auto;
+  padding:15px 20px;
+  border-top:1px solid #dedadd;
+  background:#fff;
+  color:#171717;
+  text-align:center;
+  font-size:14px;
+  line-height:1.5;
+}
+.tups-footer strong{font-size:14px;font-weight:800;color:#171717}
+.tups-footer a{color:#171717;font-weight:800;text-decoration:underline;text-underline-offset:2px}
+.tups-footer a:hover{color:#781d37}
+.tups-footer em{font-style:italic}
