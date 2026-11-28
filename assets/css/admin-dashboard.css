@@ -444,3 +444,27 @@ body.admin-body #admin-layout .content-area .shortcut-card *,
 body.admin-body #admin-layout .content-area .student-modal-card * {
   -webkit-text-fill-color: currentColor;
 }
+
+/* Make administrative panel headings readable on the dark-grey workspace.
+   Typography inside white cards remains dark for contrast. */
+body.admin-body #admin-layout .content-area .panel-view > .section-title h2,
+body.admin-body #admin-layout .content-area .panel-view > .section-title h3,
+body.admin-body #admin-layout .content-area .panel-view .section-title h2,
+body.admin-body #admin-layout .content-area .panel-view .section-title h3,
+body.admin-body #admin-layout .content-area .panel-view > h2,
+body.admin-body #admin-layout .content-area .panel-view > h3{
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+}
+body.admin-body #admin-layout .content-area .table-card h1,
+body.admin-body #admin-layout .content-area .table-card h2,
+body.admin-body #admin-layout .content-area .table-card h3,
+body.admin-body #admin-layout .content-area .form-card h1,
+body.admin-body #admin-layout .content-area .form-card h2,
+body.admin-body #admin-layout .content-area .form-card h3,
+body.admin-body #admin-layout .content-area .security-note h1,
+body.admin-body #admin-layout .content-area .security-note h2,
+body.admin-body #admin-layout .content-area .security-note h3{
+  color:#292629!important;
+  -webkit-text-fill-color:#292629!important;
+}
