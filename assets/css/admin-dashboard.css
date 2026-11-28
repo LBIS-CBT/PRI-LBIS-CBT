@@ -468,3 +468,36 @@ body.admin-body #admin-layout .content-area .security-note h3{
   color:#292629!important;
   -webkit-text-fill-color:#292629!important;
 }
+
+
+/* FINAL FIX: headings in every Admin Dashboard sidebar destination. */
+body.admin-body #admin-layout .main-area .content-area .panel-view .section-title h3,
+body.admin-body #admin-layout .main-area .content-area .panel-view .section-title h3 *,
+body.admin-body #admin-layout .main-area .content-area .panel-view > h1,
+body.admin-body #admin-layout .main-area .content-area .panel-view > h2,
+body.admin-body #admin-layout .main-area .content-area .panel-view > h3,
+body.admin-body #admin-layout .main-area .content-area .panel-view .panel-heading h1,
+body.admin-body #admin-layout .main-area .content-area .panel-view .panel-heading h2,
+body.admin-body #admin-layout .main-area .content-area .panel-view .panel-heading h3 {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Preserve dark headings inside white cards and modal cards. */
+body.admin-body #admin-layout .main-area .content-area .table-card h1,
+body.admin-body #admin-layout .main-area .content-area .table-card h2,
+body.admin-body #admin-layout .main-area .content-area .table-card h3,
+body.admin-body #admin-layout .main-area .content-area .form-card h1,
+body.admin-body #admin-layout .main-area .content-area .form-card h2,
+body.admin-body #admin-layout .main-area .content-area .form-card h3,
+body.admin-body #admin-layout .main-area .content-area .security-note h1,
+body.admin-body #admin-layout .main-area .content-area .security-note h2,
+body.admin-body #admin-layout .main-area .content-area .security-note h3,
+body.admin-body #admin-layout .main-area .content-area .student-modal-card h1,
+body.admin-body #admin-layout .main-area .content-area .student-modal-card h2,
+body.admin-body #admin-layout .main-area .content-area .student-modal-card h3 {
+  color: #292629 !important;
+  -webkit-text-fill-color: #292629 !important;
+}
