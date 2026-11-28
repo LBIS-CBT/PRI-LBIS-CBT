@@ -68,3 +68,4 @@
 .theory-submit-row p{display:block;width:100%;max-width:none;margin:0;color:#625d63;font-size:13px;line-height:1.6}
 .theory-submit-row button{display:inline-flex;align-self:flex-start;flex:0 0 auto;width:auto;min-width:220px;max-width:280px}
 @media(max-width:650px){.theory-stage{padding:18px}.theory-submit-row{align-items:flex-start;flex-direction:column}.theory-submit-row button{width:auto;max-width:100%}}
+.exam-footer.tups-footer{background:#fff;color:#171717;font-size:14px}
